@@ -13,6 +13,7 @@ import Clientes from "./pages/Clientes";
 import DetalhesCliente from "./pages/DetalhesCliente";
 import Configuracoes from "./pages/Configuracoes";
 import Financeiro from "./pages/Financeiro";
+import Eventos from "./pages/Eventos";
 import NotFound from "./pages/NotFound";
 import { FestaProvider } from "./contexts/FestaContext";
 
@@ -28,6 +29,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<MainLayout><Dashboard /></MainLayout>} />
             <Route path="/calendario" element={<MainLayout><CalendarioPage /></MainLayout>} />
+            <Route path="/eventos" element={<MainLayout><Eventos /></MainLayout>} />
             <Route path="/kits-temas" element={<MainLayout><KitsTemas /></MainLayout>} />
             <Route path="/estatisticas" element={<MainLayout><Estatisticas /></MainLayout>} />
             <Route path="/clientes" element={<MainLayout><Clientes /></MainLayout>} />

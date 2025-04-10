@@ -10,7 +10,8 @@ import {
   MessageCircle, 
   BarChart2, 
   Settings,
-  DollarSign  // Added DollarSign for Financeiro
+  DollarSign,
+  CalendarRange  // Added CalendarRange for Eventos
 } from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
 
@@ -46,6 +47,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       path: '/calendario', 
       name: 'Calendário', 
       icon: <Calendar className="h-5 w-5" /> 
+    },
+    { 
+      path: '/eventos', 
+      name: 'Eventos', 
+      icon: <CalendarRange className="h-5 w-5" /> 
     },
     { 
       path: '/clientes', 
