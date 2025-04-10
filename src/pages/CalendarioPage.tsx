@@ -152,9 +152,9 @@ const CalendarioPage = () => {
     });
   };
 
-  // Navegação para o financeiro com um evento selecionado
-  const navigateToFinanceiro = (eventoId: string) => {
-    navigate('/financeiro', { state: { activeTab: 'eventos', eventoId } });
+  // Navegação para a página de eventos com um evento selecionado
+  const navigateToEventos = (eventoId: string) => {
+    navigate('/eventos', { state: { eventoId } });
   };
   
   // Renderizar decorador do dia no calendário
@@ -241,7 +241,7 @@ const CalendarioPage = () => {
                           variant="link" 
                           size="sm" 
                           className="h-auto p-0"
-                          onClick={() => navigateToFinanceiro(evento.id)}
+                          onClick={() => navigateToEventos(evento.id)}
                         >
                           Gerenciar
                         </Button>
