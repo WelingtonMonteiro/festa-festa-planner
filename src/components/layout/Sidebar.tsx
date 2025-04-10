@@ -2,7 +2,16 @@
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { PartyPopper, Calendar, Users, Package, MessageCircle, BarChart2, Settings } from 'lucide-react';
+import { 
+  PartyPopper, 
+  Calendar, 
+  Users, 
+  Package, 
+  MessageCircle, 
+  BarChart2, 
+  Settings,
+  DollarSign  // Added DollarSign for Financeiro
+} from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
 
 interface SidebarProps {
@@ -47,6 +56,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       path: '/kits-temas', 
       name: 'Kits & Temas', 
       icon: <Package className="h-5 w-5" /> 
+    },
+    { 
+      path: '/financeiro', 
+      name: 'Financeiro', 
+      icon: <DollarSign className="h-5 w-5" /> 
     },
     { 
       path: '/mensagens', 
