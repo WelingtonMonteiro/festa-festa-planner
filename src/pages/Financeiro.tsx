@@ -18,15 +18,14 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 
 const Financeiro = () => {
   const { eventos } = useFestaContext();
   const [activeTab, setActiveTab] = useState("receitas");
   
   // Filtrar eventos pelo status e calcular valores financeiros
-  const eventosConfirmados = eventos.filter(e => e.status === 'confirmado' || e.status === 'finalizado');
-  const eventosAgendados = eventos.filter(e => e.status === 'agendado');
+  const eventosConfirmados = eventos.filter(e => (e.status === 'confirmado' || e.status === 'finalizado') && e.cliente);
+  const eventosAgendados = eventos.filter(e => e.status === 'agendado' && e.cliente);
   
   const totalReceitas = eventosConfirmados.reduce((acc, evento) => acc + evento.valorTotal, 0);
   const totalPendente = eventosAgendados.reduce((acc, evento) => acc + evento.valorTotal, 0);
@@ -115,7 +114,7 @@ const Financeiro = () => {
                         <TableCell>
                           {format(new Date(evento.data), 'dd/MM/yyyy')}
                         </TableCell>
-                        <TableCell>{evento.cliente.nome}</TableCell>
+                        <TableCell>{evento.cliente?.nome || "Cliente não informado"}</TableCell>
                         <TableCell>
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(evento.valorTotal)}
                         </TableCell>
