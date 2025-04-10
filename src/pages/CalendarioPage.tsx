@@ -216,7 +216,7 @@ const CalendarioPage = () => {
                   eventosDoDia.map(evento => (
                     <div key={evento.id} className="rounded-lg border p-4 hover:bg-muted/50">
                       <div className="flex justify-between">
-                        <div className="font-medium">{evento.cliente.nome}</div>
+                        <div className="font-medium">{evento?.cliente?.nome}</div>
                         <div className="text-sm text-muted-foreground">{evento.status}</div>
                       </div>
                       <div className="mt-1 text-sm">{evento.tema?.nome} - {evento.kit.nome}</div>
