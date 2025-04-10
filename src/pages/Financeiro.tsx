@@ -29,8 +29,8 @@ const Financeiro = () => {
   
   const totalReceitas = eventosConfirmados.reduce((acc, evento) => acc + evento.valorTotal, 0);
   const totalPendente = eventosAgendados.reduce((acc, evento) => acc + evento.valorTotal, 0);
-  const sinaisRecebidos = eventosConfirmados.reduce((acc, evento) => acc + evento.valorSinal, 0);
-  const valorAReceber = eventosConfirmados.reduce((acc, evento) => acc + evento.valorRestante, 0);
+  const sinaisRecebidos = eventosConfirmados.reduce((acc, evento) => acc + (evento.valorSinal || 0), 0);
+  const valorAReceber = eventosConfirmados.reduce((acc, evento) => acc + (evento.valorRestante || 0), 0);
   
   return (
     <div className="container mx-auto py-6 space-y-6">
@@ -119,10 +119,10 @@ const Financeiro = () => {
                           {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(evento.valorTotal)}
                         </TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(evento.valorSinal)}
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(evento.valorSinal || 0)}
                         </TableCell>
                         <TableCell>
-                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(evento.valorRestante)}
+                          {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(evento.valorRestante || 0)}
                         </TableCell>
                         <TableCell>
                           <span className={`px-2 py-1 text-xs rounded-full ${
