@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Switch } from "@/components/ui/switch"; 
 import { toast } from "@/components/ui/use-toast";
 import { useFestaContext } from "@/contexts/FestaContext";
 
@@ -21,6 +22,7 @@ const formSchema = z.object({
     .email({ message: "O email deve ser válido" })
     .or(z.literal("")),
   endereco: z.string().optional(),
+  ativo: z.boolean().default(true),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,6 +36,7 @@ interface NovoClienteDialogProps {
     telefone: string;
     email: string;
     endereco?: string;
+    ativo?: boolean;
   };
 }
 
@@ -52,11 +55,13 @@ const NovoClienteDialog = ({
       telefone: clienteParaEditar.telefone,
       email: clienteParaEditar.email || "",
       endereco: clienteParaEditar.endereco || "",
+      ativo: clienteParaEditar.ativo !== false, // Se for undefined, considera como true
     } : {
       nome: "",
       telefone: "",
       email: "",
       endereco: "",
+      ativo: true,
     },
   });
   
@@ -77,7 +82,8 @@ const NovoClienteDialog = ({
           nome: values.nome,
           telefone: values.telefone,
           email: values.email || "",
-          endereco: values.endereco
+          endereco: values.endereco,
+          ativo: values.ativo,
         });
         toast({
           title: "Cliente adicionado",
@@ -160,6 +166,29 @@ const NovoClienteDialog = ({
                     <Input placeholder="Rua, número, bairro" {...field} />
                   </FormControl>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="ativo"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-base">
+                      Status do Cliente
+                    </FormLabel>
+                    <p className="text-sm text-muted-foreground">
+                      {field.value ? "Cliente ativo" : "Cliente inativo"}
+                    </p>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
                 </FormItem>
               )}
             />

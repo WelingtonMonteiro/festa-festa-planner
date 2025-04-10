@@ -1,4 +1,3 @@
-
 export interface Cliente {
   id: string;
   nome: string;
@@ -6,6 +5,7 @@ export interface Cliente {
   email: string;
   endereco?: string;
   historico: Evento[];
+  ativo?: boolean; // Added ativo property
 }
 
 export interface Kit {

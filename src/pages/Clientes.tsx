@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { useFestaContext } from "@/contexts/FestaContext";
 import { useNavigate } from "react-router-dom";
-import { Phone, Mail, PlusCircle, Search, User, Edit, Trash2 } from "lucide-react";
+import { Phone, Mail, PlusCircle, Search, User, Edit, Trash2, Check, X, Filter } from "lucide-react";
 import NovoClienteDialog from "@/components/clientes/NovoClienteDialog";
 import {
   AlertDialog,
@@ -22,46 +22,91 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { toast } from "@/components/ui/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Clientes = () => {
-  const { clientes, excluirCliente } = useFestaContext();
+  const { clientes, atualizarCliente } = useFestaContext();
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
+  const [filtroStatus, setFiltroStatus] = useState("todos"); // "todos", "ativos", "inativos"
   const [clienteParaEditar, setClienteParaEditar] = useState<{
     id: string;
     nome: string;
     telefone: string;
     email: string;
     endereco?: string;
+    ativo?: boolean;
   } | null>(null);
   
-  // Filtragem de clientes pela busca
+  // Filtragem de clientes pela busca e status de ativo/inativo
   const clientesFiltrados = clientes.filter(
     cliente =>
-      cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.telefone.includes(busca) ||
-      cliente.email.toLowerCase().includes(busca.toLowerCase())
+      (cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
+       cliente.telefone.includes(busca) ||
+       (cliente.email && cliente.email.toLowerCase().includes(busca.toLowerCase()))) &&
+      (filtroStatus === "todos" || 
+       (filtroStatus === "ativos" && cliente.ativo !== false) ||
+       (filtroStatus === "inativos" && cliente.ativo === false))
   );
 
   // Função para abrir o diálogo de edição
-  const abrirEdicao = (cliente: typeof clienteParaEditar) => {
-    setClienteParaEditar(cliente);
+  const abrirEdicao = (cliente: any) => {
+    console.log("Cliente para editar:", cliente);
+    setClienteParaEditar({
+      id: cliente.id,
+      nome: cliente.nome,
+      telefone: cliente.telefone,
+      email: cliente.email || "",
+      endereco: cliente.endereco || "",
+      ativo: cliente.ativo !== false // Se ativo for undefined, consideramos como true
+    });
     setDialogAberto(true);
   };
   
-  // Função para confirmar exclusão de cliente
-  const confirmarExclusao = (clienteId: string) => {
+  // Função para marcar cliente como inativo
+  const marcarClienteComoInativo = (clienteId: string) => {
     try {
-      excluirCliente(clienteId);
-      toast({
-        title: "Cliente excluído",
-        description: "O cliente foi removido com sucesso.",
-      });
+      const cliente = clientes.find(c => c.id === clienteId);
+      if (cliente) {
+        atualizarCliente(clienteId, { ...cliente, ativo: false });
+        toast({
+          title: "Cliente desativado",
+          description: "O cliente foi marcado como inativo com sucesso.",
+        });
+      }
     } catch (error) {
       toast({
-        title: "Erro ao excluir",
-        description: "Não foi possível excluir o cliente. Ele pode ter eventos associados.",
+        title: "Erro ao desativar",
+        description: "Ocorreu um erro ao desativar o cliente.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Função para reativar cliente
+  const reativarCliente = (clienteId: string) => {
+    try {
+      const cliente = clientes.find(c => c.id === clienteId);
+      if (cliente) {
+        atualizarCliente(clienteId, { ...cliente, ativo: true });
+        toast({
+          title: "Cliente reativado",
+          description: "O cliente foi reativado com sucesso.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Erro ao reativar",
+        description: "Ocorreu um erro ao reativar o cliente.",
         variant: "destructive",
       });
     }
@@ -88,15 +133,35 @@ const Clientes = () => {
         </Button>
       </div>
       
-      {/* Barra de busca */}
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Buscar clientes..."
-          className="w-full pl-8"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-        />
+      {/* Barra de busca e filtro */}
+      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
+        <div className="relative w-full max-w-sm">
+          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Buscar clientes..."
+            className="w-full pl-8"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+          />
+        </div>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Filter className="mr-2 h-4 w-4" />
+              Filtro: {filtroStatus === "todos" ? "Todos" : filtroStatus === "ativos" ? "Ativos" : "Inativos"}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-56">
+            <DropdownMenuLabel>Status do Cliente</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup value={filtroStatus} onValueChange={setFiltroStatus}>
+              <DropdownMenuRadioItem value="todos">Todos</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="ativos">Ativos</DropdownMenuRadioItem>
+              <DropdownMenuRadioItem value="inativos">Inativos</DropdownMenuRadioItem>
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       
       {/* Tabela de clientes */}
@@ -114,6 +179,7 @@ const Clientes = () => {
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Contato</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Eventos</TableHead>
                   <TableHead>Valor Total</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -130,7 +196,7 @@ const Clientes = () => {
                   );
                   
                   return (
-                    <TableRow key={cliente.id}>
+                    <TableRow key={cliente.id} className={cliente.ativo === false ? "opacity-60" : ""}>
                       <TableCell className="font-medium">{cliente.nome}</TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
@@ -146,6 +212,19 @@ const Clientes = () => {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell>
+                        {cliente.ativo === false ? (
+                          <div className="flex items-center text-destructive">
+                            <X className="mr-1 h-4 w-4" />
+                            Inativo
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-green-600">
+                            <Check className="mr-1 h-4 w-4" />
+                            Ativo
+                          </div>
+                        )}
+                      </TableCell>
                       <TableCell>{totalEventos}</TableCell>
                       <TableCell>R$ {valorTotal.toLocaleString('pt-BR')}</TableCell>
                       <TableCell className="text-right">
@@ -160,55 +239,50 @@ const Clientes = () => {
                           <Button
                             variant="outline"
                             size="sm"
-                            onClick={() => abrirEdicao({
-                              id: cliente.id,
-                              nome: cliente.nome,
-                              telefone: cliente.telefone,
-                              email: cliente.email || "",
-                              endereco: cliente.endereco
-                            })}
+                            onClick={() => abrirEdicao(cliente)}
                           >
                             <Edit className="h-3 w-3" />
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-destructive hover:bg-destructive/10"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Esta ação não pode ser desfeita. Isso irá remover permanentemente o cliente {cliente.nome} e todos os seus dados associados.
-                                  {totalEventos > 0 && (
-                                    <div className="mt-2 rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/30">
-                                      <div className="flex items-center">
-                                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                                          Este cliente possui {totalEventos} evento(s) registrado(s).
-                                          A exclusão não será possível.
-                                        </p>
-                                      </div>
-                                    </div>
-                                  )}
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                <Button 
-                                  variant="destructive" 
-                                  onClick={() => confirmarExclusao(cliente.id)}
-                                  disabled={totalEventos > 0}
+                          {cliente.ativo !== false ? (
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="text-destructive hover:bg-destructive/10"
                                 >
-                                  Excluir
+                                  <Trash2 className="h-3 w-3" />
                                 </Button>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Desativar cliente</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Isso irá marcar o cliente {cliente.nome} como inativo. 
+                                    Você poderá reativar o cliente posteriormente se necessário.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <Button 
+                                    variant="destructive" 
+                                    onClick={() => marcarClienteComoInativo(cliente.id)}
+                                  >
+                                    Desativar
+                                  </Button>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-green-600 hover:bg-green-50"
+                              onClick={() => reativarCliente(cliente.id)}
+                            >
+                              <Check className="h-3 w-3" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -219,7 +293,12 @@ const Clientes = () => {
           ) : (
             <div className="flex flex-col items-center justify-center py-8">
               <p className="text-muted-foreground">
-                {busca ? "Nenhum cliente encontrado com esta busca" : "Nenhum cliente cadastrado"}
+                {busca ? 
+                  "Nenhum cliente encontrado com esta busca" : 
+                  filtroStatus !== "todos" ? 
+                    `Não há clientes ${filtroStatus === "ativos" ? "ativos" : "inativos"}` :
+                    "Nenhum cliente cadastrado"
+                }
               </p>
               {busca && (
                 <Button 
@@ -227,6 +306,14 @@ const Clientes = () => {
                   onClick={() => setBusca("")}
                 >
                   Limpar busca
+                </Button>
+              )}
+              {filtroStatus !== "todos" && (
+                <Button 
+                  variant="link" 
+                  onClick={() => setFiltroStatus("todos")}
+                >
+                  Mostrar todos
                 </Button>
               )}
             </div>

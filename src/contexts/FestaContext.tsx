@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Cliente, Kit, Tema, Evento, Mensagem, Estatisticas } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
@@ -90,7 +89,12 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const loadedEventos = localStorage.getItem('eventos');
     const loadedMensagens = localStorage.getItem('mensagens');
     
-    setClientes(loadedClientes ? JSON.parse(loadedClientes) : clientesMock);
+    // Ao carregar os clientes mock, garantir que todos tenham o campo 'ativo'
+    const clientesWithActiveStatus = loadedClientes 
+      ? JSON.parse(loadedClientes) 
+      : clientesMock.map(c => ({ ...c, ativo: true }));
+    
+    setClientes(clientesWithActiveStatus);
     setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
     setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
     setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
@@ -125,7 +129,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const novoCliente: Cliente = {
       ...cliente,
       id: `c${Date.now().toString()}`,
-      historico: []
+      historico: [],
+      ativo: cliente.ativo !== false // Se não especificado, cliente é ativo por padrão
     };
     setClientes([...clientes, novoCliente]);
     toast({ title: "Cliente adicionado", description: `${cliente.nome} foi adicionado com sucesso.` });
@@ -150,13 +155,14 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
     
-    const clienteRemovido = clientes.find(c => c.id === id);
-    setClientes(clientes.filter(c => c.id !== id));
-    
-    if (clienteRemovido) {
-      // Remover mensagens do cliente
-      setMensagens(mensagens.filter(m => m.clienteId !== id));
-      toast({ title: "Cliente removido", description: `${clienteRemovido.nome} foi removido com sucesso.` });
+    // Em vez de excluir permanentemente, apenas atualizar para inativo
+    const cliente = clientes.find(c => c.id === id);
+    if (cliente) {
+      atualizarCliente(id, { ativo: false });
+      toast({ 
+        title: "Cliente desativado", 
+        description: `${cliente.nome} foi marcado como inativo com sucesso.` 
+      });
     }
   };
   
