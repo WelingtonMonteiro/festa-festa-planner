@@ -9,14 +9,32 @@ import {
 } from "@/components/ui/table";
 import { useFestaContext } from "@/contexts/FestaContext";
 import { useNavigate } from "react-router-dom";
-import { Phone, Mail, PlusCircle, Search, User } from "lucide-react";
+import { Phone, Mail, PlusCircle, Search, User, Edit, Trash2 } from "lucide-react";
 import NovoClienteDialog from "@/components/clientes/NovoClienteDialog";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { toast } from "@/components/ui/use-toast";
 
 const Clientes = () => {
-  const { clientes } = useFestaContext();
+  const { clientes, excluirCliente } = useFestaContext();
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
+  const [clienteParaEditar, setClienteParaEditar] = useState<{
+    id: string;
+    nome: string;
+    telefone: string;
+    email: string;
+    endereco?: string;
+  } | null>(null);
   
   // Filtragem de clientes pela busca
   const clientesFiltrados = clientes.filter(
@@ -25,6 +43,37 @@ const Clientes = () => {
       cliente.telefone.includes(busca) ||
       cliente.email.toLowerCase().includes(busca.toLowerCase())
   );
+
+  // Função para abrir o diálogo de edição
+  const abrirEdicao = (cliente: typeof clienteParaEditar) => {
+    setClienteParaEditar(cliente);
+    setDialogAberto(true);
+  };
+  
+  // Função para confirmar exclusão de cliente
+  const confirmarExclusao = (clienteId: string) => {
+    try {
+      excluirCliente(clienteId);
+      toast({
+        title: "Cliente excluído",
+        description: "O cliente foi removido com sucesso.",
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o cliente. Ele pode ter eventos associados.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Limpar cliente para edição ao fechar o diálogo
+  const handleDialogOpenChange = (open: boolean) => {
+    setDialogAberto(open);
+    if (!open) {
+      setClienteParaEditar(null);
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -100,13 +149,67 @@ const Clientes = () => {
                       <TableCell>{totalEventos}</TableCell>
                       <TableCell>R$ {valorTotal.toLocaleString('pt-BR')}</TableCell>
                       <TableCell className="text-right">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => navigate(`/clientes/${cliente.id}`)}
-                        >
-                          Detalhes
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => navigate(`/clientes/${cliente.id}`)}
+                          >
+                            Detalhes
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => abrirEdicao({
+                              id: cliente.id,
+                              nome: cliente.nome,
+                              telefone: cliente.telefone,
+                              email: cliente.email || "",
+                              endereco: cliente.endereco
+                            })}
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Excluir cliente</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Esta ação não pode ser desfeita. Isso irá remover permanentemente o cliente {cliente.nome} e todos os seus dados associados.
+                                  {totalEventos > 0 && (
+                                    <div className="mt-2 rounded-md bg-yellow-50 p-3 dark:bg-yellow-900/30">
+                                      <div className="flex items-center">
+                                        <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                                          Este cliente possui {totalEventos} evento(s) registrado(s).
+                                          A exclusão não será possível.
+                                        </p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <Button 
+                                  variant="destructive" 
+                                  onClick={() => confirmarExclusao(cliente.id)}
+                                  disabled={totalEventos > 0}
+                                >
+                                  Excluir
+                                </Button>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </div>
                       </TableCell>
                     </TableRow>
                   );
@@ -131,10 +234,11 @@ const Clientes = () => {
         </CardContent>
       </Card>
       
-      {/* Dialog para adicionar novo cliente */}
+      {/* Dialog para adicionar/editar cliente */}
       <NovoClienteDialog
         open={dialogAberto} 
-        onOpenChange={setDialogAberto} 
+        onOpenChange={handleDialogOpenChange}
+        clienteParaEditar={clienteParaEditar || undefined} 
       />
     </div>
   );

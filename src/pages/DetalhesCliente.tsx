@@ -61,16 +61,19 @@ const DetalhesCliente = () => {
     );
   }
   
+  // Certifique-se de que historico existe e é um array
+  const historico = cliente.historico || [];
+  
   // Calcular estatísticas do cliente
-  const totalEventos = cliente.historico.length;
-  const valorTotalGasto = cliente.historico.reduce(
-    (total, evento) => total + evento.valorTotal,
+  const totalEventos = historico.length;
+  const valorTotalGasto = historico.reduce(
+    (total, evento) => total + (evento?.valorTotal || 0),
     0
   );
   
   // Contar kits alugados
-  const kitsAlugados = cliente.historico.reduce((acc, evento) => {
-    if (evento.kit) {
+  const kitsAlugados = historico.reduce((acc, evento) => {
+    if (evento?.kit) {
       const kitId = evento.kit.id;
       acc[kitId] = (acc[kitId] || 0) + 1;
     }
@@ -78,8 +81,8 @@ const DetalhesCliente = () => {
   }, {} as Record<string, number>);
   
   // Contar temas alugados
-  const temasAlugados = cliente.historico.reduce((acc, evento) => {
-    if (evento.tema) {
+  const temasAlugados = historico.reduce((acc, evento) => {
+    if (evento?.tema) {
       const temaId = evento.tema.id;
       acc[temaId] = (acc[temaId] || 0) + 1;
     }
@@ -87,8 +90,10 @@ const DetalhesCliente = () => {
   }, {} as Record<string, number>);
   
   // Obter status dos eventos
-  const statusEventos = cliente.historico.reduce((acc, evento) => {
-    acc[evento.status] = (acc[evento.status] || 0) + 1;
+  const statusEventos = historico.reduce((acc, evento) => {
+    if (evento?.status) {
+      acc[evento.status] = (acc[evento.status] || 0) + 1;
+    }
     return acc;
   }, {} as Record<string, number>);
   

@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Evento } from '@/types';
@@ -18,7 +17,7 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
   
   // Filtra apenas eventos com locais diferentes para o mapa
   const locaisUnicos = eventos.reduce((acc: Evento[], evento) => {
-    if (!acc.find(e => e.local === evento.local)) {
+    if (evento?.local && !acc.find(e => e.local === evento.local)) {
       acc.push(evento);
     }
     return acc;
@@ -57,15 +56,12 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
       const addMarkers = async () => {
         for (const evento of locaisUnicos) {
           try {
+            if (!evento.local) continue; // Skip if no location
+            
             // Simular geocodificação (em uma implementação real, usaria a API de geocodificação)
             // Esta é uma simulação muito simplificada
             const randomLat = -23.5505 + (Math.random() - 0.5) * 0.2;
             const randomLng = -46.6333 + (Math.random() - 0.5) * 0.2;
-            
-            // Em um app real, usaria algo como:
-            // const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(evento.local)}.json?access_token=${MAPBOX_ACCESS_TOKEN}`);
-            // const data = await response.json();
-            // const [lng, lat] = data.features[0].center;
             
             // Criar um marcador personalizado
             const el = document.createElement('div');
