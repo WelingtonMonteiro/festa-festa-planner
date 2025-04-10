@@ -35,6 +35,11 @@ const DetalhesCliente = () => {
   // Encontrar cliente pelo ID
   const cliente = clientes.find((c) => c.id === id);
   
+  // Verifica se o cliente existe e, caso exista, garante que o historico existe
+  if (cliente && !cliente.historico) {
+    cliente.historico = [];
+  }
+  
   // Redirecionar se o cliente não for encontrado
   useEffect(() => {
     if (!cliente && id) {
