@@ -1,3 +1,4 @@
+
 export interface Cliente {
   id: string;
   nome: string;
@@ -60,3 +61,10 @@ export interface Estatisticas {
   temasPorAno: Record<string, number>;
   faturamentoMensal: Record<string, number>;
 }
+
+export interface Usuario {
+  nome: string;
+  email: string;
+  telefone: string;
+}
+

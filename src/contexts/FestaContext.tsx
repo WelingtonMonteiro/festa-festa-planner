@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Cliente, Kit, Tema, Evento, Mensagem, Estatisticas } from '../types';
+import { Cliente, Kit, Tema, Evento, Mensagem, Estatisticas, Usuario } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
 import { toast } from '@/components/ui/use-toast';
 
@@ -10,6 +10,7 @@ interface FestaContextType {
   eventos: Evento[];
   mensagens: Mensagem[];
   estatisticas: Estatisticas;
+  usuario: Usuario;
   
   // Funções de clientes
   adicionarCliente: (cliente: Omit<Cliente, 'id' | 'historico'>) => void;
@@ -80,6 +81,11 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     temasPorAno: {},
     faturamentoMensal: {}
   });
+  const [usuario, setUsuario] = useState<Usuario>({
+    nome: "Administrador",
+    email: "admin@festadecoracoes.com",
+    telefone: "(11) 98765-4321"
+  });
   
   // Carregar dados do localStorage ou usar mocks
   useEffect(() => {
@@ -99,6 +105,12 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
     setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
     setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
+    
+    // Load usuario from localStorage if exists
+    const loadedUsuario = localStorage.getItem('usuario');
+    if (loadedUsuario) {
+      setUsuario(JSON.parse(loadedUsuario));
+    }
   }, []);
   
   // Salvar dados no localStorage quando mudam, evitando estruturas circulares
@@ -117,7 +129,10 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     
     if (mensagens.length) localStorage.setItem('mensagens', JSON.stringify(mensagens));
-  }, [clientes, kits, temas, eventos, mensagens]);
+    
+    // Save usuario to localStorage
+    localStorage.setItem('usuario', JSON.stringify(usuario));
+  }, [clientes, kits, temas, eventos, mensagens, usuario]);
   
   // Atualizar estatísticas quando eventos mudam
   useEffect(() => {
@@ -352,6 +367,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       eventos,
       mensagens,
       estatisticas,
+      usuario,
       adicionarCliente,
       atualizarCliente,
       excluirCliente,
