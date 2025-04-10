@@ -115,9 +115,9 @@ const Dashboard = () => {
                 {proximosEventos.map(evento => (
                   <div key={evento.id} className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-1">
-                      <div className="font-medium">{evento.cliente.nome}</div>
+                      <div className="font-medium">{evento.cliente?.nome || 'Cliente não definido'}</div>
                       <div className="text-sm text-muted-foreground">
-                        {evento.tema?.nome || 'Sem tema'} - {evento.kit.nome}
+                        {evento.tema?.nome || 'Sem tema'} - {evento.kit?.nome || 'Kit não definido'}
                       </div>
                     </div>
                     <div className="text-right">
@@ -208,9 +208,9 @@ const Dashboard = () => {
                 {eventosHoje.map(evento => (
                   <div key={evento.id} className="flex items-center justify-between rounded-lg border p-3">
                     <div className="space-y-1">
-                      <div className="font-medium">{evento.cliente.nome}</div>
+                      <div className="font-medium">{evento.cliente?.nome || 'Cliente não definido'}</div>
                       <div className="text-sm text-muted-foreground">
-                        {evento.tema?.nome || 'Sem tema'} - {evento.kit.nome}
+                        {evento.tema?.nome || 'Sem tema'} - {evento.kit?.nome || 'Kit não definido'}
                       </div>
                     </div>
                     <div className="flex items-center text-sm text-muted-foreground">
