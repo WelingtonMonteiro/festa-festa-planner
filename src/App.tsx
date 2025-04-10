@@ -11,6 +11,7 @@ import KitsTemas from "./pages/KitsTemas";
 import Estatisticas from "./pages/Estatisticas";
 import Clientes from "./pages/Clientes";
 import DetalhesCliente from "./pages/DetalhesCliente";
+import Configuracoes from "./pages/Configuracoes";
 import NotFound from "./pages/NotFound";
 import { FestaProvider } from "./contexts/FestaContext";
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="/estatisticas" element={<MainLayout><Estatisticas /></MainLayout>} />
             <Route path="/clientes" element={<MainLayout><Clientes /></MainLayout>} />
             <Route path="/clientes/:id" element={<MainLayout><DetalhesCliente /></MainLayout>} />
+            <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

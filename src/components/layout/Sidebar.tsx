@@ -5,13 +5,26 @@ import { cn } from '@/lib/utils';
 import { PartyPopper, Calendar, Users, Package, MessageCircle, BarChart2, Settings } from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
 
-const Sidebar = () => {
+interface SidebarProps {
+  onToggleCollapse?: (collapsed: boolean) => void;
+}
+
+const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const { mensagens } = useFestaContext();
   
   // Contagem de mensagens não lidas
   const unreadCount = mensagens.filter(m => !m.lida).length;
+  
+  // Toggle sidebar collapsed state
+  const toggleCollapsed = () => {
+    const newState = !collapsed;
+    setCollapsed(newState);
+    if (onToggleCollapse) {
+      onToggleCollapse(newState);
+    }
+  };
   
   // Links da navegação
   const navItems = [
@@ -66,7 +79,7 @@ const Sidebar = () => {
           {collapsed ? (
             <PartyPopper 
               className="h-10 w-10 text-festa-primary animate-float" 
-              onClick={() => setCollapsed(false)}
+              onClick={() => toggleCollapsed()}
             />
           ) : (
             <div className="flex items-center space-x-2">
@@ -106,7 +119,7 @@ const Sidebar = () => {
         {/* Toggle button */}
         <div 
           className="absolute bottom-4 right-4 cursor-pointer rounded-full bg-sidebar-accent p-2 hover:bg-sidebar-accent/80"
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={() => toggleCollapsed()}
         >
           {collapsed ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
