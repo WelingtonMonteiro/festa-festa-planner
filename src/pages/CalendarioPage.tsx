@@ -216,10 +216,12 @@ const CalendarioPage = () => {
                   eventosDoDia.map(evento => (
                     <div key={evento.id} className="rounded-lg border p-4 hover:bg-muted/50">
                       <div className="flex justify-between">
-                        <div className="font-medium">{evento?.cliente?.nome}</div>
+                        <div className="font-medium">{evento.cliente?.nome || 'Cliente não especificado'}</div>
                         <div className="text-sm text-muted-foreground">{evento.status}</div>
                       </div>
-                      <div className="mt-1 text-sm">{evento.tema?.nome} - {evento.kit.nome}</div>
+                      <div className="mt-1 text-sm">
+                        {evento.tema?.nome ? `${evento.tema.nome} - ` : ''}{evento.kit?.nome || 'Kit não especificado'}
+                      </div>
                       <div className="mt-2 flex items-center text-sm text-muted-foreground">
                         <Clock className="mr-1 h-4 w-4" /> {evento.horario}
                       </div>
@@ -227,8 +229,8 @@ const CalendarioPage = () => {
                         <MapPin className="mr-1 h-4 w-4" /> {evento.local}
                       </div>
                       <div className="mt-3 flex justify-between text-sm">
-                        <div>Valor: R$ {evento.valorTotal.toLocaleString('pt-BR')}</div>
-                        <div>Sinal: R$ {evento.valorSinal.toLocaleString('pt-BR')}</div>
+                        <div>Valor: R$ {evento.valorTotal?.toLocaleString('pt-BR') || '0'}</div>
+                        <div>Sinal: R$ {evento.valorSinal?.toLocaleString('pt-BR') || '0'}</div>
                       </div>
                     </div>
                   ))
