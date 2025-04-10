@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Cliente, Kit, Tema, Evento, Mensagem, Estatisticas } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/components/ui/use-toast';
 
 interface FestaContextType {
   clientes: Cliente[];
@@ -42,9 +42,32 @@ interface FestaContextType {
 
 const FestaContext = createContext<FestaContextType | undefined>(undefined);
 
+// Helper function to prepare data for JSON serialization
+// This removes circular references by replacing full objects with just their IDs
+const prepareForStorage = (data: any) => {
+  if (Array.isArray(data)) {
+    return data.map(item => prepareForStorage(item));
+  } else if (data && typeof data === 'object') {
+    const result = { ...data };
+    
+    // If this is an event with a cliente object, replace it with just the ID
+    if (result.cliente && result.cliente.historico) {
+      result.clienteId = result.cliente.id;
+      delete result.cliente;
+    }
+    
+    // If this is a client with events in historico, simplify the events
+    if (result.historico && Array.isArray(result.historico)) {
+      result.historicoIds = result.historico.map((e: Evento) => e.id);
+      delete result.historico;
+    }
+    
+    return result;
+  }
+  return data;
+};
+
 export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { toast } = useToast();
-  
   // Estados
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [kits, setKits] = useState<Kit[]>([]);
@@ -74,12 +97,21 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
   }, []);
   
-  // Salvar dados no localStorage quando mudam
+  // Salvar dados no localStorage quando mudam, evitando estruturas circulares
   useEffect(() => {
-    if (clientes.length) localStorage.setItem('clientes', JSON.stringify(clientes));
+    if (clientes.length) {
+      const clientesForStorage = prepareForStorage(clientes);
+      localStorage.setItem('clientes', JSON.stringify(clientesForStorage));
+    }
+    
     if (kits.length) localStorage.setItem('kits', JSON.stringify(kits));
     if (temas.length) localStorage.setItem('temas', JSON.stringify(temas));
-    if (eventos.length) localStorage.setItem('eventos', JSON.stringify(eventos));
+    
+    if (eventos.length) {
+      const eventosForStorage = prepareForStorage(eventos);
+      localStorage.setItem('eventos', JSON.stringify(eventosForStorage));
+    }
+    
     if (mensagens.length) localStorage.setItem('mensagens', JSON.stringify(mensagens));
   }, [clientes, kits, temas, eventos, mensagens]);
   

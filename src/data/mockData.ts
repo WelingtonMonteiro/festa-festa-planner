@@ -1,5 +1,5 @@
 
-import { Cliente, Kit, Tema, Evento, Mensagem } from '../types';
+import { Cliente, Kit, Tema, Evento, Mensagem, Estatisticas } from '../types';
 import { format, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
