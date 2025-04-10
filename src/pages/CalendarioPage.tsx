@@ -11,6 +11,7 @@ import { useFestaContext } from '@/contexts/FestaContext';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarPlus, Clock, MapPin } from 'lucide-react';
+import { DayContentProps } from 'react-day-picker';
 
 const CalendarioPage = () => {
   const { clientes, temas, kits, eventos, adicionarEvento } = useFestaContext();
@@ -185,12 +186,12 @@ const CalendarioPage = () => {
               locale={ptBR}
               className="rounded-md border"
               components={{
-                DayContent: props => (
+                DayContent: (props: DayContentProps) => (
                   <div className="relative h-9 w-9 p-0" {...props}>
                     <div className="flex h-full w-full items-center justify-center">
-                      {props.day.day}
+                      {props.date.getDate()}
                     </div>
-                    {dayWithEvents(props.day.date)}
+                    {dayWithEvents(props.date)}
                   </div>
                 )
               }}
