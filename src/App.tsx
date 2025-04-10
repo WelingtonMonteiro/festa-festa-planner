@@ -9,6 +9,8 @@ import Dashboard from "./pages/Dashboard";
 import CalendarioPage from "./pages/CalendarioPage";
 import KitsTemas from "./pages/KitsTemas";
 import Estatisticas from "./pages/Estatisticas";
+import Clientes from "./pages/Clientes";
+import DetalhesCliente from "./pages/DetalhesCliente";
 import NotFound from "./pages/NotFound";
 import { FestaProvider } from "./contexts/FestaContext";
 
@@ -26,6 +28,8 @@ const App = () => (
             <Route path="/calendario" element={<MainLayout><CalendarioPage /></MainLayout>} />
             <Route path="/kits-temas" element={<MainLayout><KitsTemas /></MainLayout>} />
             <Route path="/estatisticas" element={<MainLayout><Estatisticas /></MainLayout>} />
+            <Route path="/clientes" element={<MainLayout><Clientes /></MainLayout>} />
+            <Route path="/clientes/:id" element={<MainLayout><DetalhesCliente /></MainLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

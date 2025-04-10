@@ -1,10 +1,8 @@
 
-import { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CalendarDays, ClipboardCheck, Clock, DollarSign, PartyPopper, Tag, Users } from "lucide-react";
 import { useFestaContext } from "@/contexts/FestaContext";
 import { format, isSameDay } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
@@ -37,15 +35,24 @@ const Dashboard = () => {
   
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col space-y-2 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <h1 className="text-3xl font-bold">Dashboard</h1>
-        <Button 
-          onClick={() => navigate('/calendario')}
-          className="bg-festa-primary hover:bg-festa-primary/90"
-        >
-          <Calendar className="mr-2 h-4 w-4" />
-          Agendar Evento
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button 
+            onClick={() => navigate('/calendario')}
+            className="bg-festa-primary hover:bg-festa-primary/90"
+          >
+            <Calendar className="mr-2 h-4 w-4" />
+            Agendar Evento
+          </Button>
+          <Button 
+            onClick={() => navigate('/clientes')}
+            variant="outline"
+          >
+            <Users className="mr-2 h-4 w-4" />
+            Gerenciar Clientes
+          </Button>
+        </div>
       </div>
       
       {/* Resumo estatístico */}
