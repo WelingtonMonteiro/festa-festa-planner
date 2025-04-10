@@ -72,8 +72,13 @@ const NovoClienteDialog = ({
           description: `As informações de ${values.nome} foram atualizadas com sucesso.`,
         });
       } else {
-        // Adicionar novo cliente
-        adicionarCliente(values);
+        // Adicionar novo cliente - Ensure all required fields are present
+        adicionarCliente({
+          nome: values.nome,
+          telefone: values.telefone,
+          email: values.email || "",
+          endereco: values.endereco
+        });
         toast({
           title: "Cliente adicionado",
           description: `${values.nome} foi adicionado com sucesso.`,

@@ -72,9 +72,11 @@ const Clientes = () => {
               </TableHeader>
               <TableBody>
                 {clientesFiltrados.map((cliente) => {
-                  const totalEventos = cliente.historico.length;
-                  const valorTotal = cliente.historico.reduce(
-                    (total, evento) => total + evento.valorTotal, 
+                  // Add a safety check for historico property
+                  const historico = cliente.historico || [];
+                  const totalEventos = historico.length;
+                  const valorTotal = historico.reduce(
+                    (total, evento) => total + (evento?.valorTotal || 0), 
                     0
                   );
                   
