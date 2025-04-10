@@ -8,10 +8,12 @@ interface MapaClienteProps {
   eventos: Evento[];
 }
 
+// Mapbox access token provided by the user
+const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoid2VsaW5ndG9ubW9udGVpcm8iLCJhIjoiY2twNGJtNW5kMW10djMzbXd1MzQwejJrdyJ9.qjJLmY-44I8AiTN5sbn5Qw";
+
 const MapaCliente = ({ eventos }: MapaClienteProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
-  const [apiKey, setApiKey] = useState<string>("");
   const [mapError, setMapError] = useState<string | null>(null);
   
   // Filtra apenas eventos com locais diferentes para o mapa
@@ -22,19 +24,8 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
     return acc;
   }, []);
 
-  const handleApiKeyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setApiKey(e.target.value);
-    localStorage.setItem('mapbox_key', e.target.value);
-  };
-
-  const handleSubmitApiKey = (e: React.FormEvent) => {
-    e.preventDefault();
-    setMapError(null);
-    initializeMap();
-  };
-
   const initializeMap = async () => {
-    if (!apiKey || !mapRef.current) return;
+    if (!mapRef.current) return;
     
     try {
       // Carregar o script do Mapbox dinamicamente
@@ -47,7 +38,7 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
       }
       
       const { mapboxgl } = window;
-      mapboxgl.accessToken = apiKey;
+      mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN;
       
       // Inicializar o mapa
       const map = new mapboxgl.Map({
@@ -61,7 +52,6 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
 
       // Adicionar marcadores para cada local
       const bounds = new mapboxgl.LngLatBounds();
-      const geocoder = new mapboxgl.Geocoder();
       
       // Função para adicionar marcadores
       const addMarkers = async () => {
@@ -73,7 +63,7 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
             const randomLng = -46.6333 + (Math.random() - 0.5) * 0.2;
             
             // Em um app real, usaria algo como:
-            // const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(evento.local)}.json?access_token=${apiKey}`);
+            // const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(evento.local)}.json?access_token=${MAPBOX_ACCESS_TOKEN}`);
             // const data = await response.json();
             // const [lng, lat] = data.features[0].center;
             
@@ -114,7 +104,7 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
       
     } catch (error) {
       console.error("Erro ao inicializar o mapa:", error);
-      setMapError("Erro ao carregar o mapa. Verifique sua chave de API.");
+      setMapError("Erro ao carregar o mapa. Por favor, tente novamente mais tarde.");
     }
   };
 
@@ -141,18 +131,9 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
   };
   
   useEffect(() => {
-    // Verificar se há uma chave API salva no localStorage
-    const savedApiKey = localStorage.getItem('mapbox_key');
-    if (savedApiKey) {
-      setApiKey(savedApiKey);
-    }
+    // Inicializar o mapa assim que o componente for montado
+    initializeMap();
   }, []);
-  
-  useEffect(() => {
-    if (apiKey) {
-      initializeMap();
-    }
-  }, [apiKey]);
   
   if (!eventos.length) {
     return (
@@ -161,59 +142,6 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
         <p className="mt-4 text-center text-muted-foreground">
           Este cliente ainda não possui eventos com locais registrados
         </p>
-      </div>
-    );
-  }
-  
-  if (!apiKey) {
-    return (
-      <div className="flex h-full flex-col items-center justify-center p-6">
-        <div className="mb-6 text-center">
-          <MapPin className="mx-auto h-12 w-12 text-muted-foreground/70" />
-          <h3 className="mt-2 text-lg font-medium">Mapa de Eventos</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Para visualizar o mapa dos locais de eventos, é necessário uma chave de API do Mapbox
-          </p>
-        </div>
-        
-        <form onSubmit={handleSubmitApiKey} className="w-full max-w-md space-y-4">
-          <div>
-            <label htmlFor="api-key" className="text-sm font-medium">
-              Chave de API do Mapbox
-            </label>
-            <input
-              id="api-key"
-              type="text"
-              value={apiKey}
-              onChange={handleApiKeyChange}
-              placeholder="pk.eyJ1IjoiZXhhbXBsZSIsImEiOiJjazg5..."
-              className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-              required
-            />
-            <p className="mt-1 text-xs text-muted-foreground">
-              Obtenha sua chave gratuita em{" "}
-              <a 
-                href="https://www.mapbox.com/" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                mapbox.com
-              </a>
-            </p>
-          </div>
-          
-          <button
-            type="submit"
-            className="inline-flex h-10 w-full items-center justify-center rounded-md bg-festa-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-festa-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            Carregar Mapa
-          </button>
-          
-          {mapError && (
-            <p className="text-sm text-red-500">{mapError}</p>
-          )}
-        </form>
       </div>
     );
   }
@@ -227,6 +155,24 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
           <div className="text-center">
             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
             <p className="mt-2 text-sm text-muted-foreground">Carregando mapa...</p>
+          </div>
+        </div>
+      )}
+
+      {mapError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-background/90">
+          <div className="max-w-md rounded-md bg-destructive/10 p-4 text-center">
+            <MapPin className="mx-auto h-10 w-10 text-destructive" />
+            <p className="mt-2 font-medium text-destructive">{mapError}</p>
+            <button
+              onClick={() => {
+                setMapError(null);
+                initializeMap();
+              }}
+              className="mt-4 rounded-md bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary/90"
+            >
+              Tentar novamente
+            </button>
           </div>
         </div>
       )}
