@@ -1,6 +1,7 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFestaContext } from '@/contexts/FestaContext';
+import { useLocation } from 'react-router-dom';
 import { 
   Tabs, 
   TabsContent, 
@@ -18,10 +19,19 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
+import EventosManagement from '@/components/eventos/EventosManagement';
 
 const Financeiro = () => {
   const { eventos } = useFestaContext();
   const [activeTab, setActiveTab] = useState("receitas");
+  const location = useLocation();
+  
+  // Verificar se veio de outra página com state
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
   
   // Filtrar eventos pelo status e calcular valores financeiros
   const eventosConfirmados = eventos.filter(e => (e.status === 'confirmado' || e.status === 'finalizado') && e.cliente);
@@ -82,10 +92,11 @@ const Financeiro = () => {
       
       {/* Tabs para diferentes visualizações */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-4">
+        <TabsList className="grid w-full grid-cols-4 mb-4">
           <TabsTrigger value="receitas">Receitas</TabsTrigger>
           <TabsTrigger value="despesas">Despesas</TabsTrigger>
           <TabsTrigger value="fluxo">Fluxo de Caixa</TabsTrigger>
+          <TabsTrigger value="eventos">Eventos</TabsTrigger>
         </TabsList>
         
         <TabsContent value="receitas" className="pt-4">
@@ -170,6 +181,18 @@ const Financeiro = () => {
               <div className="flex items-center justify-center h-40">
                 <p className="text-muted-foreground">Funcionalidade em desenvolvimento</p>
               </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="eventos" className="pt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Gerenciamento de Eventos</CardTitle>
+              <CardDescription>Visualize e atualize o status dos eventos</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EventosManagement />
             </CardContent>
           </Card>
         </TabsContent>

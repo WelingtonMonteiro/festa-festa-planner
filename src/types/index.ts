@@ -41,7 +41,7 @@ export interface Evento {
   valorTotal: number;
   valorSinal: number;
   valorRestante: number;
-  status: 'agendado' | 'confirmado' | 'finalizado' | 'cancelado';
+  status: 'inicial' | 'agendado' | 'confirmado' | 'cancelado' | 'adiado' | 'finalizado';
   observacoes?: string;
 }
 
@@ -67,4 +67,3 @@ export interface Usuario {
   email: string;
   telefone: string;
 }
-

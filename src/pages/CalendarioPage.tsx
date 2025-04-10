@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,12 +12,15 @@ import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarPlus, Clock, MapPin } from 'lucide-react';
 import { DayContentProps } from 'react-day-picker';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 const CalendarioPage = () => {
   const { clientes, temas, kits, eventos, adicionarEvento } = useFestaContext();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
   
   // Form state
   const [formData, setFormData] = useState({
@@ -32,6 +35,18 @@ const CalendarioPage = () => {
     valorRestante: '',
     observacoes: ''
   });
+  
+  // Check if a date was passed from another page
+  useEffect(() => {
+    if (location.state?.selectedDate) {
+      const passedDate = new Date(location.state.selectedDate);
+      setDate(passedDate);
+      setSelectedDay(passedDate);
+      
+      // Clear the state to prevent reapplying on refresh
+      navigate(location.pathname, { replace: true });
+    }
+  }, [location.state, navigate, location.pathname]);
   
   // Encontrar eventos do dia selecionado
   const eventosDoDia = selectedDay 
@@ -136,6 +151,11 @@ const CalendarioPage = () => {
       observacoes: ''
     });
   };
+
+  // Navegação para o financeiro com um evento selecionado
+  const navigateToFinanceiro = (eventoId: string) => {
+    navigate('/financeiro', { state: { activeTab: 'eventos', eventoId } });
+  };
   
   // Renderizar decorador do dia no calendário
   const dayWithEvents = (day: Date) => {
@@ -217,7 +237,14 @@ const CalendarioPage = () => {
                     <div key={evento.id} className="rounded-lg border p-4 hover:bg-muted/50">
                       <div className="flex justify-between">
                         <div className="font-medium">{evento.cliente?.nome || 'Cliente não especificado'}</div>
-                        <div className="text-sm text-muted-foreground">{evento.status}</div>
+                        <Button 
+                          variant="link" 
+                          size="sm" 
+                          className="h-auto p-0"
+                          onClick={() => navigateToFinanceiro(evento.id)}
+                        >
+                          Gerenciar
+                        </Button>
                       </div>
                       <div className="mt-1 text-sm">
                         {evento.tema?.nome ? `${evento.tema.nome} - ` : ''}{evento.kit?.nome || 'Kit não especificado'}
