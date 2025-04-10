@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,6 +30,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Cliente } from "@/types";
 
 const Clientes = () => {
   const { clientes, atualizarCliente } = useFestaContext();
@@ -47,7 +47,6 @@ const Clientes = () => {
     ativo?: boolean;
   } | null>(null);
   
-  // Filtragem de clientes pela busca e status de ativo/inativo
   const clientesFiltrados = clientes.filter(
     cliente =>
       (cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -58,8 +57,7 @@ const Clientes = () => {
        (filtroStatus === "inativos" && cliente.ativo === false))
   );
 
-  // Função para abrir o diálogo de edição
-  const abrirEdicao = (cliente: any) => {
+  const abrirEdicao = (cliente: Cliente) => {
     console.log("Cliente para editar:", cliente);
     setClienteParaEditar({
       id: cliente.id,
@@ -67,12 +65,11 @@ const Clientes = () => {
       telefone: cliente.telefone,
       email: cliente.email || "",
       endereco: cliente.endereco || "",
-      ativo: cliente.ativo !== false // Se ativo for undefined, consideramos como true
+      ativo: cliente.ativo !== false
     });
     setDialogAberto(true);
   };
   
-  // Função para marcar cliente como inativo
   const marcarClienteComoInativo = (clienteId: string) => {
     try {
       const cliente = clientes.find(c => c.id === clienteId);
@@ -92,7 +89,6 @@ const Clientes = () => {
     }
   };
   
-  // Função para reativar cliente
   const reativarCliente = (clienteId: string) => {
     try {
       const cliente = clientes.find(c => c.id === clienteId);
@@ -112,7 +108,6 @@ const Clientes = () => {
     }
   };
   
-  // Limpar cliente para edição ao fechar o diálogo
   const handleDialogOpenChange = (open: boolean) => {
     setDialogAberto(open);
     if (!open) {
@@ -133,7 +128,6 @@ const Clientes = () => {
         </Button>
       </div>
       
-      {/* Barra de busca e filtro */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -164,7 +158,6 @@ const Clientes = () => {
         </DropdownMenu>
       </div>
       
-      {/* Tabela de clientes */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
@@ -187,7 +180,6 @@ const Clientes = () => {
               </TableHeader>
               <TableBody>
                 {clientesFiltrados.map((cliente) => {
-                  // Add a safety check for historico property
                   const historico = cliente.historico || [];
                   const totalEventos = historico.length;
                   const valorTotal = historico.reduce(
@@ -321,7 +313,6 @@ const Clientes = () => {
         </CardContent>
       </Card>
       
-      {/* Dialog para adicionar/editar cliente */}
       <NovoClienteDialog
         open={dialogAberto} 
         onOpenChange={handleDialogOpenChange}

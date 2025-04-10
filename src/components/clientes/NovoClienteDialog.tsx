@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -50,13 +50,7 @@ const NovoClienteDialog = ({
   
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: clienteParaEditar ? {
-      nome: clienteParaEditar.nome,
-      telefone: clienteParaEditar.telefone,
-      email: clienteParaEditar.email || "",
-      endereco: clienteParaEditar.endereco || "",
-      ativo: clienteParaEditar.ativo !== false, // Se for undefined, considera como true
-    } : {
+    defaultValues: {
       nome: "",
       telefone: "",
       email: "",
@@ -64,6 +58,28 @@ const NovoClienteDialog = ({
       ativo: true,
     },
   });
+  
+  // Atualizar os valores do formulário quando o clienteParaEditar mudar
+  useEffect(() => {
+    console.log("clienteParaEditar mudou:", clienteParaEditar);
+    if (clienteParaEditar) {
+      form.reset({
+        nome: clienteParaEditar.nome,
+        telefone: clienteParaEditar.telefone,
+        email: clienteParaEditar.email || "",
+        endereco: clienteParaEditar.endereco || "",
+        ativo: clienteParaEditar.ativo !== false, // Se for undefined, considera como true
+      });
+    } else {
+      form.reset({
+        nome: "",
+        telefone: "",
+        email: "",
+        endereco: "",
+        ativo: true,
+      });
+    }
+  }, [clienteParaEditar, form]);
   
   function onSubmit(values: FormValues) {
     setIsSubmitting(true);
