@@ -22,7 +22,8 @@ const Relatorios = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { clientes } = useFestaContext();
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [clienteFilter, setClienteFilter] = useState<string>("");
   const [tipoFilter, setTipoFilter] = useState<string>("financeiro");
   
@@ -45,8 +46,12 @@ const Relatorios = () => {
     // Construct filter parameters
     const params = new URLSearchParams();
     
-    if (date) {
-      params.append("data", format(date, "yyyy-MM-dd"));
+    if (startDate) {
+      params.append("dataInicio", format(startDate, "yyyy-MM-dd"));
+    }
+    
+    if (endDate) {
+      params.append("dataFim", format(endDate, "yyyy-MM-dd"));
     }
     
     if (clienteFilter) {
@@ -91,29 +96,55 @@ const Relatorios = () => {
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 sm:grid-cols-3">
-              {/* Filtro por Data */}
-              <div>
-                <label className="text-sm font-medium mb-1 block">Data</label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="w-full justify-start text-left font-normal"
-                    >
-                      <Calendar className="mr-2 h-4 w-4" />
-                      {date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione uma data</span>}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <CalendarComponent
-                      mode="single"
-                      selected={date}
-                      onSelect={setDate}
-                      initialFocus
-                      className="p-3"
-                    />
-                  </PopoverContent>
-                </Popover>
+              {/* Filtro por Período */}
+              <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Data Início</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Data inicial</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={startDate}
+                        onSelect={setStartDate}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                
+                <div>
+                  <label className="text-sm font-medium mb-1 block">Data Fim</label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <Calendar className="mr-2 h-4 w-4" />
+                        {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Data final</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={endDate}
+                        onSelect={setEndDate}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
               
               {/* Filtro por Cliente */}
@@ -162,7 +193,9 @@ const Relatorios = () => {
                 <div className="p-4 border rounded-md">
                   <h3 className="text-lg font-medium mb-4">Relatório Financeiro</h3>
                   <p className="text-muted-foreground">
-                    {date ? `Dados financeiros para ${format(date, "dd/MM/yyyy", { locale: ptBR })}` : 'Selecione uma data para ver dados específicos'}
+                    {startDate && endDate ? 
+                      `Dados financeiros de ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} até ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}` : 
+                      'Selecione um período para ver dados específicos'}
                   </p>
                   {/* Aqui entraria o conteúdo do relatório financeiro */}
                 </div>
@@ -171,7 +204,9 @@ const Relatorios = () => {
                 <div className="p-4 border rounded-md">
                   <h3 className="text-lg font-medium mb-4">Relatório de Eventos</h3>
                   <p className="text-muted-foreground">
-                    {date ? `Eventos para ${format(date, "dd/MM/yyyy", { locale: ptBR })}` : 'Selecione uma data para ver eventos específicos'}
+                    {startDate && endDate ? 
+                      `Eventos de ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} até ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}` : 
+                      'Selecione um período para ver eventos específicos'}
                   </p>
                   {/* Aqui entraria o conteúdo do relatório de eventos */}
                 </div>

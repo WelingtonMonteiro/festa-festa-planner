@@ -44,7 +44,8 @@ interface ReportsMenuProps {
 export function ReportsMenu({ className }: ReportsMenuProps) {
   const navigate = useNavigate();
   const { clientes } = useFestaContext();
-  const [date, setDate] = React.useState<Date | undefined>(new Date());
+  const [startDate, setStartDate] = React.useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = React.useState<Date | undefined>(new Date());
   const [clienteFilter, setClienteFilter] = React.useState<string>("");
   const [tipoFilter, setTipoFilter] = React.useState<string>("");
 
@@ -59,8 +60,12 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
   const aplicarFiltros = () => {
     const params = new URLSearchParams();
     
-    if (date) {
-      params.append("data", format(date, "yyyy-MM-dd"));
+    if (startDate) {
+      params.append("dataInicio", format(startDate, "yyyy-MM-dd"));
+    }
+    
+    if (endDate) {
+      params.append("dataFim", format(endDate, "yyyy-MM-dd"));
     }
     
     if (clienteFilter) {
@@ -71,7 +76,7 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
       params.append("tipo", tipoFilter);
     }
     
-    navigate(`/estatisticas?${params.toString()}`);
+    navigate(`/relatorios?${params.toString()}`);
   };
 
   // Sistema Info
@@ -94,20 +99,20 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
             </span>
           </MenubarTrigger>
           <MenubarContent>
-            <MenubarItem onClick={() => navigate("/estatisticas?tipo=financeiro")}>
+            <MenubarItem onClick={() => navigate("/relatorios?tipo=financeiro")}>
               <FileText className="mr-2 h-4 w-4" />
               Relatório Financeiro
             </MenubarItem>
-            <MenubarItem onClick={() => navigate("/estatisticas?tipo=eventos")}>
+            <MenubarItem onClick={() => navigate("/relatorios?tipo=eventos")}>
               <Calendar className="mr-2 h-4 w-4" />
               Relatório de Eventos
             </MenubarItem>
-            <MenubarItem onClick={() => navigate("/estatisticas?tipo=clientes")}>
+            <MenubarItem onClick={() => navigate("/relatorios?tipo=clientes")}>
               <Users className="mr-2 h-4 w-4" />
               Relatório de Clientes
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarItem onClick={() => navigate("/estatisticas")}>
+            <MenubarItem onClick={() => navigate("/relatorios")}>
               <BarChart2 className="mr-2 h-4 w-4" />
               Todos os Relatórios
             </MenubarItem>
@@ -122,10 +127,10 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
               <span>Filtros</span>
             </span>
           </MenubarTrigger>
-          <MenubarContent className="min-w-[220px]">
-            {/* Filtro por Data */}
+          <MenubarContent className="min-w-[240px]">
+            {/* Filtro por Data Início */}
             <div className="px-2 py-1.5">
-              <label className="text-sm font-medium mb-1 block">Data</label>
+              <label className="text-sm font-medium mb-1 block">Data Início</label>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button
@@ -133,14 +138,39 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
                     className="w-full justify-start text-left font-normal"
                   >
                     <Calendar className="mr-2 h-4 w-4" />
-                    {date ? format(date, "dd/MM/yyyy", { locale: ptBR }) : <span>Selecione uma data</span>}
+                    {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Data inicial</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <CalendarComponent
                     mode="single"
-                    selected={date}
-                    onSelect={setDate}
+                    selected={startDate}
+                    onSelect={setStartDate}
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            {/* Filtro por Data Fim */}
+            <div className="px-2 py-1.5">
+              <label className="text-sm font-medium mb-1 block">Data Fim</label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Data final</span>}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <CalendarComponent
+                    mode="single"
+                    selected={endDate}
+                    onSelect={setEndDate}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />
