@@ -18,6 +18,7 @@ import Index from '@/pages/Index';
 import Notifications from '@/pages/Notifications';
 import Lead from '@/pages/Lead';
 import Landing from '@/pages/Landing';
+import GerenciamentoClientes from '@/pages/GerenciamentoClientes';
 import { ThemeProvider } from '@/hooks/use-theme';
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
         <Route path="/app" element={<MainLayout><Index /></MainLayout>} />
         <Route path="/clients" element={<MainLayout><Clientes /></MainLayout>} />
         <Route path="/client/:id" element={<MainLayout><DetalhesCliente /></MainLayout>} />
+        <Route path="/client-management" element={<MainLayout><GerenciamentoClientes /></MainLayout>} />
         <Route path="/calendar" element={<MainLayout><CalendarioPage /></MainLayout>} />
         <Route path="/events" element={<MainLayout><Eventos /></MainLayout>} />
         <Route path="/kits-themes" element={<MainLayout><KitsTemas /></MainLayout>} />
