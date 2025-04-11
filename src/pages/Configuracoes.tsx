@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -19,9 +19,12 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useFestaContext } from "@/contexts/FestaContext";
+import { useTheme } from "@/hooks/use-theme";
 
 const Configuracoes = () => {
   const { usuario } = useFestaContext();
+  const { theme, setTheme, setCustomPrimaryColor } = useTheme();
+  
   const [notificacoes, setNotificacoes] = useState({
     email: true,
     app: true,
@@ -29,18 +32,42 @@ const Configuracoes = () => {
     lembretesFesta: true,
     atualizacoesSistema: false
   });
+  
   const [aparencia, setAparencia] = useState({
-    temaEscuro: false,
+    temaEscuro: theme === "dark",
     corPrimaria: "#9b87f5",
     mostrarBadge: true
   });
+  
   const [seguranca, setSeguranca] = useState({
     autenticacaoDoisFatores: false,
     tempoExpiracaoSessao: "30"
   });
   
+  useEffect(() => {
+    // Load color from localStorage if available
+    const savedColor = localStorage.getItem('primaryColor');
+    if (savedColor) {
+      setAparencia(prev => ({ ...prev, corPrimaria: savedColor }));
+    }
+  }, []);
+  
   const handleSave = (secao: string) => {
+    if (secao === "aparência") {
+      // Save theme preference
+      setTheme(aparencia.temaEscuro ? "dark" : "light");
+      
+      // Save primary color preference and apply it
+      localStorage.setItem('primaryColor', aparencia.corPrimaria);
+      setCustomPrimaryColor(aparencia.corPrimaria);
+    }
+    
     toast.success(`Configurações de ${secao} salvas com sucesso!`);
+  };
+  
+  // Handle theme toggle
+  const handleThemeToggle = (checked: boolean) => {
+    setAparencia({...aparencia, temaEscuro: checked});
   };
   
   return (
@@ -222,7 +249,7 @@ const Configuracoes = () => {
                 <Switch 
                   id="dark-mode" 
                   checked={aparencia.temaEscuro} 
-                  onCheckedChange={(checked) => setAparencia({...aparencia, temaEscuro: checked})} 
+                  onCheckedChange={handleThemeToggle} 
                 />
               </div>
               

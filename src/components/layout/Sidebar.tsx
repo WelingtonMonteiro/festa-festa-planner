@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
@@ -104,12 +105,12 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
         <div className="mb-8 flex items-center justify-center">
           {collapsed ? (
             <PartyPopper 
-              className="h-10 w-10 text-festa-primary animate-float" 
+              className="h-10 w-10 text-sidebar-primary animate-float" 
               onClick={() => toggleCollapsed()}
             />
           ) : (
             <div className="flex items-center space-x-2">
-              <PartyPopper className="h-10 w-10 text-festa-primary animate-float" />
+              <PartyPopper className="h-10 w-10 text-sidebar-primary animate-float" />
               <h1 className="text-2xl font-bold festa-gradient-text">Festa</h1>
             </div>
           )}
@@ -121,9 +122,9 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
               <Link
                 to={item.path}
                 className={cn(
-                  "flex items-center rounded-lg p-2 hover:bg-sidebar-accent",
+                  "flex items-center rounded-lg p-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
                   location.pathname === item.path 
-                    ? "bg-sidebar-accent font-medium text-festa-primary" 
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
                     : "text-sidebar-foreground"
                 )}
               >
@@ -142,7 +143,7 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
         </ul>
         
         <div 
-          className="absolute bottom-4 right-4 cursor-pointer rounded-full bg-sidebar-accent p-2 hover:bg-sidebar-accent/80"
+          className="absolute bottom-4 right-4 cursor-pointer rounded-full bg-sidebar-accent p-2 hover:bg-sidebar-accent/80 text-sidebar-accent-foreground"
           onClick={() => toggleCollapsed()}
         >
           {collapsed ? (
