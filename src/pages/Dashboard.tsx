@@ -46,7 +46,7 @@ const Dashboard = () => {
             Agendar Evento
           </Button>
           <Button 
-            onClick={() => navigate('/clientes')}
+            onClick={() => navigate('/client-management')}
             variant="outline"
           >
             <Users className="mr-2 h-4 w-4" />
