@@ -12,9 +12,12 @@ import {
   Settings,
   DollarSign,
   CalendarRange,
-  Bell
+  Bell,
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
+import { ReportsMenu } from '@/components/reports/ReportsMenu';
 
 interface SidebarProps {
   onToggleCollapse?: (collapsed: boolean) => void;
@@ -142,18 +145,25 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
           ))}
         </ul>
         
+        {!collapsed && (
+          <div className="mt-6 border-t pt-4">
+            <h3 className="mb-2 px-2 text-xs font-semibold text-sidebar-foreground/70">
+              RELATÓRIOS E SISTEMA
+            </h3>
+            <div className="px-2">
+              <ReportsMenu />
+            </div>
+          </div>
+        )}
+        
         <div 
           className="absolute bottom-4 right-4 cursor-pointer rounded-full bg-sidebar-accent p-2 hover:bg-sidebar-accent/80 text-sidebar-accent-foreground"
           onClick={() => toggleCollapsed()}
         >
           {collapsed ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            </svg>
+            <ChevronRight className="h-5 w-5" />
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
+            <ChevronLeft className="h-5 w-5" />
           )}
         </div>
       </div>
