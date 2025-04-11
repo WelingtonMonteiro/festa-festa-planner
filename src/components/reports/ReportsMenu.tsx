@@ -1,4 +1,3 @@
-
 import * as React from "react";
 import { useNavigate } from "react-router-dom";
 import { Calendar, Filter, Users, Info, BarChart2, FileText } from "lucide-react";
@@ -56,7 +55,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
     { id: "kits", nome: "Kits e Temas" }
   ];
 
-  // Função para aplicar filtros e navegar para a página de relatórios
   const aplicarFiltros = () => {
     const params = new URLSearchParams();
     
@@ -79,7 +77,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
     navigate(`/relatorios?${params.toString()}`);
   };
 
-  // Sistema Info
   const sistemaInfo = {
     versao: "1.0.0",
     ultimaAtualizacao: "2025-04-11",
@@ -88,9 +85,8 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
   };
 
   return (
-    <div className={cn("flex items-center space-x-2", className)}>
+    <nav className={cn("flex items-center space-x-2", className)} role="navigation">
       <Menubar className="border-none bg-transparent p-0">
-        {/* Relatórios Menu */}
         <MenubarMenu>
           <MenubarTrigger className="cursor-pointer data-[state=open]:bg-accent">
             <span className="flex items-center gap-2">
@@ -119,7 +115,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
           </MenubarContent>
         </MenubarMenu>
 
-        {/* Filtros Menu */}
         <MenubarMenu>
           <MenubarTrigger className="cursor-pointer data-[state=open]:bg-accent">
             <span className="flex items-center gap-2">
@@ -127,8 +122,7 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
               <span>Filtros</span>
             </span>
           </MenubarTrigger>
-          <MenubarContent className="min-w-[240px]">
-            {/* Filtro por Data Início */}
+          <MenubarContent className="min-w-[240px] max-h-[80vh] overflow-y-auto">
             <div className="px-2 py-1.5">
               <label className="text-sm font-medium mb-1 block">Data Início</label>
               <Popover>
@@ -153,7 +147,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
               </Popover>
             </div>
             
-            {/* Filtro por Data Fim */}
             <div className="px-2 py-1.5">
               <label className="text-sm font-medium mb-1 block">Data Fim</label>
               <Popover>
@@ -178,7 +171,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
               </Popover>
             </div>
             
-            {/* Filtro por Tipo */}
             <div className="px-2 py-1.5">
               <label className="text-sm font-medium mb-1 block">Tipo de Relatório</label>
               <Select value={tipoFilter} onValueChange={setTipoFilter}>
@@ -193,7 +185,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
               </Select>
             </div>
             
-            {/* Filtro por Cliente */}
             <div className="px-2 py-1.5">
               <label className="text-sm font-medium mb-1 block">Cliente</label>
               <Select value={clienteFilter} onValueChange={setClienteFilter}>
@@ -217,7 +208,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
           </MenubarContent>
         </MenubarMenu>
 
-        {/* Informações do Sistema */}
         <MenubarMenu>
           <Sheet>
             <SheetTrigger asChild>
@@ -228,7 +218,7 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
                 </span>
               </MenubarTrigger>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="overflow-y-auto max-h-[90vh]">
               <SheetHeader>
                 <SheetTitle>Informações do Sistema</SheetTitle>
                 <SheetDescription>
@@ -257,6 +247,6 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
           </Sheet>
         </MenubarMenu>
       </Menubar>
-    </div>
+    </nav>
   );
 }

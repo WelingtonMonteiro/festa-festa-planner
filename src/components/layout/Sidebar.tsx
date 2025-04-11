@@ -15,7 +15,8 @@ import {
   Bell,
   ChevronRight,
   ChevronLeft,
-  FileText
+  FileText,
+  InfoIcon
 } from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
@@ -26,6 +27,7 @@ interface SidebarProps {
 
 const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const location = useLocation();
   const { mensagens } = useFestaContext();
   
@@ -102,13 +104,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <Settings className="h-5 w-5" /> 
     }
   ];
-
-  const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   
   return (
-    <aside 
+    <nav 
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-sidebar transition-width duration-300 ease-in-out",
+        "fixed left-0 top-0 z-40 h-screen bg-sidebar transition-width duration-300 ease-in-out pb-10",
         collapsed ? "w-16" : "w-64"
       )}
     >
@@ -127,9 +127,9 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
           )}
         </div>
         
-        <ul className="space-y-2">
+        <ul className="space-y-2" role="menu">
           {navItems.map((item) => (
-            <li key={item.path}>
+            <li key={item.path} role="menuitem">
               <Link
                 to={item.path}
                 className={cn(
@@ -158,13 +158,13 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
             <h3 className="mb-2 px-2 text-xs font-semibold text-sidebar-foreground/70">
               SISTEMA
             </h3>
-            <ul className="space-y-1">
-              <li>
+            <ul className="space-y-1" role="menu">
+              <li role="menuitem">
                 <button 
                   onClick={() => setIsAboutDialogOpen(true)}
                   className="flex w-full items-center rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                 >
-                  <FileText className="h-5 w-5" />
+                  <InfoIcon className="h-5 w-5" />
                   <span className="ml-3">Sobre</span>
                 </button>
               </li>
@@ -173,8 +173,9 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
         )}
         
         <div 
-          className="absolute bottom-4 right-4 cursor-pointer rounded-full bg-sidebar-accent p-2 hover:bg-sidebar-accent/80 text-sidebar-accent-foreground"
+          className="absolute bottom-6 right-4 cursor-pointer rounded-full bg-sidebar-accent p-2 hover:bg-sidebar-accent/80 text-sidebar-accent-foreground"
           onClick={() => toggleCollapsed()}
+          aria-label={collapsed ? "Expandir menu" : "Retrair menu"}
         >
           {collapsed ? (
             <ChevronRight className="h-5 w-5" />
@@ -188,7 +189,7 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
         open={isAboutDialogOpen} 
         onOpenChange={setIsAboutDialogOpen} 
       />
-    </aside>
+    </nav>
   );
 };
 

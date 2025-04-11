@@ -87,7 +87,7 @@ const Header = () => {
   };
   
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-end bg-white px-6 shadow-sm">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-end bg-sidebar px-6 shadow-sm text-sidebar-foreground">
       <div className="mr-auto">
         <h2 className="text-xl font-medium capitalize">{formattedDate}</h2>
       </div>

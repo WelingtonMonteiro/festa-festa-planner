@@ -18,6 +18,7 @@ const MainLayout = ({ children, className }: MainLayoutProps) => {
   
   return (
     <div className="flex h-screen bg-background">
+      {/* Using nav element for sidebar navigation */}
       <Sidebar onToggleCollapse={handleSidebarToggle} />
       <div className={cn(
         "flex flex-1 flex-col transition-all duration-300",
