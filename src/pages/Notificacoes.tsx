@@ -58,7 +58,7 @@ const Notificacoes = () => {
       novasNotificacoes.push({
         id: `mensagem-${mensagem.id}`,
         titulo: 'Mensagem Não Lida',
-        mensagem: mensagem.texto.substring(0, 50) + (mensagem.texto.length > 50 ? '...' : ''),
+        mensagem: mensagem.conteudo.substring(0, 50) + (mensagem.conteudo.length > 50 ? '...' : ''),
         data: mensagem.datahora,
         lida: false,
         tipo: 'mensagem',
