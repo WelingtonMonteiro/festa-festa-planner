@@ -14,9 +14,10 @@ import Estatisticas from '@/pages/Estatisticas';
 import Reports from '@/pages/Reports';
 import Configuracoes from '@/pages/Configuracoes';
 import NotFound from '@/pages/NotFound';
-import Index from '@/pages/Index';
 import Notifications from '@/pages/Notifications';
 import Lead from '@/pages/Lead';
+import Landing from '@/pages/Landing';
+import GerenciamentoClientes from '@/pages/GerenciamentoClientes';
 import { ThemeProvider } from '@/hooks/use-theme';
 
 function App() {
@@ -24,18 +25,19 @@ function App() {
     <ThemeProvider>
       <Toaster position="top-center" richColors />
       <Routes>
-        <Route path="/" element={<MainLayout><Index /></MainLayout>} />
+        <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-        <Route path="/clientes" element={<MainLayout><Clientes /></MainLayout>} />
-        <Route path="/cliente/:id" element={<MainLayout><DetalhesCliente /></MainLayout>} />
-        <Route path="/calendario" element={<MainLayout><CalendarioPage /></MainLayout>} />
-        <Route path="/eventos" element={<MainLayout><Eventos /></MainLayout>} />
-        <Route path="/kits-temas" element={<MainLayout><KitsTemas /></MainLayout>} />
-        <Route path="/financeiro" element={<MainLayout><Financeiro /></MainLayout>} />
+        <Route path="/clients" element={<MainLayout><Clientes /></MainLayout>} />
+        <Route path="/client/:id" element={<MainLayout><DetalhesCliente /></MainLayout>} />
+        <Route path="/client-management" element={<MainLayout><GerenciamentoClientes /></MainLayout>} />
+        <Route path="/calendar" element={<MainLayout><CalendarioPage /></MainLayout>} />
+        <Route path="/events" element={<MainLayout><Eventos /></MainLayout>} />
+        <Route path="/kits-themes" element={<MainLayout><KitsTemas /></MainLayout>} />
+        <Route path="/financial" element={<MainLayout><Financeiro /></MainLayout>} />
         <Route path="/messages" element={<MainLayout><Messages /></MainLayout>} />
-        <Route path="/estatisticas" element={<MainLayout><Estatisticas /></MainLayout>} />
+        <Route path="/statistics" element={<MainLayout><Estatisticas /></MainLayout>} />
         <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-        <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
+        <Route path="/settings" element={<MainLayout><Configuracoes /></MainLayout>} />
         <Route path="/notifications" element={<MainLayout><Notifications /></MainLayout>} />
         <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
         <Route path="*" element={<NotFound />} />

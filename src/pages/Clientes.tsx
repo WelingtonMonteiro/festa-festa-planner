@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/table";
 import { useFestaContext } from "@/contexts/FestaContext";
 import { useNavigate } from "react-router-dom";
-import { Phone, Mail, PlusCircle, Search, User, Edit, Trash2, Check, X, Filter } from "lucide-react";
+import { Phone, Mail, PlusCircle, Search, User, Edit, Trash2, Check, X, Filter, BarChart2 } from "lucide-react";
 import NovoClienteDialog from "@/components/clientes/NovoClienteDialog";
 import {
   AlertDialog,
@@ -119,13 +120,23 @@ const Clientes = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Clientes</h1>
-        <Button 
-          onClick={() => setDialogAberto(true)}
-          className="bg-festa-primary hover:bg-festa-primary/90"
-        >
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Novo Cliente
-        </Button>
+        <div className="flex space-x-3">
+          <Button
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => navigate('/client-management')}
+          >
+            <BarChart2 className="h-4 w-4" />
+            Gerenciar Clientes
+          </Button>
+          <Button 
+            onClick={() => setDialogAberto(true)}
+            className="bg-festa-primary hover:bg-festa-primary/90"
+          >
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Novo Cliente
+          </Button>
+        </div>
       </div>
       
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
@@ -224,7 +235,7 @@ const Clientes = () => {
                           <Button 
                             variant="outline" 
                             size="sm"
-                            onClick={() => navigate(`/clientes/${cliente.id}`)}
+                            onClick={() => navigate(`/client/${cliente.id}`)}
                           >
                             Detalhes
                           </Button>
