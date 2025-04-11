@@ -14,7 +14,6 @@ import Estatisticas from '@/pages/Estatisticas';
 import Reports from '@/pages/Reports';
 import Configuracoes from '@/pages/Configuracoes';
 import NotFound from '@/pages/NotFound';
-import Index from '@/pages/Index';
 import Notifications from '@/pages/Notifications';
 import Lead from '@/pages/Lead';
 import Landing from '@/pages/Landing';
@@ -28,7 +27,6 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-        <Route path="/app" element={<MainLayout><Index /></MainLayout>} />
         <Route path="/clients" element={<MainLayout><Clientes /></MainLayout>} />
         <Route path="/client/:id" element={<MainLayout><DetalhesCliente /></MainLayout>} />
         <Route path="/client-management" element={<MainLayout><GerenciamentoClientes /></MainLayout>} />
