@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -11,7 +10,8 @@ import {
   BarChart2, 
   Settings,
   DollarSign,
-  CalendarRange  // Added CalendarRange for Eventos
+  CalendarRange,
+  Bell
 } from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
 
@@ -24,10 +24,12 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   const location = useLocation();
   const { mensagens } = useFestaContext();
   
-  // Contagem de mensagens não lidas
   const unreadCount = mensagens.filter(m => !m.lida).length;
   
-  // Toggle sidebar collapsed state
+  const notificacoesArmazenadas = localStorage.getItem('notificacoes');
+  const notificacoes = notificacoesArmazenadas ? JSON.parse(notificacoesArmazenadas) : [];
+  const unreadNotifications = notificacoes.filter((n: any) => !n.lida).length;
+  
   const toggleCollapsed = () => {
     const newState = !collapsed;
     setCollapsed(newState);
@@ -36,7 +38,6 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
     }
   };
   
-  // Links da navegação
   const navItems = [
     { 
       path: '/', 
@@ -69,6 +70,12 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <DollarSign className="h-5 w-5" /> 
     },
     { 
+      path: '/notificacoes', 
+      name: 'Notificações', 
+      icon: <Bell className="h-5 w-5" />,
+      badge: unreadNotifications > 0 ? unreadNotifications : undefined
+    },
+    { 
       path: '/mensagens', 
       name: 'Mensagens', 
       icon: <MessageCircle className="h-5 w-5" />,
@@ -94,7 +101,6 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       )}
     >
       <div className="h-full overflow-y-auto px-3 py-4">
-        {/* Logo */}
         <div className="mb-8 flex items-center justify-center">
           {collapsed ? (
             <PartyPopper 
@@ -109,7 +115,6 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
           )}
         </div>
         
-        {/* Navigation */}
         <ul className="space-y-2">
           {navItems.map((item) => (
             <li key={item.path}>
@@ -136,7 +141,6 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
           ))}
         </ul>
         
-        {/* Toggle button */}
         <div 
           className="absolute bottom-4 right-4 cursor-pointer rounded-full bg-sidebar-accent p-2 hover:bg-sidebar-accent/80"
           onClick={() => toggleCollapsed()}

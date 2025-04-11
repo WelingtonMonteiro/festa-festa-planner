@@ -14,6 +14,7 @@ import DetalhesCliente from "./pages/DetalhesCliente";
 import Configuracoes from "./pages/Configuracoes";
 import Financeiro from "./pages/Financeiro";
 import Eventos from "./pages/Eventos";
+import Notificacoes from "./pages/Notificacoes";
 import NotFound from "./pages/NotFound";
 import { FestaProvider } from "./contexts/FestaContext";
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/clientes/:id" element={<MainLayout><DetalhesCliente /></MainLayout>} />
             <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
             <Route path="/financeiro" element={<MainLayout><Financeiro /></MainLayout>} />
+            <Route path="/notificacoes" element={<MainLayout><Notificacoes /></MainLayout>} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

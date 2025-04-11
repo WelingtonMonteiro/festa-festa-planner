@@ -6,11 +6,13 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useFestaContext } from '@/contexts/FestaContext';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
   const { eventos, mensagens } = useFestaContext();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [notifications, setNotifications] = useState<{ id: string, title: string, message: string }[]>([]);
+  const navigate = useNavigate();
   
   // Formatar data atual
   const formattedDate = format(currentDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR });
@@ -54,7 +56,35 @@ const Header = () => {
     }
     
     setNotifications(newNotifications);
+
+    // Salvar notificações no localStorage
+    const notificacoesArmazenadas = localStorage.getItem('notificacoes');
+    let notificacoesParaSalvar = notificacoesArmazenadas ? JSON.parse(notificacoesArmazenadas) : [];
+    
+    // Adicionar novas notificações do sistema se não existirem já
+    newNotifications.forEach(notification => {
+      const existsInStorage = notificacoesParaSalvar.some((n: any) => n.id === notification.id);
+      if (!existsInStorage) {
+        notificacoesParaSalvar.push({
+          id: notification.id,
+          titulo: notification.title,
+          mensagem: notification.message,
+          data: new Date().toISOString(),
+          lida: false,
+          tipo: notification.id.startsWith('evento-') ? 'evento' : 'mensagem',
+          eventoId: notification.id.startsWith('evento-') ? notification.id.replace('evento-', '') : undefined,
+          mensagemId: notification.id === 'mensagens' ? undefined : undefined
+        });
+      }
+    });
+    
+    localStorage.setItem('notificacoes', JSON.stringify(notificacoesParaSalvar));
   }, [eventos, mensagens]);
+  
+  // Redirecionar para a página de notificações
+  const navigateToNotifications = () => {
+    navigate('/notificacoes');
+  };
   
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-end bg-white px-6 shadow-sm">
@@ -66,7 +96,21 @@ const Header = () => {
         {/* Notificações */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="relative" 
+              onClick={(e) => {
+                // Se clicar direto no ícone ou no badge, navega para notificações
+                // Se clicar fora (no botão em geral), abre o dropdown
+                if ((e.target as HTMLElement).tagName === 'svg' || 
+                    (e.target as HTMLElement).tagName === 'path' ||
+                    (e.target as HTMLElement).classList.contains('absolute')) {
+                  e.preventDefault();
+                  navigateToNotifications();
+                }
+              }}
+            >
               <Bell className="h-5 w-5" />
               {notifications.length > 0 && (
                 <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-festa-secondary" />
@@ -74,11 +118,27 @@ const Header = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-80">
-            <div className="p-2 font-medium">Notificações</div>
+            <div className="flex justify-between items-center p-2">
+              <span className="font-medium">Notificações</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigateToNotifications();
+                }}
+              >
+                Ver todas
+              </Button>
+            </div>
             <div className="max-h-[300px] overflow-y-auto">
               {notifications.length > 0 ? (
                 notifications.map(notification => (
-                  <DropdownMenuItem key={notification.id} className="flex flex-col items-start p-3">
+                  <DropdownMenuItem 
+                    key={notification.id} 
+                    className="flex flex-col items-start p-3 cursor-pointer"
+                    onClick={() => navigateToNotifications()}
+                  >
                     <div className="font-medium">{notification.title}</div>
                     <div className="text-sm text-muted-foreground">{notification.message}</div>
                   </DropdownMenuItem>
@@ -100,8 +160,12 @@ const Header = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem>Meu Perfil</DropdownMenuItem>
-            <DropdownMenuItem>Configurações</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/configuracoes?tab=perfil')}>
+              Meu Perfil
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
+              Configurações
+            </DropdownMenuItem>
             <DropdownMenuItem>Sair</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
