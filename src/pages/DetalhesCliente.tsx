@@ -43,7 +43,7 @@ const DetalhesCliente = () => {
   // Redirecionar se o cliente não for encontrado
   useEffect(() => {
     if (!cliente && id) {
-      navigate("/clientes");
+      navigate("/clients");
     }
   }, [cliente, id, navigate]);
   
@@ -56,7 +56,7 @@ const DetalhesCliente = () => {
           <p className="mt-1 text-muted-foreground">O cliente solicitado não existe ou foi removido</p>
           <Button 
             variant="link" 
-            onClick={() => navigate("/clientes")}
+            onClick={() => navigate("/clients")}
             className="mt-4"
           >
             Voltar para a lista de clientes
@@ -104,7 +104,7 @@ const DetalhesCliente = () => {
   
   const handleExcluirCliente = () => {
     excluirCliente(cliente.id);
-    navigate("/clientes");
+    navigate("/clients");
   };
   
   return (
@@ -115,7 +115,7 @@ const DetalhesCliente = () => {
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={() => navigate("/clientes")}
+            onClick={() => navigate("/clients")}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>
