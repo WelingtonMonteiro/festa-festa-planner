@@ -16,7 +16,8 @@ import {
   ChevronRight,
   ChevronLeft,
   FileText,
-  InfoIcon
+  InfoIcon,
+  UserPlus
 } from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
@@ -67,6 +68,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <Users className="h-5 w-5" /> 
     },
     { 
+      path: '/leads', 
+      name: 'Leads', 
+      icon: <UserPlus className="h-5 w-5" /> 
+    },
+    { 
       path: '/kits-temas', 
       name: 'Kits & Temas', 
       icon: <Package className="h-5 w-5" /> 
@@ -108,7 +114,7 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   return (
     <nav 
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-sidebar transition-width duration-300 ease-in-out pb-10",
+        "sticky top-0 left-0 z-40 h-screen bg-sidebar transition-width duration-300 ease-in-out pb-10",
         collapsed ? "w-16" : "w-64"
       )}
     >

@@ -16,6 +16,7 @@ import Configuracoes from '@/pages/Configuracoes';
 import NotFound from '@/pages/NotFound';
 import Index from '@/pages/Index';
 import Notificacoes from '@/pages/Notificacoes';
+import Lead from '@/pages/Lead';
 import { ThemeProvider } from '@/hooks/use-theme';
 
 function App() {
@@ -36,6 +37,7 @@ function App() {
         <Route path="/relatorios" element={<MainLayout><Relatorios /></MainLayout>} />
         <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
         <Route path="/notificacoes" element={<MainLayout><Notificacoes /></MainLayout>} />
+        <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ThemeProvider>
