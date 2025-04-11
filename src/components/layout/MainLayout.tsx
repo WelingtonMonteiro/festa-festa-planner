@@ -22,7 +22,8 @@ const MainLayout = ({ children, className }: MainLayoutProps) => {
       <Sidebar onToggleCollapse={handleSidebarToggle} />
       <div className={cn(
         "flex flex-1 flex-col transition-all duration-300",
-        sidebarCollapsed ? "ml-16" : "ml-64"
+        // Removed ml-64 and ml-16 which were creating the gap
+        sidebarCollapsed ? "" : ""
       )}>
         <Header />
         <main className={cn("flex-1 overflow-y-auto p-6", className)}>
