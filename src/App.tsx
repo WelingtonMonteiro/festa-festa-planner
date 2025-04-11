@@ -9,13 +9,13 @@ import CalendarioPage from '@/pages/CalendarioPage';
 import Eventos from '@/pages/Eventos';
 import KitsTemas from '@/pages/KitsTemas';
 import Financeiro from '@/pages/Financeiro';
-import Mensagens from '@/pages/Mensagens';
+import Messages from '@/pages/Messages';
 import Estatisticas from '@/pages/Estatisticas';
-import Relatorios from '@/pages/Relatorios';
+import Reports from '@/pages/Reports';
 import Configuracoes from '@/pages/Configuracoes';
 import NotFound from '@/pages/NotFound';
 import Index from '@/pages/Index';
-import Notificacoes from '@/pages/Notificacoes';
+import Notifications from '@/pages/Notifications';
 import Lead from '@/pages/Lead';
 import { ThemeProvider } from '@/hooks/use-theme';
 
@@ -32,11 +32,11 @@ function App() {
         <Route path="/eventos" element={<MainLayout><Eventos /></MainLayout>} />
         <Route path="/kits-temas" element={<MainLayout><KitsTemas /></MainLayout>} />
         <Route path="/financeiro" element={<MainLayout><Financeiro /></MainLayout>} />
-        <Route path="/mensagens" element={<MainLayout><Mensagens /></MainLayout>} />
+        <Route path="/messages" element={<MainLayout><Messages /></MainLayout>} />
         <Route path="/estatisticas" element={<MainLayout><Estatisticas /></MainLayout>} />
-        <Route path="/relatorios" element={<MainLayout><Relatorios /></MainLayout>} />
+        <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
         <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
-        <Route path="/notificacoes" element={<MainLayout><Notificacoes /></MainLayout>} />
+        <Route path="/notifications" element={<MainLayout><Notifications /></MainLayout>} />
         <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
         <Route path="*" element={<NotFound />} />
       </Routes>

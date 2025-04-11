@@ -11,64 +11,64 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
-const Mensagens = () => {
-  const { mensagens, clientes, adicionarMensagem, marcarMensagemComoLida } = useFestaContext();
-  const [plataforma, setPlataforma] = useState<'whatsapp' | 'instagram' | 'facebook'>('whatsapp');
-  const [clienteSelecionado, setClienteSelecionado] = useState<string | null>(null);
-  const [novaMensagem, setNovaMensagem] = useState('');
+const Messages = () => {
+  const { mensagens: messages, clientes: clients, adicionarMensagem: addMessage, marcarMensagemComoLida: markMessageAsRead } = useFestaContext();
+  const [platform, setPlatform] = useState<'whatsapp' | 'instagram' | 'facebook'>('whatsapp');
+  const [selectedClient, setSelectedClient] = useState<string | null>(null);
+  const [newMessage, setNewMessage] = useState('');
   
-  const clientesComMensagens = clientes.filter(cliente => 
-    mensagens.some(m => m.clienteId === cliente.id)
+  const clientsWithMessages = clients.filter(client => 
+    messages.some(m => m.clienteId === client.id)
   );
   
-  // Função para obter nome do cliente com base no ID do cliente
-  const obterNomeCliente = (clienteId: string) => {
-    const cliente = clientes.find(c => c.id === clienteId);
-    return cliente ? cliente.nome : 'Cliente';
+  // Function to get client name based on client ID
+  const getClientName = (clientId: string) => {
+    const client = clients.find(c => c.id === clientId);
+    return client ? client.nome : 'Client';
   };
   
-  // Função auxiliar para formatar data
-  const formatarData = (data: string) => {
-    return format(new Date(data), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR });
+  // Helper function to format date
+  const formatDate = (date: string) => {
+    return format(new Date(date), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR });
   };
 
-  // Formata data para o chat de modo mais compacto
-  const formatarHoraMensagem = (data: string) => {
-    return format(new Date(data), "HH:mm", { locale: ptBR });
+  // Format date for chat in a more compact way
+  const formatMessageTime = (date: string) => {
+    return format(new Date(date), "HH:mm", { locale: ptBR });
   };
   
-  // Filtrar mensagens do cliente selecionado
-  const mensagensFiltradas = clienteSelecionado 
-    ? mensagens
-        .filter(m => m.clienteId === clienteSelecionado)
+  // Filter messages for selected client
+  const filteredMessages = selectedClient 
+    ? messages
+        .filter(m => m.clienteId === selectedClient)
         .sort((a, b) => new Date(a.datahora).getTime() - new Date(b.datahora).getTime())
     : [];
     
-  // Marcar mensagens como lidas ao visualizar
-  if (clienteSelecionado) {
-    mensagensFiltradas
+  // Mark messages as read when viewed
+  if (selectedClient) {
+    filteredMessages
       .filter(m => !m.lida && m.remetente === 'cliente')
-      .forEach(m => marcarMensagemComoLida(m.id));
+      .forEach(m => markMessageAsRead(m.id));
   }
   
-  // Enviar nova mensagem
-  const enviarMensagem = () => {
-    if (!novaMensagem.trim() || !clienteSelecionado) return;
+  // Send new message
+  const sendMessage = () => {
+    if (!newMessage.trim() || !selectedClient) return;
     
-    adicionarMensagem({
+    addMessage({
       remetente: 'empresa',
-      clienteId: clienteSelecionado,
-      conteudo: novaMensagem,
+      clienteId: selectedClient,
+      conteudo: newMessage,
       lida: true
     });
     
-    toast.success("Mensagem enviada com sucesso!");
-    setNovaMensagem('');
+    toast.success("Message sent successfully!");
+    setNewMessage('');
   };
   
-  // Pegar o ícone da plataforma
-  const getPlataformaIcon = (plataforma: 'whatsapp' | 'instagram' | 'facebook') => {
-    switch(plataforma) {
+  // Get platform icon
+  const getPlatformIcon = (platform: 'whatsapp' | 'instagram' | 'facebook') => {
+    switch(platform) {
       case 'whatsapp':
         return <Phone className="h-4 w-4" />;
       case 'instagram':
@@ -83,13 +83,13 @@ const Mensagens = () => {
   return (
     <div className="container py-6">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Mensagens</h1>
+        <h1 className="text-3xl font-bold mb-2">Messages</h1>
         <p className="text-muted-foreground">
-          Gerencie suas conversas com clientes através de diferentes plataformas
+          Manage your conversations with clients across different platforms
         </p>
       </div>
       
-      <Tabs defaultValue="whatsapp" onValueChange={(value) => setPlataforma(value as any)}>
+      <Tabs defaultValue="whatsapp" onValueChange={(value) => setPlatform(value as any)}>
         <div className="flex justify-between items-center mb-4">
           <TabsList>
             <TabsTrigger value="whatsapp" className="flex items-center gap-2">
@@ -105,65 +105,65 @@ const Mensagens = () => {
         </div>
         
         <div className="grid grid-cols-12 gap-4 h-[calc(100vh-240px)]">
-          {/* Lista de clientes - 4 colunas */}
+          {/* Client list - 4 columns */}
           <div className="col-span-4 bg-secondary/10 rounded-lg overflow-y-auto h-full">
             <div className="p-3 border-b">
-              <h3 className="font-medium">Conversas</h3>
+              <h3 className="font-medium">Conversations</h3>
             </div>
             
-            {clientesComMensagens.length === 0 ? (
+            {clientsWithMessages.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
-                Nenhuma conversa encontrada
+                No conversations found
               </div>
             ) : (
               <div className="divide-y">
-                {clientesComMensagens.map(cliente => {
-                  const ultimaMensagem = [...mensagens]
-                    .filter(m => m.clienteId === cliente.id)
+                {clientsWithMessages.map(client => {
+                  const lastMessage = [...messages]
+                    .filter(m => m.clienteId === client.id)
                     .sort((a, b) => 
                       new Date(b.datahora).getTime() - new Date(a.datahora).getTime()
                     )[0];
                   
-                  const mensagensNaoLidas = mensagens.filter(
-                    m => m.clienteId === cliente.id && !m.lida && m.remetente === 'cliente'
+                  const unreadMessages = messages.filter(
+                    m => m.clienteId === client.id && !m.lida && m.remetente === 'cliente'
                   ).length;
                   
                   return (
                     <div 
-                      key={cliente.id}
+                      key={client.id}
                       className={`p-3 hover:bg-accent/20 cursor-pointer ${
-                        clienteSelecionado === cliente.id ? 'bg-accent/30' : ''
+                        selectedClient === client.id ? 'bg-accent/30' : ''
                       }`}
-                      onClick={() => setClienteSelecionado(cliente.id)}
+                      onClick={() => setSelectedClient(client.id)}
                     >
                       <div className="flex items-start gap-3">
                         <Avatar>
                           <AvatarFallback>
-                            {cliente.nome.substring(0, 2).toUpperCase()}
+                            {client.nome.substring(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         
                         <div className="flex-1 min-w-0">
                           <div className="flex justify-between items-center mb-1">
-                            <h4 className="font-medium truncate">{cliente.nome}</h4>
-                            {ultimaMensagem && (
+                            <h4 className="font-medium truncate">{client.nome}</h4>
+                            {lastMessage && (
                               <span className="text-xs text-muted-foreground">
-                                {format(new Date(ultimaMensagem.datahora), "dd/MM")}
+                                {format(new Date(lastMessage.datahora), "dd/MM")}
                               </span>
                             )}
                           </div>
                           
                           <div className="flex justify-between">
-                            {ultimaMensagem && (
+                            {lastMessage && (
                               <p className="text-sm text-muted-foreground truncate">
-                                {ultimaMensagem.remetente === 'empresa' ? 'Você: ' : ''}
-                                {ultimaMensagem.conteudo}
+                                {lastMessage.remetente === 'empresa' ? 'You: ' : ''}
+                                {lastMessage.conteudo}
                               </p>
                             )}
                             
-                            {mensagensNaoLidas > 0 && (
+                            {unreadMessages > 0 && (
                               <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs">
-                                {mensagensNaoLidas}
+                                {unreadMessages}
                               </span>
                             )}
                           </div>
@@ -176,76 +176,76 @@ const Mensagens = () => {
             )}
           </div>
           
-          {/* Chat - 8 colunas */}
+          {/* Chat - 8 columns */}
           <div className="col-span-8 bg-card border rounded-lg flex flex-col h-full">
-            {!clienteSelecionado ? (
+            {!selectedClient ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
-                Selecione um cliente para iniciar uma conversa
+                Select a client to start a conversation
               </div>
             ) : (
               <>
-                {/* Cabeçalho do chat */}
+                {/* Chat header */}
                 <div className="p-3 border-b flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar>
                       <AvatarFallback>
-                        {obterNomeCliente(clienteSelecionado).substring(0, 2).toUpperCase()}
+                        {getClientName(selectedClient).substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                     
                     <div>
-                      <h3 className="font-medium">{obterNomeCliente(clienteSelecionado)}</h3>
+                      <h3 className="font-medium">{getClientName(selectedClient)}</h3>
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        {getPlataformaIcon(plataforma)} <span>{plataforma}</span>
+                        {getPlatformIcon(platform)} <span>{platform}</span>
                       </div>
                     </div>
                   </div>
                 </div>
                 
-                {/* Mensagens */}
+                {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                  {mensagensFiltradas.map(mensagem => (
+                  {filteredMessages.map(message => (
                     <div
-                      key={mensagem.id}
-                      className={`flex ${mensagem.remetente === 'empresa' ? 'justify-end' : 'justify-start'}`}
+                      key={message.id}
+                      className={`flex ${message.remetente === 'empresa' ? 'justify-end' : 'justify-start'}`}
                     >
                       <div 
                         className={`max-w-[80%] rounded-lg p-3 ${
-                          mensagem.remetente === 'empresa' 
+                          message.remetente === 'empresa' 
                             ? 'bg-primary text-primary-foreground' 
                             : 'bg-secondary/50'
                         }`}
                       >
-                        <p>{mensagem.conteudo}</p>
+                        <p>{message.conteudo}</p>
                         <p className={`text-xs mt-1 text-right ${
-                          mensagem.remetente === 'empresa' 
+                          message.remetente === 'empresa' 
                             ? 'text-primary-foreground/80' 
                             : 'text-muted-foreground'
                         }`}>
-                          {formatarHoraMensagem(mensagem.datahora)}
+                          {formatMessageTime(message.datahora)}
                         </p>
                       </div>
                     </div>
                   ))}
                 </div>
                 
-                {/* Input para enviar mensagem */}
+                {/* Input to send message */}
                 <div className="p-3 border-t">
                   <form 
                     className="flex gap-2" 
                     onSubmit={(e) => {
                       e.preventDefault();
-                      enviarMensagem();
+                      sendMessage();
                     }}
                   >
                     <Textarea
-                      value={novaMensagem}
-                      onChange={(e) => setNovaMensagem(e.target.value)}
-                      placeholder="Digite sua mensagem..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      placeholder="Type your message..."
                       className="resize-none min-h-[50px] flex-1"
                       rows={1}
                     />
-                    <Button type="submit" disabled={!novaMensagem.trim()}>
+                    <Button type="submit" disabled={!newMessage.trim()}>
                       <Send className="h-4 w-4" />
                     </Button>
                   </form>
@@ -259,4 +259,4 @@ const Mensagens = () => {
   );
 };
 
-export default Mensagens;
+export default Messages;

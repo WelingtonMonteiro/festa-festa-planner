@@ -18,47 +18,47 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFestaContext } from '@/contexts/FestaContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-const Relatorios = () => {
+const Reports = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clientes } = useFestaContext();
+  const { clientes: clients } = useFestaContext();
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
-  const [clienteFilter, setClienteFilter] = useState<string>("");
-  const [tipoFilter, setTipoFilter] = useState<string>("financeiro");
+  const [clientFilter, setClientFilter] = useState<string>("");
+  const [typeFilter, setTypeFilter] = useState<string>("financial");
   
   // Parse URL search params
   const searchParams = new URLSearchParams(location.search);
-  const tipoParam = searchParams.get('tipo');
+  const typeParam = searchParams.get('type');
   
-  // Initialize active tab based on URL parameter or default to financeiro
-  const [activeTab, setActiveTab] = useState(tipoParam || "financeiro");
+  // Initialize active tab based on URL parameter or default to financial
+  const [activeTab, setActiveTab] = useState(typeParam || "financial");
 
-  const tiposDeRelatorio = [
-    { id: "financeiro", nome: "Financeiro" },
-    { id: "eventos", nome: "Eventos" },
-    { id: "clientes", nome: "Clientes" },
-    { id: "kits", nome: "Kits e Temas" }
+  const reportTypes = [
+    { id: "financial", name: "Financial" },
+    { id: "events", name: "Events" },
+    { id: "clients", name: "Clients" },
+    { id: "kits", name: "Kits & Themes" }
   ];
 
-  // Função para aplicar filtros
-  const aplicarFiltros = () => {
+  // Function to apply filters
+  const applyFilters = () => {
     // Construct filter parameters
     const params = new URLSearchParams();
     
     if (startDate) {
-      params.append("dataInicio", format(startDate, "yyyy-MM-dd"));
+      params.append("startDate", format(startDate, "yyyy-MM-dd"));
     }
     
     if (endDate) {
-      params.append("dataFim", format(endDate, "yyyy-MM-dd"));
+      params.append("endDate", format(endDate, "yyyy-MM-dd"));
     }
     
-    if (clienteFilter) {
-      params.append("cliente", clienteFilter);
+    if (clientFilter) {
+      params.append("client", clientFilter);
     }
     
-    params.append("tipo", activeTab);
+    params.append("type", activeTab);
     
     // Update URL with filters without navigating
     window.history.pushState({}, '', `${location.pathname}?${params.toString()}`);
@@ -66,20 +66,20 @@ const Relatorios = () => {
 
   const handleTabChange = (value: string) => {
     setActiveTab(value);
-    setTipoFilter(value);
+    setTypeFilter(value);
     
     // Update URL when changing tabs
     const params = new URLSearchParams(location.search);
-    params.set('tipo', value);
+    params.set('type', value);
     window.history.pushState({}, '', `${location.pathname}?${params.toString()}`);
   };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Relatórios</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Reports</h1>
         <p className="text-muted-foreground">
-          Visualize e gere relatórios para o seu negócio
+          View and generate reports for your business
         </p>
       </div>
 
@@ -88,18 +88,18 @@ const Relatorios = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Filter className="h-5 w-5" />
-              Filtros
+              Filters
             </CardTitle>
             <CardDescription>
-              Selecione os filtros para personalizar seus relatórios
+              Select filters to customize your reports
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid gap-6 sm:grid-cols-3">
-              {/* Filtro por Período */}
+              {/* Date Period Filter */}
               <div className="sm:col-span-2 grid sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Data Início</label>
+                  <label className="text-sm font-medium mb-1 block">Start Date</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -107,7 +107,7 @@ const Relatorios = () => {
                         className="w-full justify-start text-left font-normal"
                       >
                         <Calendar className="mr-2 h-4 w-4" />
-                        {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Data inicial</span>}
+                        {startDate ? format(startDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Start date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -123,7 +123,7 @@ const Relatorios = () => {
                 </div>
                 
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Data Fim</label>
+                  <label className="text-sm font-medium mb-1 block">End Date</label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -131,7 +131,7 @@ const Relatorios = () => {
                         className="w-full justify-start text-left font-normal"
                       >
                         <Calendar className="mr-2 h-4 w-4" />
-                        {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : <span>Data final</span>}
+                        {endDate ? format(endDate, "dd/MM/yyyy", { locale: ptBR }) : <span>End date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -147,24 +147,24 @@ const Relatorios = () => {
                 </div>
               </div>
               
-              {/* Filtro por Cliente */}
+              {/* Client Filter */}
               <div>
-                <label className="text-sm font-medium mb-1 block">Cliente</label>
-                <Select value={clienteFilter} onValueChange={setClienteFilter}>
+                <label className="text-sm font-medium mb-1 block">Client</label>
+                <Select value={clientFilter} onValueChange={setClientFilter}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione o cliente" />
+                    <SelectValue placeholder="Select client" />
                   </SelectTrigger>
                   <SelectContent>
-                    {clientes.map(cliente => (
-                      <SelectItem key={cliente.id} value={cliente.id}>{cliente.nome}</SelectItem>
+                    {clients.map(client => (
+                      <SelectItem key={client.id} value={client.id}>{client.nome}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="flex items-end">
-                <Button onClick={aplicarFiltros} className="w-full">
-                  Aplicar Filtros
+                <Button onClick={applyFilters} className="w-full">
+                  Apply Filters
                 </Button>
               </div>
             </div>
@@ -175,58 +175,58 @@ const Relatorios = () => {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
-              Resultados
+              Results
             </CardTitle>
             <CardDescription>
-              Visualize os resultados do relatório selecionado
+              View the results of the selected report
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue={activeTab} onValueChange={handleTabChange}>
               <TabsList className="mb-6">
-                <TabsTrigger value="financeiro">Financeiro</TabsTrigger>
-                <TabsTrigger value="eventos">Eventos</TabsTrigger>
-                <TabsTrigger value="clientes">Clientes</TabsTrigger>
-                <TabsTrigger value="kits">Kits e Temas</TabsTrigger>
+                <TabsTrigger value="financial">Financial</TabsTrigger>
+                <TabsTrigger value="events">Events</TabsTrigger>
+                <TabsTrigger value="clients">Clients</TabsTrigger>
+                <TabsTrigger value="kits">Kits & Themes</TabsTrigger>
               </TabsList>
-              <TabsContent value="financeiro">
+              <TabsContent value="financial">
                 <div className="p-4 border rounded-md">
-                  <h3 className="text-lg font-medium mb-4">Relatório Financeiro</h3>
+                  <h3 className="text-lg font-medium mb-4">Financial Report</h3>
                   <p className="text-muted-foreground">
                     {startDate && endDate ? 
-                      `Dados financeiros de ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} até ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}` : 
-                      'Selecione um período para ver dados específicos'}
+                      `Financial data from ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} to ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}` : 
+                      'Select a period to see specific data'}
                   </p>
-                  {/* Aqui entraria o conteúdo do relatório financeiro */}
+                  {/* Financial report content would go here */}
                 </div>
               </TabsContent>
-              <TabsContent value="eventos">
+              <TabsContent value="events">
                 <div className="p-4 border rounded-md">
-                  <h3 className="text-lg font-medium mb-4">Relatório de Eventos</h3>
+                  <h3 className="text-lg font-medium mb-4">Events Report</h3>
                   <p className="text-muted-foreground">
                     {startDate && endDate ? 
-                      `Eventos de ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} até ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}` : 
-                      'Selecione um período para ver eventos específicos'}
+                      `Events from ${format(startDate, "dd/MM/yyyy", { locale: ptBR })} to ${format(endDate, "dd/MM/yyyy", { locale: ptBR })}` : 
+                      'Select a period to see specific events'}
                   </p>
-                  {/* Aqui entraria o conteúdo do relatório de eventos */}
+                  {/* Events report content would go here */}
                 </div>
               </TabsContent>
-              <TabsContent value="clientes">
+              <TabsContent value="clients">
                 <div className="p-4 border rounded-md">
-                  <h3 className="text-lg font-medium mb-4">Relatório de Clientes</h3>
+                  <h3 className="text-lg font-medium mb-4">Clients Report</h3>
                   <p className="text-muted-foreground">
-                    {clienteFilter ? 'Dados do cliente selecionado' : 'Selecione um cliente para ver dados específicos'}
+                    {clientFilter ? 'Data for selected client' : 'Select a client to see specific data'}
                   </p>
-                  {/* Aqui entraria o conteúdo do relatório de clientes */}
+                  {/* Clients report content would go here */}
                 </div>
               </TabsContent>
               <TabsContent value="kits">
                 <div className="p-4 border rounded-md">
-                  <h3 className="text-lg font-medium mb-4">Relatório de Kits e Temas</h3>
+                  <h3 className="text-lg font-medium mb-4">Kits & Themes Report</h3>
                   <p className="text-muted-foreground">
-                    Visualize dados sobre kits e temas utilizados
+                    View data about kits and themes used
                   </p>
-                  {/* Aqui entraria o conteúdo do relatório de kits e temas */}
+                  {/* Kits and themes report content would go here */}
                 </div>
               </TabsContent>
             </Tabs>
@@ -237,4 +237,4 @@ const Relatorios = () => {
   );
 };
 
-export default Relatorios;
+export default Reports;
