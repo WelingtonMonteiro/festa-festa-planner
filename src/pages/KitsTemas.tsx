@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,18 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useFestaContext } from '@/contexts/FestaContext';
-import { Package, Tag, Edit, Trash2, PlusCircle, Check, X } from 'lucide-react';
+import { Package, Tag, Edit, Trash2, PlusCircle, Check, X, Image, Upload } from 'lucide-react';
 
 const KitsTemas = () => {
   const { kits, temas, adicionarKit, adicionarTema, atualizarKit, atualizarTema, excluirKit, excluirTema } = useFestaContext();
   
-  // Estados para os dialogs
   const [kitDialogOpen, setKitDialogOpen] = useState(false);
   const [temaDialogOpen, setTemaDialogOpen] = useState(false);
   const [editingKit, setEditingKit] = useState<string | null>(null);
   const [editingTema, setEditingTema] = useState<string | null>(null);
   
-  // Estados para os formulários
   const [kitForm, setKitForm] = useState({
     nome: '',
     descricao: '',
@@ -36,7 +33,6 @@ const KitsTemas = () => {
     kitsIds: [] as string[]
   });
   
-  // Handlers para form do kit
   const handleKitChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setKitForm({ ...kitForm, [name]: value });
@@ -57,7 +53,6 @@ const KitsTemas = () => {
     setKitForm({ ...kitForm, itens: newItens });
   };
   
-  // Handlers para form do tema
   const handleTemaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setTemaForm({ ...temaForm, [name]: value });
@@ -71,7 +66,48 @@ const KitsTemas = () => {
     setTemaForm({ ...temaForm, kitsIds: newKitsIds });
   };
   
-  // Reset forms
+  const handleKitImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setKitForm({ 
+            ...kitForm, 
+            imagens: [...kitForm.imagens.filter(img => img !== ''), reader.result] 
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleTemaImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (typeof reader.result === 'string') {
+          setTemaForm({ 
+            ...temaForm, 
+            imagens: [...temaForm.imagens.filter(img => img !== ''), reader.result] 
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const removeKitImage = (index: number) => {
+    const newImagens = kitForm.imagens.filter((_, i) => i !== index);
+    setKitForm({ ...kitForm, imagens: newImagens.length ? newImagens : [''] });
+  };
+  
+  const removeTemaImage = (index: number) => {
+    const newImagens = temaForm.imagens.filter((_, i) => i !== index);
+    setTemaForm({ ...temaForm, imagens: newImagens.length ? newImagens : [''] });
+  };
+  
   const resetKitForm = () => {
     setKitForm({
       nome: '',
@@ -94,7 +130,6 @@ const KitsTemas = () => {
     setEditingTema(null);
   };
   
-  // Submit handlers
   const handleKitSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -137,7 +172,6 @@ const KitsTemas = () => {
     resetTemaForm();
   };
   
-  // Edit handlers
   const handleEditKit = (kit: typeof kits[0]) => {
     setKitForm({
       nome: kit.nome,
@@ -162,7 +196,6 @@ const KitsTemas = () => {
     setTemaDialogOpen(true);
   };
   
-  // Calcular ROI para um tema
   const calcularROI = (tema: typeof temas[0]) => {
     const receitaTotal = tema.vezes_alugado * (tema.kits.reduce((sum, kit) => sum + kit.preco, 0) / tema.kits.length);
     const roi = tema.valorGasto > 0 ? ((receitaTotal / tema.valorGasto) - 1) * 100 : 0;
@@ -185,7 +218,6 @@ const KitsTemas = () => {
           </TabsTrigger>
         </TabsList>
         
-        {/* Conteúdo da aba Kits */}
         <TabsContent value="kits" className="space-y-4">
           <div className="flex justify-end">
             <Button 
@@ -204,9 +236,21 @@ const KitsTemas = () => {
             {kits.map(kit => (
               <Card key={kit.id}>
                 <CardHeader className="relative">
-                  <CardTitle>{kit.nome}</CardTitle>
-                  <CardDescription>R$ {kit.preco.toLocaleString('pt-BR')}</CardDescription>
-                  <div className="absolute right-4 top-4 flex space-x-2">
+                  {kit.imagens && kit.imagens.length > 0 && kit.imagens[0] !== '' && (
+                    <div className="absolute inset-0 rounded-t-lg overflow-hidden">
+                      <img 
+                        src={kit.imagens[0]} 
+                        alt={kit.nome}
+                        className="w-full h-24 object-cover opacity-20"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
+                    </div>
+                  )}
+                  <CardTitle className="relative z-10">{kit.nome}</CardTitle>
+                  <CardDescription className="relative z-10">
+                    R$ {kit.preco.toLocaleString('pt-BR')}
+                  </CardDescription>
+                  <div className="absolute right-4 top-4 flex space-x-2 z-10">
                     <Button 
                       variant="outline" 
                       size="icon" 
@@ -264,7 +308,6 @@ const KitsTemas = () => {
           </div>
         </TabsContent>
         
-        {/* Conteúdo da aba Temas */}
         <TabsContent value="temas" className="space-y-4">
           <div className="flex justify-end">
             <Button 
@@ -283,11 +326,21 @@ const KitsTemas = () => {
             {temas.map(tema => (
               <Card key={tema.id}>
                 <CardHeader className="relative">
-                  <CardTitle>{tema.nome}</CardTitle>
-                  <CardDescription>
+                  {tema.imagens && tema.imagens.length > 0 && tema.imagens[0] !== '' && (
+                    <div className="absolute inset-0 rounded-t-lg overflow-hidden">
+                      <img 
+                        src={tema.imagens[0]} 
+                        alt={tema.nome}
+                        className="w-full h-24 object-cover opacity-20"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
+                    </div>
+                  )}
+                  <CardTitle className="relative z-10">{tema.nome}</CardTitle>
+                  <CardDescription className="relative z-10">
                     Investimento: R$ {tema.valorGasto.toLocaleString('pt-BR')}
                   </CardDescription>
-                  <div className="absolute right-4 top-4 flex space-x-2">
+                  <div className="absolute right-4 top-4 flex space-x-2 z-10">
                     <Button 
                       variant="outline" 
                       size="icon" 
@@ -355,7 +408,6 @@ const KitsTemas = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Dialog para adicionar/editar kit */}
       <Dialog open={kitDialogOpen} onOpenChange={setKitDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -432,6 +484,46 @@ const KitsTemas = () => {
               </div>
             </div>
             
+            <div className="space-y-2">
+              <Label>Imagens do Kit</Label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                {kitForm.imagens.map((img, index) => 
+                  img !== '' ? (
+                    <div key={index} className="relative rounded-md overflow-hidden border h-24">
+                      <img 
+                        src={img} 
+                        alt={`Imagem ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6 rounded-full"
+                        onClick={() => removeKitImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : null
+                )}
+                
+                <div className="border rounded-md flex flex-col items-center justify-center p-4 h-24 cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Label htmlFor="kit-image-upload" className="cursor-pointer flex flex-col items-center gap-1">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Upload</span>
+                  </Label>
+                  <Input
+                    id="kit-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleKitImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+            </div>
+            
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => {
                 setKitDialogOpen(false);
@@ -447,7 +539,6 @@ const KitsTemas = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Dialog para adicionar/editar tema */}
       <Dialog open={temaDialogOpen} onOpenChange={setTemaDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -491,6 +582,46 @@ const KitsTemas = () => {
                 rows={3}
                 required
               />
+            </div>
+            
+            <div className="space-y-2">
+              <Label>Imagens do Tema</Label>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
+                {temaForm.imagens.map((img, index) => 
+                  img !== '' ? (
+                    <div key={index} className="relative rounded-md overflow-hidden border h-24">
+                      <img 
+                        src={img} 
+                        alt={`Imagem ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6 rounded-full"
+                        onClick={() => removeTemaImage(index)}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : null
+                )}
+                
+                <div className="border rounded-md flex flex-col items-center justify-center p-4 h-24 cursor-pointer hover:bg-muted/50 transition-colors">
+                  <Label htmlFor="tema-image-upload" className="cursor-pointer flex flex-col items-center gap-1">
+                    <Upload className="h-8 w-8 text-muted-foreground" />
+                    <span className="text-xs text-muted-foreground">Upload</span>
+                  </Label>
+                  <Input
+                    id="tema-image-upload"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleTemaImageUpload}
+                    className="hidden"
+                  />
+                </div>
+              </div>
             </div>
             
             <div className="space-y-2">
