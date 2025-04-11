@@ -160,7 +160,7 @@ const Header = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate('/configuracoes?tab=perfil')}>
+            <DropdownMenuItem onClick={() => navigate('/configuracoes?tab=conta')}>
               Meu Perfil
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
