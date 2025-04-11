@@ -35,13 +35,14 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 260 90% 96%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 259 89% 64%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* Dark sidebar colors for both light and dark modes */
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 259 89% 64%; 
+    --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 259 89% 54%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 259 60% 80%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
@@ -74,6 +75,7 @@
     --input: 217.2 32.6% 17.5%;
     --ring: 212.7 26.8% 83.9%;
     
+    /* Keep the same dark sidebar colors */
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 259 89% 64%; 
