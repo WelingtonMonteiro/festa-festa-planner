@@ -48,22 +48,22 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   
   const navItems = [
     { 
-      path: '/', 
+      path: '/dashboard', 
       name: 'Dashboard', 
       icon: <PartyPopper className="h-5 w-5" /> 
     },
     { 
-      path: '/calendario', 
+      path: '/calendar', 
       name: 'Calendário', 
       icon: <Calendar className="h-5 w-5" /> 
     },
     { 
-      path: '/eventos', 
+      path: '/events', 
       name: 'Eventos', 
       icon: <CalendarRange className="h-5 w-5" /> 
     },
     { 
-      path: '/clientes', 
+      path: '/clients', 
       name: 'Clientes', 
       icon: <Users className="h-5 w-5" /> 
     },
@@ -73,39 +73,39 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <UserPlus className="h-5 w-5" /> 
     },
     { 
-      path: '/kits-temas', 
+      path: '/kits-themes', 
       name: 'Kits & Temas', 
       icon: <Package className="h-5 w-5" /> 
     },
     { 
-      path: '/financeiro', 
+      path: '/financial', 
       name: 'Financeiro', 
       icon: <DollarSign className="h-5 w-5" /> 
     },
     { 
-      path: '/notificacoes', 
+      path: '/notifications', 
       name: 'Notificações', 
       icon: <Bell className="h-5 w-5" />,
       badge: unreadNotifications > 0 ? unreadNotifications : undefined
     },
     { 
-      path: '/mensagens', 
+      path: '/messages', 
       name: 'Mensagens', 
       icon: <MessageCircle className="h-5 w-5" />,
       badge: unreadCount > 0 ? unreadCount : undefined
     },
     { 
-      path: '/estatisticas', 
+      path: '/statistics', 
       name: 'Estatísticas', 
       icon: <BarChart2 className="h-5 w-5" /> 
     },
     { 
-      path: '/relatorios', 
+      path: '/reports', 
       name: 'Relatórios', 
       icon: <FileText className="h-5 w-5" /> 
     },
     { 
-      path: '/configuracoes', 
+      path: '/settings', 
       name: 'Configurações', 
       icon: <Settings className="h-5 w-5" /> 
     }
