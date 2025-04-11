@@ -20,11 +20,7 @@ const MainLayout = ({ children, className }: MainLayoutProps) => {
     <div className="flex h-screen bg-background">
       {/* Using nav element for sidebar navigation */}
       <Sidebar onToggleCollapse={handleSidebarToggle} />
-      <div className={cn(
-        "flex flex-1 flex-col transition-all duration-300",
-        // Removed ml-64 and ml-16 which were creating the gap
-        sidebarCollapsed ? "" : ""
-      )}>
+      <div className="flex flex-1 flex-col transition-all duration-300">
         <Header />
         <main className={cn("flex-1 overflow-y-auto p-6", className)}>
           {children}

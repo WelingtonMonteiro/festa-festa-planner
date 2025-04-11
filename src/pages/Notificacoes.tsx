@@ -58,7 +58,7 @@ const Notificacoes = () => {
       novasNotificacoes.push({
         id: `mensagem-${mensagem.id}`,
         titulo: 'Mensagem Não Lida',
-        mensagem: mensagem.conteudo.substring(0, 50) + (mensagem.conteudo.length > 50 ? '...' : ''),
+        mensagem: mensagem.conteudo,
         data: mensagem.datahora,
         lida: false,
         tipo: 'mensagem',
@@ -137,7 +137,7 @@ const Notificacoes = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Modal de detalhes da notificação */}
+      {/* Modal de detalhes da notificação - modificado para mostrar o conteúdo completo */}
       <Dialog open={modalAberta} onOpenChange={setModalAberta}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -164,23 +164,6 @@ const Notificacoes = () => {
                   }}
                 >
                   Ver Evento
-                </Button>
-              </div>
-            )}
-            
-            {notificacaoSelecionada?.tipo === 'mensagem' && (
-              <div className="mt-4">
-                <p className="text-sm text-muted-foreground">
-                  Esta notificação está relacionada a uma mensagem não lida.
-                </p>
-                <Button 
-                  className="mt-2"
-                  onClick={() => {
-                    setModalAberta(false);
-                    window.location.href = `/mensagens?id=${notificacaoSelecionada.mensagemId}`;
-                  }}
-                >
-                  Ver Mensagem
                 </Button>
               </div>
             )}
