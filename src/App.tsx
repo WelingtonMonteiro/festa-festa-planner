@@ -11,6 +11,7 @@ import KitsTemas from '@/pages/KitsTemas';
 import Financeiro from '@/pages/Financeiro';
 import Mensagens from '@/pages/Mensagens';
 import Estatisticas from '@/pages/Estatisticas';
+import Relatorios from '@/pages/Relatorios';
 import Configuracoes from '@/pages/Configuracoes';
 import NotFound from '@/pages/NotFound';
 import Index from '@/pages/Index';
@@ -32,6 +33,7 @@ function App() {
         <Route path="/financeiro" element={<MainLayout><Financeiro /></MainLayout>} />
         <Route path="/mensagens" element={<MainLayout><Mensagens /></MainLayout>} />
         <Route path="/estatisticas" element={<MainLayout><Estatisticas /></MainLayout>} />
+        <Route path="/relatorios" element={<MainLayout><Relatorios /></MainLayout>} />
         <Route path="/configuracoes" element={<MainLayout><Configuracoes /></MainLayout>} />
         <Route path="/notificacoes" element={<MainLayout><Notificacoes /></MainLayout>} />
         <Route path="*" element={<NotFound />} />

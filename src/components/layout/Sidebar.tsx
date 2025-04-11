@@ -14,10 +14,11 @@ import {
   CalendarRange,
   Bell,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  FileText
 } from 'lucide-react';
 import { useFestaContext } from '@/contexts/FestaContext';
-import { ReportsMenu } from '@/components/reports/ReportsMenu';
+import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
 
 interface SidebarProps {
   onToggleCollapse?: (collapsed: boolean) => void;
@@ -91,11 +92,18 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <BarChart2 className="h-5 w-5" /> 
     },
     { 
+      path: '/relatorios', 
+      name: 'Relatórios', 
+      icon: <FileText className="h-5 w-5" /> 
+    },
+    { 
       path: '/configuracoes', 
       name: 'Configurações', 
       icon: <Settings className="h-5 w-5" /> 
     }
   ];
+
+  const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   
   return (
     <aside 
@@ -148,11 +156,19 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
         {!collapsed && (
           <div className="mt-6 border-t pt-4">
             <h3 className="mb-2 px-2 text-xs font-semibold text-sidebar-foreground/70">
-              RELATÓRIOS E SISTEMA
+              SISTEMA
             </h3>
-            <div className="px-2">
-              <ReportsMenu />
-            </div>
+            <ul className="space-y-1">
+              <li>
+                <button 
+                  onClick={() => setIsAboutDialogOpen(true)}
+                  className="flex w-full items-center rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <FileText className="h-5 w-5" />
+                  <span className="ml-3">Sobre</span>
+                </button>
+              </li>
+            </ul>
           </div>
         )}
         
@@ -167,6 +183,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
           )}
         </div>
       </div>
+
+      <AboutSystemDialog 
+        open={isAboutDialogOpen} 
+        onOpenChange={setIsAboutDialogOpen} 
+      />
     </aside>
   );
 };
