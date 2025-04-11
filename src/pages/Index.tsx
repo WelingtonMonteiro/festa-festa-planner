@@ -9,7 +9,7 @@ const Index = () => {
     navigate('/dashboard', { replace: true });
   }, [navigate]);
   
-  return null; // Return null instead of rendering Dashboard directly
+  return null;
 };
 
 export default Index;
