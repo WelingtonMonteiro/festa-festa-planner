@@ -91,13 +91,24 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       }
     }
 
-    const newContract = addContract({
+    // Create the contract data object
+    const contractData = {
       title: newContractTitle.trim(),
       content: content,
       clientId: newContractClient,
-      status: 'draft',
+      status: 'draft' as const,
       templateId: newContractTemplate || undefined
-    });
+    };
+
+    // Add the contract
+    addContract(contractData);
+    
+    // Find the newly created contract by title to get its ID
+    const newContract = contracts.find(c => 
+      c.title === newContractTitle.trim() && 
+      c.clientId === newContractClient &&
+      c.status === 'draft'
+    );
 
     if (newContract) {
       setNewContractTitle('');
@@ -135,16 +146,17 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
   };
 
   const handleCopyContract = (contract: Contract) => {
-    const copiedContract = addContract({
+    // Create a copy of the contract data
+    const copyData = {
       title: `${contract.title} (Cópia)`,
       content: contract.content,
       clientId: contract.clientId,
-      status: 'draft'
-    });
+      status: 'draft' as const
+    };
 
-    if (copiedContract) {
-      toast.success(`Contrato "${contract.title}" copiado com sucesso`);
-    }
+    // Add the contract copy
+    addContract(copyData);
+    toast.success(`Contrato "${contract.title}" copiado com sucesso`);
   };
 
   const getClientById = (id: string): Client | undefined => {

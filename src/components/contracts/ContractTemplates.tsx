@@ -48,11 +48,18 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       return;
     }
 
-    const newTemplate = addContractTemplate({
+    // Create the template data object
+    const templateData = {
       name: newTemplateName.trim(),
       content: `<h1>${newTemplateName}</h1><p>Insira aqui o conteúdo do contrato.</p>`
-    });
-
+    };
+    
+    // Add the template and store the result
+    addContractTemplate(templateData);
+    
+    // Find the newly created template by name to get its ID
+    const newTemplate = contractTemplates.find(t => t.name === newTemplateName.trim());
+    
     if (newTemplate) {
       setNewTemplateName('');
       setIsCreateDialogOpen(false);
@@ -81,14 +88,15 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
   };
 
   const handleCopyTemplate = (template: ContractTemplate) => {
-    const copiedTemplate = addContractTemplate({
+    // Create a copy of the template data
+    const copyData = {
       name: `${template.name} (Cópia)`,
       content: template.content
-    });
-
-    if (copiedTemplate) {
-      toast.success(`Modelo "${template.name}" copiado com sucesso`);
-    }
+    };
+    
+    // Add the template copy
+    addContractTemplate(copyData);
+    toast.success(`Modelo "${template.name}" copiado com sucesso`);
   };
 
   const filteredTemplates = contractTemplates.filter(template => 
