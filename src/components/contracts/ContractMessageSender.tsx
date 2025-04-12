@@ -40,6 +40,7 @@ const ContractMessageSender = ({ clientId }: ContractMessageSenderProps) => {
       sendContractToClient(selectedContract, clientId);
       setSelectedContract('');
       setIsOpen(false);
+      toast.success('Contrato enviado com sucesso');
     } else {
       toast.error('Selecione um contrato para enviar');
     }

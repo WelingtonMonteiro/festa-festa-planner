@@ -34,6 +34,7 @@ const ContractEditor = ({
   const [content, setContent] = useState<string>('');
   const [initialContent, setInitialContent] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
+  const [processedContent, setProcessedContent] = useState<string>('');
   const editorRef = useRef<ReactQuill>(null);
   
   // Use this effect to only set content when the dialog is opened or the template/contract changes
@@ -44,20 +45,37 @@ const ContractEditor = ({
         setTimeout(() => {
           setContent(template.content);
           setInitialContent(template.content);
+          if (previewClient) {
+            setProcessedContent(replaceVariables(template.content, previewClient));
+          } else {
+            setProcessedContent(template.content);
+          }
           setIsInitializing(false);
-        }, 50);
+        }, 100);
       } else if (contract) {
         setTimeout(() => {
           setContent(contract.content);
           setInitialContent(contract.content);
+          if (previewClient) {
+            setProcessedContent(replaceVariables(contract.content, previewClient));
+          } else {
+            setProcessedContent(contract.content);
+          }
           setIsInitializing(false);
-        }, 50);
+        }, 100);
       }
     } else {
       // Reset the initializing state when the dialog closes
       setIsInitializing(true);
     }
-  }, [template, contract, isOpen]);
+  }, [template, contract, isOpen, previewClient]);
+
+  // Update processed content whenever content or previewClient changes
+  useEffect(() => {
+    if (previewClient && !isInitializing) {
+      setProcessedContent(replaceVariables(content, previewClient));
+    }
+  }, [content, previewClient, isInitializing]);
 
   const handleSave = () => {
     if (content.trim() === '') {
@@ -78,9 +96,6 @@ const ContractEditor = ({
     setContent(initialContent);
     onOpenChange(false);
   };
-
-  // Process variables if a preview client is provided
-  const processedContent = previewClient ? replaceVariables(content, previewClient) : content;
 
   const modules = {
     toolbar: [
