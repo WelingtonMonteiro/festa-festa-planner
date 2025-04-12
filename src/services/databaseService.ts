@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { setupSupabaseDatabase } from "./migrationScripts";
+import { KitRecord, ThemRecord } from "@/types/supabase";
 
 export const databaseService = {
   async setupDatabase() {
@@ -18,7 +19,7 @@ export const databaseService = {
         for (const kit of kits) {
           const { error } = await supabase
             .from('kits')
-            .insert({
+            .upsert({
               id: kit.id,
               nome: kit.nome,
               descricao: kit.descricao,
@@ -44,7 +45,7 @@ export const databaseService = {
         for (const them of thems) {
           const { error } = await supabase
             .from('thems')
-            .insert({
+            .upsert({
               id: them.id,
               nome: them.nome,
               descricao: them.descricao,

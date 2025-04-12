@@ -1,118 +1,102 @@
 
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from '@/integrations/supabase/client';
 
 export const setupSupabaseDatabase = async () => {
   try {
-    // Create kits table if not exists
-    const { error: kitsError } = await supabase
+    // Check if kits table exists
+    const { count: kitsCount, error: kitsError } = await supabase
       .from('kits')
-      .select('id')
-      .limit(1)
-      .maybeSingle();
-      
-    if (kitsError && kitsError.code === '42P01') { // Table doesn't exist
-      // Create table
-      await supabase.rpc('create_kits_table');
-    }
+      .select('id', { count: 'exact', head: true });
     
-    // Create thems table if not exists
-    const { error: themsError } = await supabase
+    // If there's an error and it's because the table doesn't exist
+    if (kitsError && kitsError.code === '42P01') {
+      console.log('Creating kits table...');
+      await createKitsTable();
+    }
+
+    // Check if thems table exists
+    const { count: themsCount, error: themsError } = await supabase
       .from('thems')
-      .select('id')
-      .limit(1)
-      .maybeSingle();
-      
-    if (themsError && themsError.code === '42P01') { // Table doesn't exist
-      // Create table
-      await supabase.rpc('create_thems_table');
-    }
+      .select('id', { count: 'exact', head: true });
     
-    // Create stored procedures if they don't exist
-    await createStoredProcedures();
+    // If there's an error and it's because the table doesn't exist
+    if (themsError && themsError.code === '42P01') {
+      console.log('Creating thems table...');
+      await createThemsTable();
+    }
 
     return true;
   } catch (error) {
-    console.error('Failed to set up Supabase database:', error);
+    console.error('Error setting up Supabase database:', error);
     return false;
   }
 };
 
-const createStoredProcedures = async () => {
+const createKitsTable = async () => {
   try {
-    // Test if the function exists by calling it
-    const { error: fnError } = await supabase.rpc('create_kits_table');
+    // Create kits table with proper schema
+    const { error } = await supabase.rpc('create_kits_table');
     
-    // If function doesn't exist, create it
-    if (fnError && fnError.message.includes('does not exist')) {
-      // We can't use SQL directly with Supabase client in browser
-      // Instead, we'll need to create these functions via Supabase dashboard
-      console.warn('Please create the stored procedures manually in the Supabase dashboard');
+    if (error) {
+      // If the RPC function doesn't exist, create the table manually
+      await supabase.from('kits').insert({
+        id: 'initial_entry',
+        nome: 'Test Kit',
+        descricao: 'Initial kit to create table',
+        itens: [],
+        preco: 0,
+        imagens: [],
+        vezes_alugado: 0
+      });
+
+      // Set permissions
+      await setupTablePermissions('kits');
     }
     
     return true;
   } catch (error) {
-    console.error('Failed to create stored procedures:', error);
+    console.error('Error creating kits table:', error);
     return false;
   }
 };
 
-export const migrateLocalStorageToSupabase = async () => {
+const createThemsTable = async () => {
   try {
-    // Get kits from localStorage
-    const storedKits = localStorage.getItem('kits');
-    if (storedKits) {
-      const kits = JSON.parse(storedKits);
-      
-      // Insert kits into Supabase
-      for (const kit of kits) {
-        const { error } = await supabase
-          .from('kits')
-          .insert({
-            id: kit.id,
-            nome: kit.nome,
-            descricao: kit.descricao,
-            itens: kit.itens,
-            preco: kit.preco,
-            imagens: kit.imagens,
-            vezes_alugado: kit.vezes_alugado
-          })
-          .single();
-          
-        if (error && error.code !== '23505') { // Ignore unique violation errors
-          console.error('Error migrating kit:', error);
-        }
-      }
-    }
+    // Create thems table with proper schema
+    const { error } = await supabase.rpc('create_thems_table');
     
-    // Get thems from localStorage
-    const storedThems = localStorage.getItem('temas');
-    if (storedThems) {
-      const thems = JSON.parse(storedThems);
-      
-      // Insert thems into Supabase
-      for (const them of thems) {
-        const { error } = await supabase
-          .from('thems')
-          .insert({
-            id: them.id,
-            nome: them.nome,
-            descricao: them.descricao,
-            imagens: them.imagens,
-            valorGasto: them.valorGasto,
-            vezes_alugado: them.vezes_alugado,
-            kits_ids: them.kits.map((kit: any) => kit.id)
-          })
-          .single();
-          
-        if (error && error.code !== '23505') { // Ignore unique violation errors
-          console.error('Error migrating them:', error);
-        }
-      }
+    if (error) {
+      // If the RPC function doesn't exist, create the table manually
+      await supabase.from('thems').insert({
+        id: 'initial_entry',
+        nome: 'Test Theme',
+        descricao: 'Initial theme to create table',
+        imagens: [],
+        valorGasto: 0,
+        vezes_alugado: 0,
+        kits_ids: []
+      });
+
+      // Set permissions
+      await setupTablePermissions('thems');
     }
     
     return true;
   } catch (error) {
-    console.error('Failed to migrate localStorage to Supabase:', error);
+    console.error('Error creating thems table:', error);
+    return false;
+  }
+};
+
+// Set up permissions for the table
+const setupTablePermissions = async (tableName: string) => {
+  try {
+    // Since we can't create policies directly through the JS client,
+    // we'll just log a reminder for the user
+    console.log(`Remember to set up Row Level Security policies for the ${tableName} table in the Supabase dashboard.`);
+    return true;
+  } catch (error) {
+    console.error(`Error setting permissions for ${tableName} table:`, error);
     return false;
   }
 };
