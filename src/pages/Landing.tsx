@@ -175,7 +175,7 @@ const Landing = () => {
                 size="lg" 
                 className="text-lg px-8"
                 onClick={() => {
-                  document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' });
+                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
                 Saiba Mais
