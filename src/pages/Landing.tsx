@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ const Landing = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState('');
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactMessage, setContactMessage] = useState('');
@@ -34,6 +34,11 @@ const Landing = () => {
     setContactName('');
     setContactEmail('');
     setContactMessage('');
+  };
+
+  const handlePlanSelection = (planName: string) => {
+    setSelectedPlan(planName);
+    setLoginModalOpen(true);
   };
 
   const features = [
@@ -114,7 +119,7 @@ const Landing = () => {
       features: [
         "Até 15 eventos por mês",
         "Até 50 clientes",
-        "Gerenciamento de Temas e Kits"
+        "Gerenciamento de Temas e Kits",
         "Gerenciamento de calendário",
         "Suporte por email"
       ]
@@ -127,8 +132,8 @@ const Landing = () => {
       features: [        
         "Até 30 eventos por mês",
         "Gerenciamento de Clientes",
-        "Gerenciamento de Temas e Kits"
-        "Financeiro"
+        "Gerenciamento de Temas e Kits",
+        "Financeiro",
         "Gerenciamento de calendário",
         "Suporte por email"
       ]
@@ -378,7 +383,7 @@ const Landing = () => {
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
             {pricingPlans.map((plan, index) => (
               <Card key={index} className={`border ${plan.highlighted ? 'border-primary shadow-lg' : 'shadow-md'}`}>
                 <CardHeader className={`pb-8 ${plan.highlighted ? 'bg-primary/10' : ''}`}>
@@ -400,7 +405,10 @@ const Landing = () => {
                   </ul>
                 </CardContent>
                 <CardFooter>
-                  <Button className={`w-full ${plan.highlighted ? '' : 'bg-muted-foreground hover:bg-muted-foreground/80'}`}>
+                  <Button 
+                    className={`w-full ${plan.highlighted ? '' : 'bg-muted-foreground hover:bg-muted-foreground/80'}`}
+                    onClick={() => handlePlanSelection(plan.name)}
+                  >
                     {plan.highlighted ? 'Começar Agora' : 'Escolher Plano'}
                   </Button>
                 </CardFooter>
@@ -744,9 +752,14 @@ const Landing = () => {
       <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-2xl">Entrar na sua conta</DialogTitle>
+            <DialogTitle className="text-2xl">
+              {selectedPlan ? `Entrar para assinar o plano ${selectedPlan}` : 'Entrar na sua conta'}
+            </DialogTitle>
             <DialogDescription>
-              Digite suas credenciais para acessar o sistema de planejamento de eventos
+              {selectedPlan 
+                ? `Digite suas credenciais para assinar o plano ${selectedPlan} e acessar o sistema`
+                : 'Digite suas credenciais para acessar o sistema de planejamento de eventos'
+              }
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleLogin} className="space-y-4 py-4">
@@ -782,7 +795,9 @@ const Landing = () => {
                 className="w-full"
               />
             </div>
-            <Button type="submit" className="w-full">Entrar</Button>
+            <Button type="submit" className="w-full">
+              {selectedPlan ? `Assinar plano ${selectedPlan}` : 'Entrar'}
+            </Button>
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Não tem uma conta?{" "}
