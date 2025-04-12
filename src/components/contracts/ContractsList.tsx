@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Contract, ContractTemplate, Client } from '@/types';
@@ -91,7 +90,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       }
     }
 
-    // Create the contract data object
     const contractData = {
       title: newContractTitle.trim(),
       content: content,
@@ -100,25 +98,25 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       templateId: newContractTemplate || undefined
     };
 
-    // Add the contract
     addContract(contractData);
     
-    // Find the newly created contract by title to get its ID
-    const newContract = contracts.find(c => 
-      c.title === newContractTitle.trim() && 
-      c.clientId === newContractClient &&
-      c.status === 'draft'
-    );
-
-    if (newContract) {
-      setNewContractTitle('');
-      setNewContractClient('');
-      setNewContractTemplate('');
-      setIsCreateDialogOpen(false);
-      setSelectedContract(newContract.id);
-      setContractToEdit(newContract);
-      setIsEditDialogOpen(true);
-    }
+    setTimeout(() => {
+      const newContract = contracts.find(c => 
+        c.title === newContractTitle.trim() && 
+        c.clientId === newContractClient &&
+        c.status === 'draft'
+      );
+  
+      if (newContract) {
+        setNewContractTitle('');
+        setNewContractClient('');
+        setNewContractTemplate('');
+        setIsCreateDialogOpen(false);
+        setSelectedContract(newContract.id);
+        setContractToEdit(newContract);
+        setIsEditDialogOpen(true);
+      }
+    }, 0);
   };
 
   const handleViewContract = (contract: Contract) => {
@@ -146,7 +144,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
   };
 
   const handleCopyContract = (contract: Contract) => {
-    // Create a copy of the contract data
     const copyData = {
       title: `${contract.title} (Cópia)`,
       content: contract.content,
@@ -154,7 +151,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       status: 'draft' as const
     };
 
-    // Add the contract copy
     addContract(copyData);
     toast.success(`Contrato "${contract.title}" copiado com sucesso`);
   };
@@ -275,7 +271,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
         </div>
       )}
 
-      {/* Create Contract Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -316,7 +311,7 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
                   <SelectValue placeholder="Selecione um modelo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Sem modelo</SelectItem>
+                  <SelectItem value="none">Sem modelo</SelectItem>
                   {contractTemplates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
@@ -333,7 +328,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
         </DialogContent>
       </Dialog>
 
-      {/* Delete Contract Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -349,7 +343,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
         </DialogContent>
       </Dialog>
 
-      {/* Edit Contract Dialog */}
       {contractToEdit && (
         <ContractEditor
           isOpen={isEditDialogOpen}
@@ -363,7 +356,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
         />
       )}
 
-      {/* View Contract Dialog */}
       {contractToView && (
         <ContractView
           contract={contractToView}

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
@@ -48,25 +47,24 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       return;
     }
 
-    // Create the template data object
     const templateData = {
       name: newTemplateName.trim(),
       content: `<h1>${newTemplateName}</h1><p>Insira aqui o conteúdo do contrato.</p>`
     };
     
-    // Add the template and store the result
     addContractTemplate(templateData);
     
-    // Find the newly created template by name to get its ID
-    const newTemplate = contractTemplates.find(t => t.name === newTemplateName.trim());
-    
-    if (newTemplate) {
-      setNewTemplateName('');
-      setIsCreateDialogOpen(false);
-      setSelectedTemplate(newTemplate.id);
-      setIsEditDialogOpen(true);
-      setTemplateToEdit(newTemplate);
-    }
+    setTimeout(() => {
+      const newTemplate = contractTemplates.find(t => t.name === newTemplateName.trim());
+      
+      if (newTemplate) {
+        setNewTemplateName('');
+        setIsCreateDialogOpen(false);
+        setSelectedTemplate(newTemplate.id);
+        setIsEditDialogOpen(true);
+        setTemplateToEdit(newTemplate);
+      }
+    }, 0);
   };
 
   const handleEditTemplate = (template: ContractTemplate) => {
@@ -88,13 +86,11 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
   };
 
   const handleCopyTemplate = (template: ContractTemplate) => {
-    // Create a copy of the template data
     const copyData = {
       name: `${template.name} (Cópia)`,
       content: template.content
     };
     
-    // Add the template copy
     addContractTemplate(copyData);
     toast.success(`Modelo "${template.name}" copiado com sucesso`);
   };
@@ -180,7 +176,6 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
         </div>
       )}
 
-      {/* Create Template Dialog */}
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -201,7 +196,6 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
         </DialogContent>
       </Dialog>
 
-      {/* Delete Template Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -217,7 +211,6 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
         </DialogContent>
       </Dialog>
 
-      {/* Edit Template Dialog */}
       {templateToEdit && (
         <ContractEditor
           isOpen={isEditDialogOpen}

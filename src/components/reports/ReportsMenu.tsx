@@ -178,6 +178,7 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
                   <SelectValue placeholder="Selecione o tipo" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Todos os tipos</SelectItem>
                   {tiposDeRelatorio.map(tipo => (
                     <SelectItem key={tipo.id} value={tipo.id}>{tipo.nome}</SelectItem>
                   ))}
@@ -192,6 +193,7 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="all">Todos os clientes</SelectItem>
                   {clients.map(cliente => (
                     <SelectItem key={cliente.id} value={cliente.id}>{cliente.nome}</SelectItem>
                   ))}
