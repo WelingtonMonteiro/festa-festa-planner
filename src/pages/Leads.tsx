@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { 
   UserPlus, 
@@ -8,7 +7,9 @@ import {
   Clock, 
   CalendarClock,
   PhoneCall,
-  Mail
+  Mail,
+  LayoutGrid,
+  List
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,13 +19,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import LeadFilters from "@/components/leads/LeadFilters";
 import LeadTable from "@/components/leads/LeadTable";
+import LeadKanban from "@/components/leads/LeadKanban";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import { useToast } from "@/hooks/use-toast";
 
-// Define available lead statuses
 export type LeadStatus = 'novo' | 'contato' | 'negociando' | 'convertido' | 'perdido';
 
-// Define a lead type
 export interface Leads {
   id: string;
   nome: string;
@@ -39,7 +39,6 @@ export interface Leads {
   dataUltimoContato?: Date;
 }
 
-// Mock data
 const mockLeads: Leads[] = [
   {
     id: '1',
@@ -105,7 +104,6 @@ const mockLeads: Leads[] = [
   }
 ];
 
-// Helper function to get color for status badges
 const getStatusColor = (status: LeadStatus) => {
   switch (status) {
     case 'novo':
@@ -123,7 +121,6 @@ const getStatusColor = (status: LeadStatus) => {
   }
 };
 
-// Helper function to get icon for status
 const getStatusIcon = (status: LeadStatus) => {
   switch (status) {
     case 'novo':
@@ -147,13 +144,12 @@ const LeadPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("todos");
+  const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
   const { toast } = useToast();
 
-  // Filter leads based on search and active tab
   const filterLeads = (search: string, tab: string, filters: any = null) => {
     let filtered = [...leads];
     
-    // Apply search term filter
     if (search) {
       filtered = filtered.filter(lead => 
         lead.nome.toLowerCase().includes(search.toLowerCase()) ||
@@ -163,14 +159,11 @@ const LeadPage = () => {
       );
     }
     
-    // Apply tab filter
     if (tab !== "todos") {
       filtered = filtered.filter(lead => lead.status === tab);
     }
     
-    // Apply additional filters if provided
     if (filters) {
-      // Filter by date range
       if (filters.dataInicio && filters.dataFim) {
         filtered = filtered.filter(lead => {
           const leadDate = lead.dataCriacao;
@@ -178,12 +171,10 @@ const LeadPage = () => {
         });
       }
       
-      // Filter by tipo de festa
       if (filters.tipoFesta && filters.tipoFesta !== "todos") {
         filtered = filtered.filter(lead => lead.tipoFesta === filters.tipoFesta);
       }
       
-      // Filter by valor range
       if (filters.valorMinimo !== undefined) {
         filtered = filtered.filter(lead => 
           lead.valorOrcamento !== undefined && 
@@ -217,7 +208,6 @@ const LeadPage = () => {
   };
 
   const handleStatusChange = (leadId: string, newStatus: LeadStatus) => {
-    // Update lead status in both arrays
     const updatedLeads = leads.map(lead => 
       lead.id === leadId ? { ...lead, status: newStatus, dataUltimoContato: new Date() } : lead
     );
@@ -277,63 +267,91 @@ const LeadPage = () => {
                 />
               </div>
               <LeadFilters onApplyFilters={handleFilterApply} />
+              
+              <div className="flex items-center gap-2 ml-auto">
+                <Button
+                  variant={viewMode === "table" ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => setViewMode("table")}
+                  className="h-9 w-9"
+                >
+                  <List className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant={viewMode === "kanban" ? "default" : "outline"}
+                  size="icon"
+                  onClick={() => setViewMode("kanban")}
+                  className="h-9 w-9"
+                >
+                  <LayoutGrid className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="overflow-hidden">
-          <Tabs value={activeTab} onValueChange={handleTabChange}>
-            <div className="overflow-x-auto">
-              <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
-                <TabsTrigger 
-                  value="todos" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
-                >
-                  Todos <Badge className="ml-2 bg-gray-500">{leads.length}</Badge>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="novo" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
-                >
-                  Novos <Badge className="ml-2 bg-blue-500">{leads.filter(l => l.status === 'novo').length}</Badge>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="contato" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
-                >
-                  Em Contato <Badge className="ml-2 bg-yellow-500">{leads.filter(l => l.status === 'contato').length}</Badge>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="negociando" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
-                >
-                  Negociando <Badge className="ml-2 bg-purple-500">{leads.filter(l => l.status === 'negociando').length}</Badge>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="convertido" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
-                >
-                  Convertidos <Badge className="ml-2 bg-green-500">{leads.filter(l => l.status === 'convertido').length}</Badge>
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="perdido" 
-                  className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
-                >
-                  Perdidos <Badge className="ml-2 bg-red-500">{leads.filter(l => l.status === 'perdido').length}</Badge>
-                </TabsTrigger>
-              </TabsList>
-            </div>
-            
-            <TabsContent value={activeTab} className="p-0 border-0">
-              <LeadTable 
-                leads={filteredLeads} 
-                onStatusChange={handleStatusChange}
-                getStatusColor={getStatusColor}
-                getStatusIcon={getStatusIcon}
-              />
-            </TabsContent>
-          </Tabs>
-        </Card>
+        {viewMode === "table" ? (
+          <Card className="overflow-hidden">
+            <Tabs value={activeTab} onValueChange={handleTabChange}>
+              <div className="overflow-x-auto">
+                <TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent">
+                  <TabsTrigger 
+                    value="todos" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
+                  >
+                    Todos <Badge className="ml-2 bg-gray-500">{leads.length}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="novo" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
+                  >
+                    Novos <Badge className="ml-2 bg-blue-500">{leads.filter(l => l.status === 'novo').length}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="contato" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
+                  >
+                    Em Contato <Badge className="ml-2 bg-yellow-500">{leads.filter(l => l.status === 'contato').length}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="negociando" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
+                  >
+                    Negociando <Badge className="ml-2 bg-purple-500">{leads.filter(l => l.status === 'negociando').length}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="convertido" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
+                  >
+                    Convertidos <Badge className="ml-2 bg-green-500">{leads.filter(l => l.status === 'convertido').length}</Badge>
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="perdido" 
+                    className="data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none py-3 px-6"
+                  >
+                    Perdidos <Badge className="ml-2 bg-red-500">{leads.filter(l => l.status === 'perdido').length}</Badge>
+                  </TabsTrigger>
+                </TabsList>
+              </div>
+              
+              <TabsContent value={activeTab} className="p-0 border-0">
+                <LeadTable 
+                  leads={filteredLeads} 
+                  onStatusChange={handleStatusChange}
+                  getStatusColor={getStatusColor}
+                  getStatusIcon={getStatusIcon}
+                />
+              </TabsContent>
+            </Tabs>
+          </Card>
+        ) : (
+          <LeadKanban 
+            leads={filteredLeads} 
+            onStatusChange={handleStatusChange}
+            getStatusColor={getStatusColor}
+            getStatusIcon={getStatusIcon}
+          />
+        )}
       </div>
       
       <AddLeadDialog 
