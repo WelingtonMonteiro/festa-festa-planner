@@ -21,31 +21,34 @@ import ClientsManagement from '@/pages/ClientsManagement.tsx';
 import Contracts from '@/pages/Contracts';
 import { ThemeProvider } from '@/hooks/use-theme';
 import { StorageProvider } from '@/contexts/storageContext';
+import { FestaProvider } from '@/contexts/handleContext';
 
 function App() {
   return (
     <ThemeProvider>
       <StorageProvider>
-        <Toaster position="top-center" richColors />
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-          <Route path="/clients" element={<MainLayout><Clients /></MainLayout>} />
-          <Route path="/client/:id" element={<MainLayout><ClientDetails /></MainLayout>} />
-          <Route path="/client-management" element={<MainLayout><ClientsManagement /></MainLayout>} />
-          <Route path="/calendar" element={<MainLayout><CalendarPage /></MainLayout>} />
-          <Route path="/events" element={<MainLayout><Eventos /></MainLayout>} />
-          <Route path="/kits-themes" element={<MainLayout><KitsThems /></MainLayout>} />
-          <Route path="/financial" element={<MainLayout><Financial /></MainLayout>} />
-          <Route path="/messages" element={<MainLayout><Messages /></MainLayout>} />
-          <Route path="/statistics" element={<MainLayout><Statistics /></MainLayout>} />
-          <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-          <Route path="/settings" element={<MainLayout><Configurations /></MainLayout>} />
-          <Route path="/notifications" element={<MainLayout><Notifications /></MainLayout>} />
-          <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
-          <Route path="/contracts" element={<MainLayout><Contracts /></MainLayout>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <FestaProvider>
+          <Toaster position="top-center" richColors />
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
+            <Route path="/clients" element={<MainLayout><Clients /></MainLayout>} />
+            <Route path="/client/:id" element={<MainLayout><ClientDetails /></MainLayout>} />
+            <Route path="/client-management" element={<MainLayout><ClientsManagement /></MainLayout>} />
+            <Route path="/calendar" element={<MainLayout><CalendarPage /></MainLayout>} />
+            <Route path="/events" element={<MainLayout><Eventos /></MainLayout>} />
+            <Route path="/kits-themes" element={<MainLayout><KitsThems /></MainLayout>} />
+            <Route path="/financial" element={<MainLayout><Financial /></MainLayout>} />
+            <Route path="/messages" element={<MainLayout><Messages /></MainLayout>} />
+            <Route path="/statistics" element={<MainLayout><Statistics /></MainLayout>} />
+            <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
+            <Route path="/settings" element={<MainLayout><Configurations /></MainLayout>} />
+            <Route path="/notifications" element={<MainLayout><Notifications /></MainLayout>} />
+            <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
+            <Route path="/contracts" element={<MainLayout><Contracts /></MainLayout>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </FestaProvider>
       </StorageProvider>
     </ThemeProvider>
   );

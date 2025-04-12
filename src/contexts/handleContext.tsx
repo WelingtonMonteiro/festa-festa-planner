@@ -636,10 +636,6 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     toast({ title: "Contrato assinado", description: "O contrato foi assinado com sucesso." });
   };
   
-  if (!isInitialized) {
-    return null;
-  }
-  
   return (
     <HandleContext.Provider value={{
       clients: clientes,
