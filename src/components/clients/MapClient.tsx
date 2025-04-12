@@ -7,7 +7,6 @@ interface MapClientProps {
   events: Event[];
 }
 
-// Mapbox access token provided by the user
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoid2VsaW5ndG9ubW9udGVpcm8iLCJhIjoiY2twNGJtNW5kMW10djMzbXd1MzQwejJrdyJ9.qjJLmY-44I8AiTN5sbn5Qw";
 
 const MapClient = ({ events }: MapClientProps) => {
