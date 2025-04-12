@@ -4,7 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from 'react-router-dom';
-import { LogIn } from 'lucide-react';
+import { LogIn, Mail, Phone, Info } from 'lucide-react';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from "@/components/ui/navigation-menu";
+import { cn } from "@/lib/utils";
 
 interface LoginHeaderProps {
   onLoginClick: () => void;
@@ -28,23 +37,144 @@ const LoginHeader = ({ onLoginClick }: LoginHeaderProps) => {
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
           <span className="text-2xl font-bold bg-gradient-to-r from-festa-primary via-festa-secondary to-festa-accent text-transparent bg-clip-text">
-            FestaPlanner
+            Festana
           </span>
         </div>
         
         <nav className="hidden md:flex items-center space-x-8">
-          <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-            Recursos
-          </a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-            Planos
-          </a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-            Sobre nós
-          </a>
-          <a href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-            Contato
-          </a>
+          <NavigationMenu>
+            <NavigationMenuList>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Recursos</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-6 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                    <li className="row-span-3">
+                      <NavigationMenuLink asChild>
+                        <a
+                          className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
+                          href="#features"
+                        >
+                          <div className="mb-2 mt-4 text-lg font-medium">
+                            Gestão Simplificada
+                          </div>
+                          <p className="text-sm leading-tight text-muted-foreground">
+                            Organize eventos, clientes e fornecedores em uma única plataforma integrada
+                          </p>
+                        </a>
+                      </NavigationMenuLink>
+                    </li>
+                    <li>
+                      <a href="#features" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Calendário</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Visualize e organize seus eventos com facilidade
+                        </p>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#features" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Gestão de Clientes</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Cadastre e acompanhe informações importantes
+                        </p>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#features" className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                        <div className="text-sm font-medium leading-none">Mensagens</div>
+                        <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                          Comunique-se diretamente com seus clientes
+                        </p>
+                      </a>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <a href="#pricing" className="text-muted-foreground hover:text-foreground transition-colors px-4 py-2">
+                  Planos
+                </a>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Sobre nós</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-6 md:w-[400px]">
+                    <li>
+                      <NavigationMenuLink asChild>
+                        <a
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          href="#about"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Info className="h-4 w-4" />
+                            <span className="text-sm font-medium leading-none">Nossa História</span>
+                          </div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Conheça a história da Festana e nossa missão
+                          </p>
+                        </a>
+                      </NavigationMenuLink>
+                    </li>
+                    <li>
+                      <NavigationMenuLink asChild>
+                        <a
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          href="#team"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Info className="h-4 w-4" />
+                            <span className="text-sm font-medium leading-none">Nosso Time</span>
+                          </div>
+                          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
+                            Conheça os profissionais por trás da plataforma
+                          </p>
+                        </a>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuTrigger>Contato</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid gap-3 p-6 md:w-[400px]">
+                    <li>
+                      <NavigationMenuLink asChild>
+                        <a
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          href="#contact"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Mail className="h-4 w-4" />
+                            <span className="text-sm font-medium leading-none">E-mail</span>
+                          </div>
+                          <p className="text-sm leading-snug text-muted-foreground">
+                            contato@festana.com.br
+                          </p>
+                        </a>
+                      </NavigationMenuLink>
+                    </li>
+                    <li>
+                      <NavigationMenuLink asChild>
+                        <a
+                          className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                          href="#contact"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Phone className="h-4 w-4" />
+                            <span className="text-sm font-medium leading-none">Telefone</span>
+                          </div>
+                          <p className="text-sm leading-snug text-muted-foreground">
+                            (11) 9999-8888
+                          </p>
+                        </a>
+                      </NavigationMenuLink>
+                    </li>
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            </NavigationMenuList>
+          </NavigationMenu>
         </nav>
         
         <div className="flex items-center gap-4">
