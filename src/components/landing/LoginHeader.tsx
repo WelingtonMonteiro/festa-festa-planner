@@ -1,10 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from 'react-router-dom';
 import { LogIn, Mail, Phone, Info } from 'lucide-react';
+import FestanaLogo from "@/components/common/FestanaLogo";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -36,9 +36,7 @@ const LoginHeader = ({ onLoginClick }: LoginHeaderProps) => {
     <header className="w-full py-4 px-6 bg-background/95 backdrop-blur-sm border-b sticky top-0 z-50">
       <div className="container mx-auto flex justify-between items-center">
         <div className="flex items-center">
-          <span className="text-2xl font-bold bg-gradient-to-r from-festa-primary via-festa-secondary to-festa-accent text-transparent bg-clip-text">
-            Festana
-          </span>
+          <FestanaLogo size="md" />
         </div>
         
         <nav className="hidden md:flex items-center space-x-8">
