@@ -14,7 +14,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 // Dados mockados para pagamentos atrasados
-const clientesPagamentosAtrasados = [
+const latePaymentsClients = [
   {
     id: "c1",
     nome: "Maria Silva",
@@ -48,7 +48,7 @@ const ClientesPagamentosAtrasados = () => {
   const [busca, setBusca] = useState("");
   const navigate = useNavigate();
   
-  const clientesFiltrados = clientesPagamentosAtrasados.filter(
+  const clientesFiltrados = latePaymentsClients.filter(
     cliente =>
       cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
       cliente.telefone.includes(busca) ||

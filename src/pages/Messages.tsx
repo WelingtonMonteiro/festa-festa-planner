@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 
 const Messages = () => {
-  const { mensagens: messages, clientes: clients, adicionarMensagem: addMessage, marcarMensagemComoLida: markMessageAsRead } = useFestaContext();
+  const { messages: messages, clients: clients, addMessage: addMessage, markMessageAsRead: markMessageAsRead } = useHandleContext();
   const [platform, setPlatform] = useState<'whatsapp' | 'instagram' | 'facebook'>('whatsapp');
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');

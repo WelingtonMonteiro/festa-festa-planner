@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import { 
   Table, 
@@ -24,14 +24,14 @@ import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/components/ui/use-toast';
 
-const EventosManagement = () => {
-  const { eventos, atualizarEvento } = useFestaContext();
+const EventsManagement = () => {
+  const { events, updateEvent } = useHandleContext();
   const [filteredStatus, setFilteredStatus] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const filteredEventos = filteredStatus 
-    ? eventos.filter(e => e.status === filteredStatus && e.cliente)
-    : eventos.filter(e => e.cliente);
+    ? events.filter(e => e.status === filteredStatus && e.cliente)
+    : events.filter(e => e.cliente);
 
   const statusOptions = [
     { value: 'inicial', label: 'Inicial', icon: <Clock className="h-4 w-4 text-slate-500" /> },
@@ -43,7 +43,7 @@ const EventosManagement = () => {
   ];
 
   const handleStatusChange = (eventoId: string, newStatus: string) => {
-    atualizarEvento(eventoId, { status: newStatus as any });
+    updateEvent(eventoId, { status: newStatus as any });
     toast({
       title: "Status atualizado",
       description: `O status do evento foi alterado para ${newStatus}`,
@@ -52,7 +52,7 @@ const EventosManagement = () => {
 
   const navigateToCalendar = (date: string) => {
     const eventDate = new Date(date);
-    navigate('/calendario', { state: { selectedDate: eventDate } });
+    navigate('/calendar', { state: { selectedDate: eventDate } });
   };
 
   const getStatusBadge = (status: string) => {
@@ -179,4 +179,4 @@ const EventosManagement = () => {
   );
 };
 
-export default EventosManagement;
+export default EventsManagement;

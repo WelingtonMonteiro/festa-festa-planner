@@ -1,22 +1,22 @@
 import { useEffect, useRef, useState } from 'react';
 import { Card } from "@/components/ui/card";
-import { Evento } from '@/types';
+import { Event } from '@/types';
 import { MapPin } from "lucide-react";
 
-interface MapaClienteProps {
-  eventos: Evento[];
+interface MapClientProps {
+  events: Event[];
 }
 
 // Mapbox access token provided by the user
 const MAPBOX_ACCESS_TOKEN = "pk.eyJ1Ijoid2VsaW5ndG9ubW9udGVpcm8iLCJhIjoiY2twNGJtNW5kMW10djMzbXd1MzQwejJrdyJ9.qjJLmY-44I8AiTN5sbn5Qw";
 
-const MapaCliente = ({ eventos }: MapaClienteProps) => {
+const MapClient = ({ events }: MapClientProps) => {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [mapError, setMapError] = useState<string | null>(null);
   
-  // Filtra apenas eventos com locais diferentes para o mapa
-  const locaisUnicos = eventos.reduce((acc: Evento[], evento) => {
+  // Filtra apenas events com locais diferentes para o mapa
+  const locaisUnicos = events.reduce((acc: Event[], evento) => {
     if (evento?.local && !acc.find(e => e.local === evento.local)) {
       acc.push(evento);
     }
@@ -131,7 +131,7 @@ const MapaCliente = ({ eventos }: MapaClienteProps) => {
     initializeMap();
   }, []);
   
-  if (!eventos.length) {
+  if (!events.length) {
     return (
       <div className="flex h-full flex-col items-center justify-center">
         <MapPin className="h-16 w-16 text-muted-foreground/50" />
@@ -183,4 +183,4 @@ declare global {
   }
 }
 
-export default MapaCliente;
+export default MapClient;

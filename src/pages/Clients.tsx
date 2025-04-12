@@ -7,10 +7,10 @@ import {
   Table, TableBody, TableCell, TableHead, 
   TableHeader, TableRow 
 } from "@/components/ui/table";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { useNavigate } from "react-router-dom";
 import { Phone, Mail, PlusCircle, Search, User, Edit, Trash2, Check, X, Filter, BarChart2 } from "lucide-react";
-import NovoClienteDialog from "@/components/clientes/NovoClienteDialog";
+import NewClientDialog from "@/components/clients/NewClientDialog.tsx";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -31,10 +31,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Cliente } from "@/types";
+import { Client } from "@/types";
 
-const Clientes = () => {
-  const { clientes, atualizarCliente } = useFestaContext();
+const Clients = () => {
+  const { clients, updateClients } = useHandleContext();
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
@@ -48,7 +48,7 @@ const Clientes = () => {
     ativo?: boolean;
   } | null>(null);
   
-  const clientesFiltrados = clientes.filter(
+  const clientesFiltrados = clients.filter(
     cliente =>
       (cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
        cliente.telefone.includes(busca) ||
@@ -58,7 +58,7 @@ const Clientes = () => {
        (filtroStatus === "inativos" && cliente.ativo === false))
   );
 
-  const abrirEdicao = (cliente: Cliente) => {
+  const abrirEdicao = (cliente: Client) => {
     console.log("Cliente para editar:", cliente);
     setClienteParaEditar({
       id: cliente.id,
@@ -73,9 +73,9 @@ const Clientes = () => {
   
   const marcarClienteComoInativo = (clienteId: string) => {
     try {
-      const cliente = clientes.find(c => c.id === clienteId);
+      const cliente = clients.find(c => c.id === clienteId);
       if (cliente) {
-        atualizarCliente(clienteId, { ...cliente, ativo: false });
+        updateClients(clienteId, { ...cliente, ativo: false });
         toast({
           title: "Cliente desativado",
           description: "O cliente foi marcado como inativo com sucesso.",
@@ -92,9 +92,9 @@ const Clientes = () => {
   
   const reativarCliente = (clienteId: string) => {
     try {
-      const cliente = clientes.find(c => c.id === clienteId);
+      const cliente = clients.find(c => c.id === clienteId);
       if (cliente) {
-        atualizarCliente(clienteId, { ...cliente, ativo: true });
+        updateClients(clienteId, { ...cliente, ativo: true });
         toast({
           title: "Cliente reativado",
           description: "O cliente foi reativado com sucesso.",
@@ -324,13 +324,13 @@ const Clientes = () => {
         </CardContent>
       </Card>
       
-      <NovoClienteDialog
+      <NewClientDialog
         open={dialogAberto} 
         onOpenChange={handleDialogOpenChange}
-        clienteParaEditar={clienteParaEditar || undefined} 
+        editClient={clienteParaEditar || undefined}
       />
     </div>
   );
 };
 
-export default Clientes;
+export default Clients;

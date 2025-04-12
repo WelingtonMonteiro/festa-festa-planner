@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -23,17 +23,17 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import NovoClienteDialog from "@/components/clientes/NovoClienteDialog";
-import MapaCliente from "@/components/clientes/MapaCliente";
+import NewClientDialog from "@/components/clients/NewClientDialog.tsx";
+import MapClient from "@/components/clients/MapClient.tsx";
 
-const DetalhesCliente = () => {
+const ClientDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { clientes, excluirCliente } = useFestaContext();
+  const { clients, removeClients } = useHandleContext();
   const [dialogEdicaoAberto, setDialogEdicaoAberto] = useState(false);
   
   // Encontrar cliente pelo ID
-  const cliente = clientes.find((c) => c.id === id);
+  const cliente = clients.find((c) => c.id === id);
   
   // Verifica se o cliente existe e, caso exista, garante que o historico existe
   if (cliente && !cliente.historico) {
@@ -94,7 +94,7 @@ const DetalhesCliente = () => {
     return acc;
   }, {} as Record<string, number>);
   
-  // Obter status dos eventos
+  // Obter status dos events
   const statusEventos = historico.reduce((acc, evento) => {
     if (evento?.status) {
       acc[evento.status] = (acc[evento.status] || 0) + 1;
@@ -103,7 +103,7 @@ const DetalhesCliente = () => {
   }, {} as Record<string, number>);
   
   const handleExcluirCliente = () => {
-    excluirCliente(cliente.id);
+    removeClients(cliente.id);
     navigate("/clients");
   };
   
@@ -234,7 +234,7 @@ const DetalhesCliente = () => {
           <TabsTrigger value="mapa">Mapa</TabsTrigger>
         </TabsList>
         
-        {/* Histórico de eventos */}
+        {/* Histórico de events */}
         <TabsContent value="historico">
           <Card>
             <CardHeader>
@@ -302,7 +302,7 @@ const DetalhesCliente = () => {
                   </p>
                   <Button 
                     variant="link" 
-                    onClick={() => navigate("/calendario")}
+                    onClick={() => navigate("/calendar")}
                   >
                     Agendar um evento
                   </Button>
@@ -405,7 +405,7 @@ const DetalhesCliente = () => {
           </div>
         </TabsContent>
         
-        {/* Mapa de eventos */}
+        {/* Mapa de events */}
         <TabsContent value="mapa">
           <Card className="min-h-[500px]">
             <CardHeader>
@@ -415,17 +415,17 @@ const DetalhesCliente = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="h-[500px]">
-              <MapaCliente eventos={cliente.historico} />
+              <MapClient events={cliente.historico} />
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
       
       {/* Diálogo de edição */}
-      <NovoClienteDialog
+      <NewClientDialog
         open={dialogEdicaoAberto}
         onOpenChange={setDialogEdicaoAberto}
-        clienteParaEditar={{
+        editClient={{
           id: cliente.id,
           nome: cliente.nome,
           telefone: cliente.telefone,
@@ -437,4 +437,4 @@ const DetalhesCliente = () => {
   );
 };
 
-export default DetalhesCliente;
+export default ClientDetails;

@@ -1,34 +1,34 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CalendarDays, ClipboardCheck, Clock, DollarSign, PartyPopper, Tag, Users } from "lucide-react";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { format, isSameDay } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 
 const Dashboard = () => {
-  const { clientes, temas, eventos, estatisticas } = useFestaContext();
+  const { clients, thems, events, statistics } = useHandleContext();
   const navigate = useNavigate();
   
   // Estatísticas e cálculos
-  const eventosHoje = eventos.filter(evento => 
+  const eventosHoje = events.filter(evento =>
     isSameDay(new Date(evento.data), new Date()) && evento.status !== 'cancelado'
   );
   
-  const eventosFuturos = eventos.filter(evento => 
+  const eventosFuturos = events.filter(evento =>
     new Date(evento.data) > new Date() && evento.status !== 'cancelado'
   );
   
-  const faturamentoTotal = eventos
+  const faturamentoTotal = events
     .filter(e => e.status === 'finalizado')
     .reduce((total, evento) => total + evento.valorTotal, 0);
   
-  const temasMaisPopulares = temas
+  const temasMaisPopulares = thems
     .sort((a, b) => b.vezes_alugado - a.vezes_alugado)
     .slice(0, 3);
   
-  // Calcular próximos eventos
+  // Calcular próximos events
   const proximosEventos = eventosFuturos
     .sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime())
     .slice(0, 3);
@@ -39,7 +39,7 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="flex flex-wrap gap-2">
           <Button 
-            onClick={() => navigate('/calendario')}
+            onClick={() => navigate('/calendar')}
             className="bg-festa-primary hover:bg-festa-primary/90"
           >
             <Calendar className="mr-2 h-4 w-4" />
@@ -73,7 +73,7 @@ const Dashboard = () => {
           <CardContent className="flex flex-row items-center justify-between p-6">
             <div className="space-y-1">
               <CardDescription>Total de Clientes</CardDescription>
-              <CardTitle>{clientes.length}</CardTitle>
+              <CardTitle>{clients.length}</CardTitle>
             </div>
             <div className="rounded-full bg-festa-secondary/20 p-2">
               <Users className="h-6 w-6 text-festa-secondary" />
@@ -108,7 +108,7 @@ const Dashboard = () => {
       
       {/* Seções principais */}
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {/* Próximos eventos */}
+        {/* Próximos events */}
         <Card className="md:col-span-2 xl:col-span-1">
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -139,7 +139,7 @@ const Dashboard = () => {
                   <Button 
                     variant="outline" 
                     className="w-full" 
-                    onClick={() => navigate('/calendario')}
+                    onClick={() => navigate('/calendar')}
                   >
                     Ver todos os eventos
                   </Button>
@@ -150,7 +150,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum evento agendado
                 </p>
-                <Button variant="link" onClick={() => navigate('/calendario')}>
+                <Button variant="link" onClick={() => navigate('/calendari')}>
                   Agendar um evento
                 </Button>
               </div>
@@ -232,7 +232,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum evento para hoje
                 </p>
-                <Button variant="link" onClick={() => navigate('/calendario')}>
+                <Button variant="link" onClick={() => navigate('/calendar')}>
                   Ver calendário
                 </Button>
               </div>

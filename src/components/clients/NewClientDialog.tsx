@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch"; 
 import { toast } from "@/components/ui/use-toast";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 
 // Schema de validação
 const formSchema = z.object({
@@ -27,10 +27,10 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-interface NovoClienteDialogProps {
+interface NewClientDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  clienteParaEditar?: {
+  editClient?: {
     id: string;
     nome: string;
     telefone: string;
@@ -40,12 +40,12 @@ interface NovoClienteDialogProps {
   };
 }
 
-const NovoClienteDialog = ({ 
+const NewClientDialog = ({
   open, 
   onOpenChange, 
-  clienteParaEditar 
-}: NovoClienteDialogProps) => {
-  const { adicionarCliente, atualizarCliente } = useFestaContext();
+  editClient
+}: NewClientDialogProps) => {
+  const { addClients, updateClients } = useHandleContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const form = useForm<FormValues>({
@@ -61,14 +61,14 @@ const NovoClienteDialog = ({
   
   // Atualizar os valores do formulário quando o clienteParaEditar mudar
   useEffect(() => {
-    console.log("clienteParaEditar mudou:", clienteParaEditar);
-    if (clienteParaEditar) {
+    console.log("clienteParaEditar mudou:", editClient);
+    if (editClient) {
       form.reset({
-        nome: clienteParaEditar.nome,
-        telefone: clienteParaEditar.telefone,
-        email: clienteParaEditar.email || "",
-        endereco: clienteParaEditar.endereco || "",
-        ativo: clienteParaEditar.ativo !== false, // Se for undefined, considera como true
+        nome: editClient.nome,
+        telefone: editClient.telefone,
+        email: editClient.email || "",
+        endereco: editClient.endereco || "",
+        ativo: editClient.ativo !== false, // Se for undefined, considera como true
       });
     } else {
       form.reset({
@@ -79,22 +79,22 @@ const NovoClienteDialog = ({
         ativo: true,
       });
     }
-  }, [clienteParaEditar, form]);
+  }, [editClient, form]);
   
   function onSubmit(values: FormValues) {
     setIsSubmitting(true);
     
     try {
-      if (clienteParaEditar) {
+      if (editClient) {
         // Editar cliente existente
-        atualizarCliente(clienteParaEditar.id, values);
+        updateClients(editClient.id, values);
         toast({
           title: "Cliente atualizado",
           description: `As informações de ${values.nome} foram atualizadas com sucesso.`,
         });
       } else {
         // Adicionar novo cliente - Ensure all required fields are present
-        adicionarCliente({
+        addClients({
           nome: values.nome,
           telefone: values.telefone,
           email: values.email || "",
@@ -124,7 +124,7 @@ const NovoClienteDialog = ({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>
-            {clienteParaEditar ? "Editar Cliente" : "Novo Cliente"}
+            {editClient ? "Editar Cliente" : "Novo Cliente"}
           </DialogTitle>
         </DialogHeader>
         
@@ -225,4 +225,4 @@ const NovoClienteDialog = ({
   );
 };
 
-export default NovoClienteDialog;
+export default NewClientDialog;

@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 // Dados mockados para últimos acessos
-const clientesAcessos = [
+const clientsAccess = [
   {
     id: "c1",
     nome: "Maria Silva",
@@ -57,25 +57,25 @@ const clientesAcessos = [
   }
 ];
 
-const ClientesUltimosAcessos = () => {
-  const [busca, setBusca] = useState("");
+const LastedAccessClients = () => {
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
   
-  const clientesFiltrados = clientesAcessos.filter(
-    cliente =>
-      cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.telefone.includes(busca) ||
-      cliente.email.toLowerCase().includes(busca.toLowerCase())
+  const filteredClients = clientsAccess.filter(
+    client =>
+      client.nome.toLowerCase().includes(search.toLowerCase()) ||
+      client.telefone.includes(search) ||
+      client.email.toLowerCase().includes(search.toLowerCase())
   );
   
   // Função para formatar a data e hora
-  const formatarDataHora = (dataString: string) => {
+  const formatDateHour = (dataString: string) => {
     const data = new Date(dataString);
     return data.toLocaleString('pt-BR');
   };
   
   // Função para determinar o status de inatividade
-  const getStatusInatividade = (dias: number) => {
+  const getInactiveStatus = (dias: number) => {
     if (dias === 0) {
       return <Badge className="bg-green-500">Hoje</Badge>;
     } else if (dias < 7) {
@@ -99,13 +99,13 @@ const ClientesUltimosAcessos = () => {
           <Input
             placeholder="Buscar clientes..."
             className="w-full pl-8"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
       
-      {clientesFiltrados.length > 0 ? (
+      {filteredClients.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
@@ -118,7 +118,7 @@ const ClientesUltimosAcessos = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clientesFiltrados.map((cliente) => (
+            {filteredClients.map((cliente) => (
               <TableRow key={cliente.id}>
                 <TableCell className="font-medium">{cliente.nome}</TableCell>
                 <TableCell>
@@ -136,7 +136,7 @@ const ClientesUltimosAcessos = () => {
                 <TableCell>
                   <div className="flex items-center">
                     <Calendar className="mr-1 h-4 w-4 text-muted-foreground" />
-                    {formatarDataHora(cliente.ultimoAcesso)}
+                    {formatDateHour(cliente.ultimoAcesso)}
                   </div>
                 </TableCell>
                 <TableCell>
@@ -145,7 +145,7 @@ const ClientesUltimosAcessos = () => {
                     {cliente.diasSemAcesso} {cliente.diasSemAcesso === 1 ? 'dia' : 'dias'}
                   </div>
                 </TableCell>
-                <TableCell>{getStatusInatividade(cliente.diasSemAcesso)}</TableCell>
+                <TableCell>{getInactiveStatus(cliente.diasSemAcesso)}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">
                     <Button 
@@ -176,8 +176,8 @@ const ClientesUltimosAcessos = () => {
           <p className="mt-2 text-muted-foreground">
             Nenhum registro de acesso encontrado
           </p>
-          {busca && (
-            <Button variant="link" onClick={() => setBusca("")}>
+          {search && (
+            <Button variant="link" onClick={() => setSearch("")}>
               Limpar busca
             </Button>
           )}
@@ -187,4 +187,4 @@ const ClientesUltimosAcessos = () => {
   );
 };
 
-export default ClientesUltimosAcessos;
+export default LastedAccessClients;

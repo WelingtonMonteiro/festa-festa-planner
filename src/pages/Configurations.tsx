@@ -18,11 +18,11 @@ import {
   Palette
 } from "lucide-react";
 import { toast } from "sonner";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { useTheme } from "@/hooks/use-theme";
 
-const Configuracoes = () => {
-  const { usuario } = useFestaContext();
+const Configurations = () => {
+  const { users } = useHandleContext();
   const { theme, setTheme, setCustomPrimaryColor } = useTheme();
   
   const [notificacoes, setNotificacoes] = useState({
@@ -109,15 +109,15 @@ const Configuracoes = () => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome</Label>
-                <Input id="nome" defaultValue={usuario?.nome || "Usuário"} />
+                <Input id="nome" defaultValue={users?.nome || "Usuário"} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" defaultValue={usuario?.email || "usuario@example.com"} />
+                <Input id="email" type="email" defaultValue={users?.email || "usuario@example.com"} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="telefone">Telefone</Label>
-                <Input id="telefone" defaultValue={usuario?.telefone || "(00) 00000-0000"} />
+                <Input id="telefone" defaultValue={users?.telefone || "(00) 00000-0000"} />
               </div>
               
               <Separator className="my-4" />
@@ -369,4 +369,4 @@ const Configuracoes = () => {
   );
 };
 
-export default Configuracoes;
+export default Configurations;

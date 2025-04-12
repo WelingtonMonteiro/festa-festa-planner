@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { useLocation } from 'react-router-dom';
 import { 
   Tabs, 
@@ -20,8 +20,8 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 
-const Financeiro = () => {
-  const { eventos } = useFestaContext();
+const Financial = () => {
+  const { events } = useHandleContext();
   const [activeTab, setActiveTab] = useState("receitas");
   const location = useLocation();
   
@@ -32,9 +32,9 @@ const Financeiro = () => {
     }
   }, [location.state]);
   
-  // Filtrar eventos pelo status e calcular valores financeiros
-  const eventosConfirmados = eventos.filter(e => (e.status === 'confirmado' || e.status === 'finalizado') && e.cliente);
-  const eventosAgendados = eventos.filter(e => e.status === 'agendado' && e.cliente);
+  // Filtrar events pelo status e calcular valores financeiros
+  const eventosConfirmados = events.filter(e => (e.status === 'confirmado' || e.status === 'finalizado') && e.cliente);
+  const eventosAgendados = events.filter(e => e.status === 'agendado' && e.cliente);
   
   const totalReceitas = eventosConfirmados.reduce((acc, evento) => acc + evento.valorTotal, 0);
   const totalPendente = eventosAgendados.reduce((acc, evento) => acc + evento.valorTotal, 0);
@@ -50,7 +50,7 @@ const Financeiro = () => {
         </p>
       </div>
       
-      {/* Resumo Financeiro */}
+      {/* Resumo Financial */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
@@ -187,4 +187,4 @@ const Financeiro = () => {
   );
 };
 
-export default Financeiro;
+export default Financial;

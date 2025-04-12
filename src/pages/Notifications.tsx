@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -20,7 +20,7 @@ type Notification = {
 };
 
 const Notifications = () => {
-  const { eventos: events, mensagens: messages } = useFestaContext();
+  const { events: events, messages: messages } = useHandleContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'read' | 'unread'>('all');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);

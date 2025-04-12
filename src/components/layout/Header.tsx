@@ -3,13 +3,13 @@ import { useEffect, useState } from 'react';
 import { Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 
 const Header = () => {
-  const { eventos, mensagens } = useFestaContext();
+  const { events, messages } = useHandleContext();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [notifications, setNotifications] = useState<{ id: string, title: string, message: string }[]>([]);
   const navigate = useNavigate();
@@ -27,12 +27,12 @@ const Header = () => {
   useEffect(() => {
     const newNotifications = [];
     
-    // Verificar eventos próximos (nos próximos 3 dias)
+    // Verificar events próximos (nos próximos 3 dias)
     const today = new Date();
     const threeDaysLater = new Date();
     threeDaysLater.setDate(today.getDate() + 3);
     
-    const eventosProximos = eventos.filter(evento => {
+    const eventosProximos = events.filter(evento => {
       const dataEvento = new Date(evento.data);
       return dataEvento >= today && dataEvento <= threeDaysLater && evento.status !== 'cancelado';
     });
@@ -46,7 +46,7 @@ const Header = () => {
     });
     
     // Adicionar mensagens não lidas
-    const mensagensNaoLidas = mensagens.filter(m => !m.lida && m.remetente === 'cliente');
+    const mensagensNaoLidas = messages.filter(m => !m.lida && m.remetente === 'cliente');
     if (mensagensNaoLidas.length > 0) {
       newNotifications.push({
         id: 'mensagens',
@@ -79,11 +79,11 @@ const Header = () => {
     });
     
     localStorage.setItem('notificacoes', JSON.stringify(notificacoesParaSalvar));
-  }, [eventos, mensagens]);
+  }, [events, messages]);
   
   // Redirecionar para a página de notificações
   const navigateToNotifications = () => {
-    navigate('/notificacoes');
+    navigate('/notifications');
   };
   
   return (

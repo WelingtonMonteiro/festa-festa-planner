@@ -19,7 +19,7 @@ import {
   InfoIcon,
   UserPlus
 } from 'lucide-react';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
 
 interface SidebarProps {
@@ -30,13 +30,13 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const location = useLocation();
-  const { mensagens } = useFestaContext();
+  const { messages } = useHandleContext();
   
-  const unreadCount = mensagens.filter(m => !m.lida).length;
+  const unreadCount = messages.filter(m => !m.lida).length;
   
-  const notificacoesArmazenadas = localStorage.getItem('notificacoes');
-  const notificacoes = notificacoesArmazenadas ? JSON.parse(notificacoesArmazenadas) : [];
-  const unreadNotifications = notificacoes.filter((n: any) => !n.lida).length;
+  const storageNotifications = localStorage.getItem('notificacoes');
+  const notifications = storageNotifications ? JSON.parse(storageNotifications) : [];
+  const unreadNotifications = notifications.filter((n: any) => !n.lida).length;
   
   const toggleCollapsed = () => {
     const newState = !collapsed;

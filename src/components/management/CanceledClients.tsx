@@ -12,8 +12,8 @@ import {
   AlertTriangle, SquareX, MessageSquare
 } from "lucide-react";
 
-// Dados mockados para clientes que cancelaram pagamentos
-const clientesCancelados = [
+// Dados mockados para clients que cancelaram pagamentos
+const canceledClients = [
   {
     id: "c1",
     nome: "Pedro Oliveira",
@@ -34,15 +34,15 @@ const clientesCancelados = [
   }
 ];
 
-const ClientesCancelados = () => {
-  const [busca, setBusca] = useState("");
+const CanceledClients = () => {
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
   
-  const clientesFiltrados = clientesCancelados.filter(
-    cliente =>
-      cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.telefone.includes(busca) ||
-      cliente.email.toLowerCase().includes(busca.toLowerCase())
+  const filteredClients = canceledClients.filter(
+    client =>
+      client.nome.toLowerCase().includes(search.toLowerCase()) ||
+      client.telefone.includes(search) ||
+      client.email.toLowerCase().includes(search.toLowerCase())
   );
   
   return (
@@ -57,13 +57,13 @@ const ClientesCancelados = () => {
           <Input
             placeholder="Buscar clientes com cancelamentos..."
             className="w-full pl-8"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
       
-      {clientesFiltrados.length > 0 ? (
+      {filteredClients.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
@@ -76,8 +76,8 @@ const ClientesCancelados = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clientesFiltrados.map((cliente) => {
-              const dataCancelamento = new Date(cliente.dataCancelamento);
+            {filteredClients.map((cliente) => {
+              const cancellationDate = new Date(cliente.dataCancelamento);
               
               return (
                 <TableRow key={cliente.id}>
@@ -100,7 +100,7 @@ const ClientesCancelados = () => {
                   <TableCell>
                     <div className="flex items-center">
                       <Calendar className="mr-1 h-4 w-4 text-muted-foreground" />
-                      {dataCancelamento.toLocaleDateString('pt-BR')}
+                      {cancellationDate.toLocaleDateString('pt-BR')}
                     </div>
                   </TableCell>
                   <TableCell>
@@ -138,8 +138,8 @@ const ClientesCancelados = () => {
           <p className="mt-2 text-muted-foreground">
             Nenhum cliente com cancelamentos encontrado
           </p>
-          {busca && (
-            <Button variant="link" onClick={() => setBusca("")}>
+          {search && (
+            <Button variant="link" onClick={() => setSearch("")}>
               Limpar busca
             </Button>
           )}
@@ -149,4 +149,4 @@ const ClientesCancelados = () => {
   );
 };
 
-export default ClientesCancelados;
+export default CanceledClients;

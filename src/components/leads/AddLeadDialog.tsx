@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Lead, LeadStatus } from "@/pages/Lead";
+import { Leads, LeadStatus } from "@/pages/Leads.tsx";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -19,7 +19,7 @@ import { DatePicker } from "@/components/ui/date-picker";
 interface AddLeadDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAddLead: (lead: Omit<Lead, "id" | "dataCriacao">) => void;
+  onAddLead: (lead: Omit<Leads, "id" | "dataCriacao">) => void;
 }
 
 const AddLeadDialog = ({ open, onOpenChange, onAddLead }: AddLeadDialogProps) => {

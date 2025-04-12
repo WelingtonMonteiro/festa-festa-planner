@@ -33,7 +33,7 @@ import {
   MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { cn } from "@/lib/utils";
 
 interface ReportsMenuProps {
@@ -42,7 +42,7 @@ interface ReportsMenuProps {
 
 export function ReportsMenu({ className }: ReportsMenuProps) {
   const navigate = useNavigate();
-  const { clientes } = useFestaContext();
+  const { clients } = useHandleContext();
   const [startDate, setStartDate] = React.useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = React.useState<Date | undefined>(new Date());
   const [clienteFilter, setClienteFilter] = React.useState<string>("");
@@ -50,8 +50,8 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
 
   const tiposDeRelatorio = [
     { id: "financeiro", nome: "Financeiro" },
-    { id: "eventos", nome: "Eventos" },
-    { id: "clientes", nome: "Clientes" },
+    { id: "events", nome: "Eventos" },
+    { id: "clients", nome: "Clientes" },
     { id: "kits", nome: "Kits e Temas" }
   ];
 
@@ -99,11 +99,11 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
               <FileText className="mr-2 h-4 w-4" />
               Relatório Financeiro
             </MenubarItem>
-            <MenubarItem onClick={() => navigate("/relatorios?tipo=eventos")}>
+            <MenubarItem onClick={() => navigate("/relatorios?tipo=events")}>
               <Calendar className="mr-2 h-4 w-4" />
               Relatório de Eventos
             </MenubarItem>
-            <MenubarItem onClick={() => navigate("/relatorios?tipo=clientes")}>
+            <MenubarItem onClick={() => navigate("/relatorios?tipo=clients")}>
               <Users className="mr-2 h-4 w-4" />
               Relatório de Clientes
             </MenubarItem>
@@ -192,7 +192,7 @@ export function ReportsMenu({ className }: ReportsMenuProps) {
                   <SelectValue placeholder="Selecione o cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clientes.map(cliente => (
+                  {clients.map(cliente => (
                     <SelectItem key={cliente.id} value={cliente.id}>{cliente.nome}</SelectItem>
                   ))}
                 </SelectContent>

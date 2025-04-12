@@ -1,11 +1,11 @@
 
-export interface Cliente {
+export interface Client {
   id: string;
   nome: string;
   telefone: string;
   email: string;
   endereco?: string;
-  historico: Evento[];
+  historico: Event[];
   ativo?: boolean; // Added ativo property
 }
 
@@ -19,7 +19,7 @@ export interface Kit {
   vezes_alugado: number;
 }
 
-export interface Tema {
+export interface Them {
   id: string;
   nome: string;
   descricao: string;
@@ -29,10 +29,10 @@ export interface Tema {
   kits: Kit[];
 }
 
-export interface Evento {
+export interface Event {
   id: string;
-  cliente: Cliente;
-  tema?: Tema;
+  cliente: Client;
+  tema?: Them;
   kit: Kit;
   data: string; // ISO date string
   horario: string;
@@ -45,7 +45,7 @@ export interface Evento {
   observacoes?: string;
 }
 
-export interface Mensagem {
+export interface Message {
   id: string;
   remetente: 'empresa' | 'cliente';
   clienteId: string;
@@ -54,7 +54,7 @@ export interface Mensagem {
   lida: boolean;
 }
 
-export interface Estatisticas {
+export interface Statistic {
   eventosPorMes: Record<string, number>;
   kitsPopulares: Array<{kit: string, quantidade: number}>;
   temasPorMes: Record<string, Record<string, number>>;
@@ -62,7 +62,7 @@ export interface Estatisticas {
   faturamentoMensal: Record<string, number>;
 }
 
-export interface Usuario {
+export interface User {
   nome: string;
   email: string;
   telefone: string;

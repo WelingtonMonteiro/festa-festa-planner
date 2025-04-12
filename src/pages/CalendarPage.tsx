@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarPlus, Clock, MapPin } from 'lucide-react';
@@ -15,8 +15,8 @@ import { DayContentProps } from 'react-day-picker';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
 
-const CalendarioPage = () => {
-  const { clientes, temas, kits, eventos, adicionarEvento } = useFestaContext();
+const CalendarPage = () => {
+  const { clients, thems, kits, events, addEvent } = useHandleContext();
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -58,9 +58,9 @@ const CalendarioPage = () => {
     }
   }, [location.state, navigate, location.pathname]);
   
-  // Encontrar eventos do dia selecionado
+  // Encontrar events do dia selecionado
   const eventosDoDia = selectedDay 
-    ? eventos.filter(evento => isSameDay(new Date(evento.data), selectedDay))
+    ? events.filter(evento => isSameDay(new Date(evento.data), selectedDay))
     : [];
   
   // Handler para clicar em um dia
@@ -121,8 +121,8 @@ const CalendarioPage = () => {
     
     if (!selectedDay) return;
     
-    const cliente = clientes.find(c => c.id === formData.clienteId);
-    const tema = formData.temaId ? temas.find(t => t.id === formData.temaId) : undefined;
+    const cliente = clients.find(c => c.id === formData.clienteId);
+    const tema = formData.temaId ? thems.find(t => t.id === formData.temaId) : undefined;
     const kit = kits.find(k => k.id === formData.kitId);
     
     if (!cliente || !kit) {
@@ -134,7 +134,7 @@ const CalendarioPage = () => {
       return;
     }
     
-    adicionarEvento({
+    addEvent({
       cliente,
       tema,
       kit,
@@ -174,14 +174,14 @@ const CalendarioPage = () => {
     });
   };
 
-  // Navegação para a página de eventos com um evento selecionado
+  // Navegação para a página de events com um evento selecionado
   const navigateToEventos = (eventoId: string) => {
-    navigate('/eventos', { state: { eventoId } });
+    navigate('/events', { state: { eventoId } });
   };
   
   // Renderizar decorador do dia no calendário
   const dayWithEvents = (day: Date) => {
-    const matchingEvents = eventos.filter(evento => 
+    const matchingEvents = events.filter(evento =>
       isSameDay(new Date(evento.data), day)
     );
     
@@ -231,9 +231,9 @@ const CalendarioPage = () => {
                 DayContent: (props: DayContentProps) => (
                   <div className="relative h-9 w-9 p-0" {...props}>
                     <div className="flex h-full w-full items-center justify-center">
-                      {props.date.getDate()}
+                      {props?.date?.getDate()}
                     </div>
-                    {dayWithEvents(props.date)}
+                    {dayWithEvents(props?.date)}
                   </div>
                 )
               }}
@@ -248,7 +248,7 @@ const CalendarioPage = () => {
               {selectedDay ? `Eventos de ${format(selectedDay, 'dd/MM/yyyy')}` : 'Eventos'}
             </CardTitle>
             <CardDescription>
-              {selectedDay ? `${eventosDoDia.length} eventos para este dia` : 'Selecione um dia para ver os eventos'}
+              {selectedDay ? `${eventosDoDia.length} eventos para este dia` : 'Selecione um dia para ver os events'}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -323,7 +323,7 @@ const CalendarioPage = () => {
                     <SelectValue placeholder="Selecione um cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    {clientes.map(cliente => (
+                    {clients.map(cliente => (
                       <SelectItem key={cliente.id} value={cliente.id}>
                         {cliente.nome}
                       </SelectItem>
@@ -342,7 +342,7 @@ const CalendarioPage = () => {
                     <SelectValue placeholder="Selecione um tema" />
                   </SelectTrigger>
                   <SelectContent>
-                    {temas.map(tema => (
+                    {thems.map(tema => (
                       <SelectItem key={tema.id} value={tema.id}>
                         {tema.nome}
                       </SelectItem>
@@ -469,4 +469,4 @@ const CalendarioPage = () => {
   );
 };
 
-export default CalendarioPage;
+export default CalendarPage;

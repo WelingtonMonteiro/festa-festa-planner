@@ -15,13 +15,13 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 const Reports = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { clientes: clients } = useFestaContext();
+  const { clients: clients } = useHandleContext();
   const [startDate, setStartDate] = useState<Date | undefined>(new Date());
   const [endDate, setEndDate] = useState<Date | undefined>(new Date());
   const [clientFilter, setClientFilter] = useState<string>("");

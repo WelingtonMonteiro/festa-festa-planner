@@ -1,40 +1,40 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Cliente, Kit, Tema, Evento, Mensagem, Estatisticas, Usuario } from '../types';
+import { Client, Kit, Them, Event, Message, Statistic, User } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
 import { toast } from '@/hooks/use-toast';
 
-interface FestaContextType {
-  clientes: Cliente[];
+interface HandleContextType {
+  clients: Client[];
   kits: Kit[];
-  temas: Tema[];
-  eventos: Evento[];
-  mensagens: Mensagem[];
-  estatisticas: Estatisticas;
-  usuario: Usuario;
+  thems: Them[];
+  events: Event[];
+  messages: Message[];
+  statistics: Statistic;
+  users: User;
   
-  adicionarCliente: (cliente: Omit<Cliente, 'id' | 'historico'>) => void;
-  atualizarCliente: (id: string, cliente: Partial<Cliente>) => void;
-  excluirCliente: (id: string) => void;
+  addClients: (cliente: Omit<Client, 'id' | 'historico'>) => void;
+  updateClients: (id: string, cliente: Partial<Client>) => void;
+  removeClients: (id: string) => void;
   
-  adicionarKit: (kit: Omit<Kit, 'id' | 'vezes_alugado'>) => void;
-  atualizarKit: (id: string, kit: Partial<Kit>) => void;
-  excluirKit: (id: string) => void;
+  addKit: (kit: Omit<Kit, 'id' | 'vezes_alugado'>) => void;
+  updateKit: (id: string, kit: Partial<Kit>) => void;
+  removeKit: (id: string) => void;
   
-  adicionarTema: (tema: Omit<Tema, 'id' | 'vezes_alugado'>) => void;
-  atualizarTema: (id: string, tema: Partial<Tema>) => void;
-  excluirTema: (id: string) => void;
+  addThems: (tema: Omit<Them, 'id' | 'vezes_alugado'>) => void;
+  updateThems: (id: string, tema: Partial<Them>) => void;
+  removeThems: (id: string) => void;
   
-  adicionarEvento: (evento: Omit<Evento, 'id'>) => void;
-  atualizarEvento: (id: string, evento: Partial<Evento>) => void;
-  excluirEvento: (id: string) => void;
+  addEvent: (evento: Omit<Event, 'id'>) => void;
+  updateEvent: (id: string, evento: Partial<Event>) => void;
+  removeEvent: (id: string) => void;
   
-  adicionarMensagem: (mensagem: Omit<Mensagem, 'id' | 'datahora'>) => void;
-  marcarMensagemComoLida: (id: string) => void;
+  addMessage: (mensagem: Omit<Message, 'id' | 'datahora'>) => void;
+  markMessageAsRead: (id: string) => void;
   
-  atualizarEstatisticas: () => void;
+  updateStatistic: () => void;
 }
 
-const FestaContext = createContext<FestaContextType | undefined>(undefined);
+const HandleContext = createContext<HandleContextType | undefined>(undefined);
 
 const prepareForStorage = (data: any) => {
   if (Array.isArray(data)) {
@@ -48,7 +48,7 @@ const prepareForStorage = (data: any) => {
     }
     
     if (result.historico && Array.isArray(result.historico)) {
-      result.historicoIds = result.historico.map((e: Evento) => e.id);
+      result.historicoIds = result.historico.map((e: Event) => e.id);
       delete result.historico;
     }
     
@@ -58,29 +58,29 @@ const prepareForStorage = (data: any) => {
 };
 
 export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [clientes, setClientes] = useState<Client[]>([]);
   const [kits, setKits] = useState<Kit[]>([]);
-  const [temas, setTemas] = useState<Tema[]>([]);
-  const [eventos, setEventos] = useState<Evento[]>([]);
-  const [mensagens, setMensagens] = useState<Mensagem[]>([]);
-  const [estatisticas, setEstatisticas] = useState<Estatisticas>({
+  const [temas, setTemas] = useState<Them[]>([]);
+  const [eventos, setEventos] = useState<Event[]>([]);
+  const [mensagens, setMensagens] = useState<Message[]>([]);
+  const [estatisticas, setEstatisticas] = useState<Statistic>({
     eventosPorMes: {},
     kitsPopulares: [],
     temasPorMes: {},
     temasPorAno: {},
     faturamentoMensal: {}
   });
-  const [usuario, setUsuario] = useState<Usuario>({
+  const [usuario, setUsuario] = useState<User>({
     nome: "Administrador",
     email: "admin@festadecoracoes.com",
     telefone: "(11) 98765-4321"
   });
   
   useEffect(() => {
-    const loadedClientes = localStorage.getItem('clientes');
+    const loadedClientes = localStorage.getItem('clients');
     const loadedKits = localStorage.getItem('kits');
     const loadedTemas = localStorage.getItem('temas');
-    const loadedEventos = localStorage.getItem('eventos');
+    const loadedEventos = localStorage.getItem('events');
     const loadedMensagens = localStorage.getItem('mensagens');
     
     const clientesWithActiveStatus = loadedClientes 
@@ -102,7 +102,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     if (clientes.length) {
       const clientesForStorage = prepareForStorage(clientes);
-      localStorage.setItem('clientes', JSON.stringify(clientesForStorage));
+      localStorage.setItem('clients', JSON.stringify(clientesForStorage));
     }
     
     if (kits.length) localStorage.setItem('kits', JSON.stringify(kits));
@@ -110,7 +110,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     if (eventos.length) {
       const eventosForStorage = prepareForStorage(eventos);
-      localStorage.setItem('eventos', JSON.stringify(eventosForStorage));
+      localStorage.setItem('events', JSON.stringify(eventosForStorage));
     }
     
     if (mensagens.length) localStorage.setItem('mensagens', JSON.stringify(mensagens));
@@ -122,8 +122,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     atualizarEstatisticas();
   }, [eventos]);
   
-  const adicionarCliente = (cliente: Omit<Cliente, 'id' | 'historico'>) => {
-    const novoCliente: Cliente = {
+  const adicionarCliente = (cliente: Omit<Client, 'id' | 'historico'>) => {
+    const novoCliente: Client = {
       ...cliente,
       id: `c${Date.now().toString()}`,
       historico: [],
@@ -133,7 +133,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     toast({ title: "Cliente adicionado", description: `${cliente.nome} foi adicionado com sucesso.` });
   };
   
-  const atualizarCliente = (id: string, clienteAtualizado: Partial<Cliente>) => {
+  const atualizarCliente = (id: string, clienteAtualizado: Partial<Client>) => {
     setClientes(clientes.map(c => 
       c.id === id ? { ...c, ...clienteAtualizado } : c
     ));
@@ -145,7 +145,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (clienteComEventos) {
       toast({ 
         title: "Operação não permitida", 
-        description: "Este cliente possui eventos registrados e não pode ser excluído.", 
+        description: "Este cliente possui events registrados e não pode ser excluído.",
         variant: "destructive" 
       });
       return;
@@ -183,7 +183,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (kitEmUso) {
       toast({ 
         title: "Operação não permitida", 
-        description: "Este kit está associado a eventos e não pode ser excluído.", 
+        description: "Este kit está associado a events e não pode ser excluído.",
         variant: "destructive" 
       });
       return;
@@ -202,8 +202,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
-  const adicionarTema = (tema: Omit<Tema, 'id' | 'vezes_alugado'>) => {
-    const novoTema: Tema = {
+  const adicionarTema = (tema: Omit<Them, 'id' | 'vezes_alugado'>) => {
+    const novoTema: Them = {
       ...tema,
       id: `t${Date.now().toString()}`,
       vezes_alugado: 0
@@ -212,7 +212,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
   };
   
-  const atualizarTema = (id: string, temaAtualizado: Partial<Tema>) => {
+  const atualizarTema = (id: string, temaAtualizado: Partial<Them>) => {
     setTemas(temas.map(t => 
       t.id === id ? { ...t, ...temaAtualizado } : t
     ));
@@ -224,7 +224,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     if (temaEmUso) {
       toast({ 
         title: "Operação não permitida", 
-        description: "Este tema está associado a eventos e não pode ser excluído.", 
+        description: "Este tema está associado a events e não pode ser excluído.",
         variant: "destructive" 
       });
       return;
@@ -238,8 +238,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
-  const adicionarEvento = (evento: Omit<Evento, 'id'>) => {
-    const novoEvento: Evento = {
+  const adicionarEvento = (evento: Omit<Event, 'id'>) => {
+    const novoEvento: Event = {
       ...evento,
       id: `e${Date.now().toString()}`
     };
@@ -264,6 +264,9 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const clienteAtualizado = clientes.find(c => c.id === novoEvento.cliente.id);
     if (clienteAtualizado) {
+      if (!clienteAtualizado.historico) {
+        clienteAtualizado.historico = []
+      }
       const clienteComHistoricoAtualizado = {
         ...clienteAtualizado,
         historico: [...clienteAtualizado.historico, novoEvento]
@@ -278,12 +281,12 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setEventos(eventosAtualizados);
     
     const eventosForStorage = prepareForStorage(eventosAtualizados);
-    localStorage.setItem('eventos', JSON.stringify(eventosForStorage));
+    localStorage.setItem('events', JSON.stringify(eventosForStorage));
     
     return novoEvento;
   };
   
-  const atualizarEvento = (id: string, eventoAtualizado: Partial<Evento>) => {
+  const atualizarEvento = (id: string, eventoAtualizado: Partial<Event>) => {
     setEventos(eventos.map(e => 
       e.id === id ? { ...e, ...eventoAtualizado } : e
     ));
@@ -317,8 +320,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
-  const adicionarMensagem = (mensagem: Omit<Mensagem, 'id' | 'datahora'>) => {
-    const novaMensagem: Mensagem = {
+  const adicionarMensagem = (mensagem: Omit<Message, 'id' | 'datahora'>) => {
+    const novaMensagem: Message = {
       ...mensagem,
       id: `m${Date.now().toString()}`,
       datahora: new Date().toISOString()
@@ -338,39 +341,39 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
   
   return (
-    <FestaContext.Provider value={{
-      clientes,
+    <HandleContext.Provider value={{
+      clients: clientes,
       kits,
-      temas,
-      eventos,
-      mensagens,
-      estatisticas,
-      usuario,
-      adicionarCliente,
-      atualizarCliente,
-      excluirCliente,
-      adicionarKit,
-      atualizarKit,
-      excluirKit,
-      adicionarTema,
-      atualizarTema,
-      excluirTema,
-      adicionarEvento,
-      atualizarEvento,
-      excluirEvento,
-      adicionarMensagem,
-      marcarMensagemComoLida,
-      atualizarEstatisticas
+      thems: temas,
+      events: eventos,
+      messages: mensagens,
+      statistics: estatisticas,
+      users: usuario,
+      addClients: adicionarCliente,
+      updateClients: atualizarCliente,
+      removeClients: excluirCliente,
+      addKit: adicionarKit,
+      updateKit: atualizarKit,
+      removeKit: excluirKit,
+      addThems: adicionarTema,
+      updateThems: atualizarTema,
+      removeThems: excluirTema,
+      addEvent: adicionarEvento,
+      updateEvent: atualizarEvento,
+      removeEvent: excluirEvento,
+      addMessage: adicionarMensagem,
+      markMessageAsRead: marcarMensagemComoLida,
+      updateStatistic: atualizarEstatisticas
     }}>
       {children}
-    </FestaContext.Provider>
+    </HandleContext.Provider>
   );
 };
 
-export const useFestaContext = () => {
-  const context = useContext(FestaContext);
+export const useHandleContext = () => {
+  const context = useContext(HandleContext);
   if (context === undefined) {
-    throw new Error('useFestaContext must be used within a FestaProvider');
+    throw new Error('useHandleContext must be used within a FestaProvider');
   }
   return context;
 };

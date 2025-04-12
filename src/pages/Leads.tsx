@@ -25,7 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 export type LeadStatus = 'novo' | 'contato' | 'negociando' | 'convertido' | 'perdido';
 
 // Define a lead type
-export interface Lead {
+export interface Leads {
   id: string;
   nome: string;
   email: string;
@@ -40,7 +40,7 @@ export interface Lead {
 }
 
 // Mock data
-const mockLeads: Lead[] = [
+const mockLeads: Leads[] = [
   {
     id: '1',
     nome: 'Maria Silva',
@@ -142,8 +142,8 @@ const getStatusIcon = (status: LeadStatus) => {
 };
 
 const LeadPage = () => {
-  const [leads, setLeads] = useState<Lead[]>(mockLeads);
-  const [filteredLeads, setFilteredLeads] = useState<Lead[]>(mockLeads);
+  const [leads, setLeads] = useState<Leads[]>(mockLeads);
+  const [filteredLeads, setFilteredLeads] = useState<Leads[]>(mockLeads);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("todos");
@@ -231,8 +231,8 @@ const LeadPage = () => {
     });
   };
 
-  const handleAddLead = (newLead: Omit<Lead, 'id' | 'dataCriacao'>) => {
-    const lead: Lead = {
+  const handleAddLead = (newLead: Omit<Leads, 'id' | 'dataCriacao'>) => {
+    const lead: Leads = {
       ...newLead,
       id: (leads.length + 1).toString(),
       dataCriacao: new Date(),
@@ -243,7 +243,7 @@ const LeadPage = () => {
     filterLeads(searchTerm, activeTab);
     
     toast({
-      title: "Lead adicionado",
+      title: "Leads adicionado",
       description: "Novo lead foi adicionado com sucesso",
     });
   };

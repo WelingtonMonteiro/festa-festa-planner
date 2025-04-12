@@ -6,20 +6,20 @@ import {
   Users, AlertCircle, Clock, CalendarX, 
   DollarSign, CalendarCheck, Calendar 
 } from "lucide-react";
-import { useFestaContext } from "@/contexts/FestaContext";
-import ClientesAtivos from "@/components/gerenciamento/ClientesAtivos";
-import ClientesPagamentosAtrasados from "@/components/gerenciamento/ClientesPagamentosAtrasados";
-import ClientesCancelados from "@/components/gerenciamento/ClientesCancelados";
-import ClientesUltimosAcessos from "@/components/gerenciamento/ClientesUltimosAcessos";
-import ClientesInativos from "@/components/gerenciamento/ClientesInativos";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
+import ActiveClients from "@/components/management/ActiveClients.tsx";
+import ClientesPagamentosAtrasados from "@/components/management/LatePaymentsClients.tsx";
+import CanceledClients from "@/components/management/CanceledClients.tsx";
+import LastedAccessClients from "@/components/management/LastedAccessClients.tsx";
+import InactiveClients from "@/components/management/InactiveClients.tsx";
 
-const GerenciamentoClientes = () => {
+const ClientsManagement = () => {
   const [activeTab, setActiveTab] = useState("ativos");
-  const { clientes } = useFestaContext();
+  const { clients } = useHandleContext();
 
   // Contadores para os badges
-  const totalAtivos = clientes.filter(c => c.ativo !== false).length;
-  const totalInativos = clientes.filter(c => c.ativo === false).length;
+  const totalAtivos = clients.filter(c => c.ativo !== false).length;
+  const totalInativos = clients.filter(c => c.ativo === false).length;
   
   // Estes seriam dados reais em uma aplicação completa
   const totalPagamentosAtrasados = 3;
@@ -84,7 +84,7 @@ const GerenciamentoClientes = () => {
           
           <CardContent className="p-0">
             <TabsContent value="ativos" className="mt-0 border-0 p-4">
-              <ClientesAtivos />
+              <ActiveClients />
             </TabsContent>
             
             <TabsContent value="pagamentos-atrasados" className="mt-0 border-0 p-4">
@@ -92,15 +92,15 @@ const GerenciamentoClientes = () => {
             </TabsContent>
             
             <TabsContent value="cancelados" className="mt-0 border-0 p-4">
-              <ClientesCancelados />
+              <CanceledClients />
             </TabsContent>
             
             <TabsContent value="ultimos-acessos" className="mt-0 border-0 p-4">
-              <ClientesUltimosAcessos />
+              <LastedAccessClients />
             </TabsContent>
             
             <TabsContent value="inativos" className="mt-0 border-0 p-4">
-              <ClientesInativos />
+              <InactiveClients />
             </TabsContent>
           </CardContent>
         </Tabs>
@@ -109,4 +109,4 @@ const GerenciamentoClientes = () => {
   );
 };
 
-export default GerenciamentoClientes;
+export default ClientsManagement;

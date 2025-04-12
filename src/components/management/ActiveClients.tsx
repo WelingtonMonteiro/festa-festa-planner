@@ -7,21 +7,21 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { Search, User, Edit, Phone, Mail } from "lucide-react";
 
-const ClientesAtivos = () => {
-  const { clientes } = useFestaContext();
-  const [busca, setBusca] = useState("");
+const ActiveClients = () => {
+  const { clients } = useHandleContext();
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
   
-  const clientesAtivos = clientes.filter(cliente => cliente.ativo !== false);
+  const activeClients = clients.filter(client => client.ativo !== false);
   
-  const clientesFiltrados = clientesAtivos.filter(
-    cliente =>
-      cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.telefone.includes(busca) ||
-      (cliente.email && cliente.email.toLowerCase().includes(busca.toLowerCase()))
+  const filteredClients = activeClients.filter(
+    client =>
+      client.nome.toLowerCase().includes(search.toLowerCase()) ||
+      client.telefone.includes(search) ||
+      (client.email && client.email.toLowerCase().includes(search.toLowerCase()))
   );
   
   return (
@@ -33,13 +33,13 @@ const ClientesAtivos = () => {
           <Input
             placeholder="Buscar clientes ativos..."
             className="w-full pl-8"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
       
-      {clientesFiltrados.length > 0 ? (
+      {filteredClients.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
@@ -52,46 +52,43 @@ const ClientesAtivos = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clientesFiltrados.map((cliente) => {
-              const historico = cliente.historico || [];
-              const totalEventos = historico.length;
-              const valorTotal = historico.reduce(
-                (total, evento) => total + (evento?.valorTotal || 0), 
-                0
-              );
+            {filteredClients.map((client) => {
+              const histories = client.historico || [];
+              const totalEvents = histories.length;
+              const totalValues = histories.reduce((total, event) => total + (event?.valorTotal || 0), 0);
               
-              const ultimoEvento = historico.length > 0 
-                ? new Date(historico.sort((a, b) => 
+              const lastedEvent = histories.length > 0
+                ? new Date(histories.sort((a, b) =>
                     new Date(b.data).getTime() - new Date(a.data).getTime()
                   )[0].data).toLocaleDateString('pt-BR')
                 : "Nenhum";
               
               return (
-                <TableRow key={cliente.id}>
-                  <TableCell className="font-medium">{cliente.nome}</TableCell>
+                <TableRow key={client.id}>
+                  <TableCell className="font-medium">{client.nome}</TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center text-sm">
                         <Phone className="mr-2 h-3 w-3" />
-                        {cliente.telefone}
+                        {client.telefone}
                       </div>
-                      {cliente.email && (
+                      {client.email && (
                         <div className="flex items-center text-sm">
                           <Mail className="mr-2 h-3 w-3" />
-                          {cliente.email}
+                          {client.email}
                         </div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>{totalEventos}</TableCell>
-                  <TableCell>R$ {valorTotal.toLocaleString('pt-BR')}</TableCell>
-                  <TableCell>{ultimoEvento}</TableCell>
+                  <TableCell>{totalEvents}</TableCell>
+                  <TableCell>R$ {totalValues.toLocaleString('pt-BR')}</TableCell>
+                  <TableCell>{lastedEvent}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => navigate(`/client/${cliente.id}`)}
+                        onClick={() => navigate(`/client/${client.id}`)}
                       >
                         Detalhes
                       </Button>
@@ -112,10 +109,10 @@ const ClientesAtivos = () => {
         <div className="flex flex-col items-center justify-center py-8">
           <User className="h-12 w-12 text-muted-foreground/80" />
           <p className="mt-2 text-muted-foreground">Nenhum cliente ativo encontrado com esta busca</p>
-          {busca && (
+          {search && (
             <Button 
               variant="link" 
-              onClick={() => setBusca("")}
+              onClick={() => setSearch("")}
             >
               Limpar busca
             </Button>
@@ -126,4 +123,4 @@ const ClientesAtivos = () => {
   );
 };
 
-export default ClientesAtivos;
+export default ActiveClients;

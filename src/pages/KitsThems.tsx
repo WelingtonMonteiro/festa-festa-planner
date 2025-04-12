@@ -6,16 +6,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { Package, Tag, Edit, Trash2, PlusCircle, Check, X, Image, Upload } from 'lucide-react';
 
-const KitsTemas = () => {
-  const { kits, temas, adicionarKit, adicionarTema, atualizarKit, atualizarTema, excluirKit, excluirTema } = useFestaContext();
+const KitsThems = () => {
+  const { kits, thems, addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
   
   const [kitDialogOpen, setKitDialogOpen] = useState(false);
-  const [temaDialogOpen, setTemaDialogOpen] = useState(false);
+  const [themDialogOpen, setThemDialogOpen] = useState(false);
   const [editingKit, setEditingKit] = useState<string | null>(null);
-  const [editingTema, setEditingTema] = useState<string | null>(null);
+  const [editingThem, setEditingThem] = useState<string | null>(null);
   
   const [kitForm, setKitForm] = useState({
     nome: '',
@@ -25,7 +25,7 @@ const KitsTemas = () => {
     imagens: ['']
   });
   
-  const [temaForm, setTemaForm] = useState({
+  const [themForm, setThemForm] = useState({
     nome: '',
     descricao: '',
     valorGasto: '',
@@ -53,17 +53,17 @@ const KitsTemas = () => {
     setKitForm({ ...kitForm, itens: newItens });
   };
   
-  const handleTemaChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleThemChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setTemaForm({ ...temaForm, [name]: value });
+    setThemForm({ ...themForm, [name]: value });
   };
   
   const handleKitToggle = (kitId: string) => {
-    const newKitsIds = temaForm.kitsIds.includes(kitId)
-      ? temaForm.kitsIds.filter(id => id !== kitId)
-      : [...temaForm.kitsIds, kitId];
+    const newKitsIds = themForm.kitsIds.includes(kitId)
+      ? themForm.kitsIds.filter(id => id !== kitId)
+      : [...themForm.kitsIds, kitId];
     
-    setTemaForm({ ...temaForm, kitsIds: newKitsIds });
+    setThemForm({ ...themForm, kitsIds: newKitsIds });
   };
   
   const handleKitImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,15 +82,15 @@ const KitsTemas = () => {
     }
   };
   
-  const handleTemaImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThemImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
-          setTemaForm({ 
-            ...temaForm, 
-            imagens: [...temaForm.imagens.filter(img => img !== ''), reader.result] 
+          setThemForm({
+            ...themForm,
+            imagens: [...themForm.imagens.filter(img => img !== ''), reader.result]
           });
         }
       };
@@ -99,13 +99,13 @@ const KitsTemas = () => {
   };
   
   const removeKitImage = (index: number) => {
-    const newImagens = kitForm.imagens.filter((_, i) => i !== index);
-    setKitForm({ ...kitForm, imagens: newImagens.length ? newImagens : [''] });
+    const newImages = kitForm.imagens.filter((_, i) => i !== index);
+    setKitForm({ ...kitForm, imagens: newImages.length ? newImages : [''] });
   };
   
-  const removeTemaImage = (index: number) => {
-    const newImagens = temaForm.imagens.filter((_, i) => i !== index);
-    setTemaForm({ ...temaForm, imagens: newImagens.length ? newImagens : [''] });
+  const removeThemImage = (index: number) => {
+    const newImages = themForm.imagens.filter((_, i) => i !== index);
+    setThemForm({ ...themForm, imagens: newImages.length ? newImages : [''] });
   };
   
   const resetKitForm = () => {
@@ -119,15 +119,15 @@ const KitsTemas = () => {
     setEditingKit(null);
   };
   
-  const resetTemaForm = () => {
-    setTemaForm({
+  const resetThemForm = () => {
+    setThemForm({
       nome: '',
       descricao: '',
       valorGasto: '',
       imagens: [''],
       kitsIds: []
     });
-    setEditingTema(null);
+    setEditingThem(null);
   };
   
   const handleKitSubmit = (e: React.FormEvent) => {
@@ -142,34 +142,34 @@ const KitsTemas = () => {
     };
     
     if (editingKit) {
-      atualizarKit(editingKit, kitData);
+      updateKit(editingKit, kitData);
     } else {
-      adicionarKit(kitData);
+      addKit(kitData);
     }
     
     setKitDialogOpen(false);
     resetKitForm();
   };
   
-  const handleTemaSubmit = (e: React.FormEvent) => {
+  const handleThemSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const temaData = {
-      nome: temaForm.nome,
-      descricao: temaForm.descricao,
-      valorGasto: parseFloat(temaForm.valorGasto) || 0,
-      imagens: temaForm.imagens.filter(img => img.trim() !== ''),
-      kits: kits.filter(kit => temaForm.kitsIds.includes(kit.id))
+    const themData = {
+      nome: themForm.nome,
+      descricao: themForm.descricao,
+      valorGasto: parseFloat(themForm.valorGasto) || 0,
+      imagens: themForm.imagens.filter(img => img.trim() !== ''),
+      kits: kits.filter(kit => themForm.kitsIds.includes(kit.id))
     };
     
-    if (editingTema) {
-      atualizarTema(editingTema, temaData);
+    if (editingThem) {
+      updateThems(editingThem, themData);
     } else {
-      adicionarTema(temaData);
+      addThems(themData);
     }
     
-    setTemaDialogOpen(false);
-    resetTemaForm();
+    setThemDialogOpen(false);
+    resetThemForm();
   };
   
   const handleEditKit = (kit: typeof kits[0]) => {
@@ -184,21 +184,21 @@ const KitsTemas = () => {
     setKitDialogOpen(true);
   };
   
-  const handleEditTema = (tema: typeof temas[0]) => {
-    setTemaForm({
+  const handleEditTema = (tema: typeof thems[0]) => {
+    setThemForm({
       nome: tema.nome,
       descricao: tema.descricao,
       valorGasto: tema.valorGasto.toString(),
       imagens: [...tema.imagens],
       kitsIds: tema.kits.map(k => k.id)
     });
-    setEditingTema(tema.id);
-    setTemaDialogOpen(true);
+    setEditingThem(tema.id);
+    setThemDialogOpen(true);
   };
   
-  const calcularROI = (tema: typeof temas[0]) => {
-    const receitaTotal = tema.vezes_alugado * (tema.kits.reduce((sum, kit) => sum + kit.preco, 0) / tema.kits.length);
-    const roi = tema.valorGasto > 0 ? ((receitaTotal / tema.valorGasto) - 1) * 100 : 0;
+  const calcROI = (them: typeof thems[0]) => {
+    const receitaTotal = them.vezes_alugado * (them.kits.reduce((sum, kit) => sum + kit.preco, 0) / them.kits.length);
+    const roi = them.valorGasto > 0 ? ((receitaTotal / them.valorGasto) - 1) * 100 : 0;
     return roi.toFixed(2);
   };
   
@@ -261,7 +261,7 @@ const KitsTemas = () => {
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      onClick={() => excluirKit(kit.id)}
+                      onClick={() => removeKit(kit.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -312,8 +312,8 @@ const KitsTemas = () => {
           <div className="flex justify-end">
             <Button 
               onClick={() => {
-                resetTemaForm();
-                setTemaDialogOpen(true);
+                resetThemForm();
+                setThemDialogOpen(true);
               }}
               className="bg-festa-primary hover:bg-festa-primary/90"
             >
@@ -323,7 +323,7 @@ const KitsTemas = () => {
           </div>
           
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {temas.map(tema => (
+            {thems.map(tema => (
               <Card key={tema.id}>
                 <CardHeader className="relative">
                   {tema.imagens && tema.imagens.length > 0 && tema.imagens[0] !== '' && (
@@ -351,7 +351,7 @@ const KitsTemas = () => {
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      onClick={() => excluirTema(tema.id)}
+                      onClick={() => removeThems(tema.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -376,8 +376,8 @@ const KitsTemas = () => {
                     </div>
                     <div className="bg-muted rounded p-2">
                       <div className="font-medium">ROI</div>
-                      <div className={Number(calcularROI(tema)) > 0 ? "text-green-600" : "text-red-600"}>
-                        {calcularROI(tema)}%
+                      <div className={Number(calcROI(tema)) > 0 ? "text-green-600" : "text-red-600"}>
+                        {calcROI(tema)}%
                       </div>
                     </div>
                   </div>
@@ -385,7 +385,7 @@ const KitsTemas = () => {
               </Card>
             ))}
             
-            {temas.length === 0 && (
+            {thems.length === 0 && (
               <div className="col-span-full">
                 <Card>
                   <CardContent className="flex flex-col items-center justify-center p-8">
@@ -395,7 +395,7 @@ const KitsTemas = () => {
                     </p>
                     <Button 
                       variant="outline" 
-                      onClick={() => setTemaDialogOpen(true)} 
+                      onClick={() => setThemDialogOpen(true)}
                       className="mt-4"
                     >
                       Adicionar Tema
@@ -539,23 +539,23 @@ const KitsTemas = () => {
         </DialogContent>
       </Dialog>
       
-      <Dialog open={temaDialogOpen} onOpenChange={setTemaDialogOpen}>
+      <Dialog open={themDialogOpen} onOpenChange={setThemDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{editingTema ? 'Editar Tema' : 'Adicionar Novo Tema'}</DialogTitle>
+            <DialogTitle>{editingThem ? 'Editar Tema' : 'Adicionar Novo Tema'}</DialogTitle>
             <DialogDescription>
-              Preencha os dados para {editingTema ? 'editar' : 'adicionar'} um tema.
+              Preencha os dados para {editingThem ? 'editar' : 'adicionar'} um tema.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleTemaSubmit} className="space-y-4">
+          <form onSubmit={handleThemSubmit} className="space-y-4">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="nome">Nome do Tema</Label>
                 <Input 
                   id="nome" 
                   name="nome" 
-                  value={temaForm.nome} 
-                  onChange={handleTemaChange}
+                  value={themForm.nome}
+                  onChange={handleThemChange}
                   required
                 />
               </div>
@@ -565,8 +565,8 @@ const KitsTemas = () => {
                   id="valorGasto" 
                   name="valorGasto" 
                   type="number" 
-                  value={temaForm.valorGasto} 
-                  onChange={handleTemaChange}
+                  value={themForm.valorGasto}
+                  onChange={handleThemChange}
                   required
                 />
               </div>
@@ -577,8 +577,8 @@ const KitsTemas = () => {
               <Textarea 
                 id="descricao" 
                 name="descricao" 
-                value={temaForm.descricao} 
-                onChange={handleTemaChange}
+                value={themForm.descricao}
+                onChange={handleThemChange}
                 rows={3}
                 required
               />
@@ -587,7 +587,7 @@ const KitsTemas = () => {
             <div className="space-y-2">
               <Label>Imagens do Tema</Label>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
-                {temaForm.imagens.map((img, index) => 
+                {themForm.imagens.map((img, index) =>
                   img !== '' ? (
                     <div key={index} className="relative rounded-md overflow-hidden border h-24">
                       <img 
@@ -600,7 +600,7 @@ const KitsTemas = () => {
                         variant="destructive"
                         size="icon"
                         className="absolute top-1 right-1 h-6 w-6 rounded-full"
-                        onClick={() => removeTemaImage(index)}
+                        onClick={() => removeThemImage(index)}
                       >
                         <X className="h-3 w-3" />
                       </Button>
@@ -617,7 +617,7 @@ const KitsTemas = () => {
                     id="tema-image-upload"
                     type="file"
                     accept="image/*"
-                    onChange={handleTemaImageUpload}
+                    onChange={handleThemImageUpload}
                     className="hidden"
                   />
                 </div>
@@ -631,12 +631,12 @@ const KitsTemas = () => {
                   <div key={kit.id} className="flex items-center space-x-2">
                     <Button
                       type="button"
-                      variant={temaForm.kitsIds.includes(kit.id) ? "default" : "outline"}
+                      variant={themForm.kitsIds.includes(kit.id) ? "default" : "outline"}
                       size="sm"
                       className="w-full justify-start"
                       onClick={() => handleKitToggle(kit.id)}
                     >
-                      {temaForm.kitsIds.includes(kit.id) && (
+                      {themForm.kitsIds.includes(kit.id) && (
                         <Check className="mr-2 h-4 w-4" />
                       )}
                       {kit.nome}
@@ -653,17 +653,17 @@ const KitsTemas = () => {
             
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => {
-                setTemaDialogOpen(false);
-                resetTemaForm();
+                setThemDialogOpen(false);
+                resetThemForm();
               }}>
                 Cancelar
               </Button>
               <Button 
                 type="submit" 
                 className="bg-festa-primary hover:bg-festa-primary/90"
-                disabled={kits.length === 0 || temaForm.kitsIds.length === 0}
+                disabled={kits.length === 0 || themForm.kitsIds.length === 0}
               >
-                {editingTema ? 'Salvar Alterações' : 'Adicionar Tema'}
+                {editingThem ? 'Salvar Alterações' : 'Adicionar Tema'}
               </Button>
             </DialogFooter>
           </form>
@@ -673,4 +673,4 @@ const KitsTemas = () => {
   );
 };
 
-export default KitsTemas;
+export default KitsThems;

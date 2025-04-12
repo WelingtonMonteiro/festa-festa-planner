@@ -1,10 +1,10 @@
 
-import { Cliente, Kit, Tema, Evento, Mensagem, Estatisticas } from '../types';
+import { Client, Kit, Them, Event, Message, Statistic } from '../types';
 import { format, addDays, subDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 // Dados de exemplo para o sistema
-export const clientesMock: Cliente[] = [
+export const clientesMock: Client[] = [
   {
     id: '1',
     nome: 'Maria Silva',
@@ -60,7 +60,7 @@ export const kitsMock: Kit[] = [
   }
 ];
 
-export const temasMock: Tema[] = [
+export const temasMock: Them[] = [
   {
     id: 't1',
     nome: 'Super-Heróis',
@@ -105,7 +105,7 @@ const nextWeek = format(addDays(today, 7), 'yyyy-MM-dd');
 const lastWeek = format(subDays(today, 7), 'yyyy-MM-dd');
 const twoWeeksFromNow = format(addDays(today, 14), 'yyyy-MM-dd');
 
-export const eventosMock: Evento[] = [
+export const eventosMock: Event[] = [
   {
     id: 'e1',
     cliente: clientesMock[0],
@@ -163,12 +163,12 @@ export const eventosMock: Evento[] = [
   }
 ];
 
-// Atualizar o histórico dos clientes com seus eventos
+// Atualizar o histórico dos clients com seus events
 clientesMock[0].historico = [eventosMock[0], eventosMock[3]];
 clientesMock[1].historico = [eventosMock[1]];
 clientesMock[2].historico = [eventosMock[2]];
 
-export const mensagensMock: Mensagem[] = [
+export const mensagensMock: Message[] = [
   {
     id: 'm1',
     remetente: 'cliente',
@@ -203,8 +203,8 @@ export const mensagensMock: Mensagem[] = [
   }
 ];
 
-// Função para gerar estatísticas com base nos eventos
-export const gerarEstatisticas = (eventos: Evento[]): Estatisticas => {
+// Função para gerar estatísticas com base nos events
+export const gerarEstatisticas = (eventos: Event[]): Statistic => {
   const eventosPorMes: Record<string, number> = {};
   const kitsContagem: Record<string, number> = {};
   const temasPorMes: Record<string, Record<string, number>> = {};
@@ -220,7 +220,7 @@ export const gerarEstatisticas = (eventos: Evento[]): Estatisticas => {
     const mes = format(data, 'yyyy-MM', { locale: ptBR });
     const mesNome = format(data, 'MMM', { locale: ptBR });
     
-    // Contar eventos por mês
+    // Contar events por mês
     eventosPorMes[mesNome] = (eventosPorMes[mesNome] || 0) + 1;
     
     // Contar kits utilizados

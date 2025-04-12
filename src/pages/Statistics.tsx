@@ -1,40 +1,40 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useState } from "react";
 
 const COLORS = ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
-const Estatisticas = () => {
-  const { estatisticas, eventos, temas } = useFestaContext();
+const Statistics = () => {
+  const { statistics, events, thems } = useHandleContext();
   const [periodoSelecionado, setPeriodoSelecionado] = useState('mes');
   
   // Preparar dados para gráficos
   const prepararDadosEventos = () => {
-    return Object.entries(estatisticas.eventosPorMes).map(([mes, quantidade]) => ({
+    return Object.entries(statistics.eventosPorMes).map(([mes, quantidade]) => ({
       mes,
       quantidade
     }));
   };
   
   const prepararDadosKitsPopulares = () => {
-    return estatisticas.kitsPopulares.map(({ kit, quantidade }) => ({
+    return statistics.kitsPopulares.map(({ kit, quantidade }) => ({
       name: kit,
       value: quantidade
     }));
   };
   
   const prepararDadosTemasPorAno = () => {
-    return Object.entries(estatisticas.temasPorAno).map(([tema, quantidade]) => ({
+    return Object.entries(statistics.temasPorAno).map(([tema, quantidade]) => ({
       name: tema,
       value: quantidade
     }));
   };
   
   const prepararDadosFaturamento = () => {
-    return Object.entries(estatisticas.faturamentoMensal).map(([mes, valor]) => ({
+    return Object.entries(statistics.faturamentoMensal).map(([mes, valor]) => ({
       mes,
       valor
     }));
@@ -42,7 +42,7 @@ const Estatisticas = () => {
   
   // Calcular retorno sobre investimento (ROI) dos temas
   const calcularROITemas = () => {
-    return temas.map(tema => {
+    return thems.map(tema => {
       const receitaTotal = tema.vezes_alugado * (tema.kits.reduce((sum, kit) => sum + kit.preco, 0) / tema.kits.length);
       const roi = tema.valorGasto > 0 ? ((receitaTotal / tema.valorGasto) - 1) * 100 : 0;
       
@@ -101,25 +101,25 @@ const Estatisticas = () => {
                 <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-festa-primary">
-                      {eventos.filter(e => e.status === 'agendado').length}
+                      {events.filter(e => e.status === 'agendado').length}
                     </div>
                     <div className="text-sm text-muted-foreground">Agendados</div>
                   </div>
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-festa-secondary">
-                      {eventos.filter(e => e.status === 'confirmado').length}
+                      {events.filter(e => e.status === 'confirmado').length}
                     </div>
                     <div className="text-sm text-muted-foreground">Confirmados</div>
                   </div>
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-festa-accent">
-                      {eventos.filter(e => e.status === 'finalizado').length}
+                      {events.filter(e => e.status === 'finalizado').length}
                     </div>
                     <div className="text-sm text-muted-foreground">Finalizados</div>
                   </div>
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-gray-500">
-                      {eventos.filter(e => e.status === 'cancelado').length}
+                      {events.filter(e => e.status === 'cancelado').length}
                     </div>
                     <div className="text-sm text-muted-foreground">Cancelados</div>
                   </div>
@@ -134,7 +134,7 @@ const Estatisticas = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <div className="text-5xl font-bold text-festa-primary mb-2">{eventos.length}</div>
+                  <div className="text-5xl font-bold text-festa-primary mb-2">{events.length}</div>
                   <div className="text-sm text-muted-foreground">Total de eventos</div>
                 </div>
               </CardContent>
@@ -152,7 +152,7 @@ const Estatisticas = () => {
               </CardHeader>
               <CardContent className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={estatisticas.kitsPopulares} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <BarChart data={statistics.kitsPopulares} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="kit" />
                     <YAxis />
@@ -199,7 +199,7 @@ const Estatisticas = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {estatisticas.kitsPopulares.slice(0, 5).map((kit, index) => (
+                  {statistics.kitsPopulares.slice(0, 5).map((kit, index) => (
                     <div key={index} className="flex items-center">
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted font-medium">
                         {index + 1}
@@ -290,7 +290,7 @@ const Estatisticas = () => {
           </div>
         </TabsContent>
         
-        {/* Tab Financeiro */}
+        {/* Tab Financial */}
         <TabsContent value="financeiro">
           <div className="grid gap-4 md:grid-cols-2">
             <Card className="md:col-span-2">
@@ -321,7 +321,7 @@ const Estatisticas = () => {
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-green-600">
-                      R$ {eventos
+                      R$ {events
                         .reduce((total, evento) => total + evento.valorTotal, 0)
                         .toLocaleString('pt-BR')}
                     </div>
@@ -330,7 +330,7 @@ const Estatisticas = () => {
                   
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-yellow-600">
-                      R$ {eventos
+                      R$ {events
                         .reduce((total, evento) => total + evento.valorRestante, 0)
                         .toLocaleString('pt-BR')}
                     </div>
@@ -339,7 +339,7 @@ const Estatisticas = () => {
                   
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-festa-primary">
-                      R$ {eventos
+                      R$ {events
                         .filter(e => e.status === 'finalizado')
                         .reduce((total, evento) => total + evento.valorTotal, 0)
                         .toLocaleString('pt-BR')}
@@ -349,7 +349,7 @@ const Estatisticas = () => {
                   
                   <div className="rounded-lg bg-muted p-4 text-center">
                     <div className="text-2xl font-bold text-festa-secondary">
-                      R$ {temas
+                      R$ {thems
                         .reduce((total, tema) => total + tema.valorGasto, 0)
                         .toLocaleString('pt-BR')}
                     </div>
@@ -369,8 +369,8 @@ const Estatisticas = () => {
                   <div className="rounded-lg bg-muted p-4">
                     <div className="text-sm text-muted-foreground mb-1">Ticket Médio</div>
                     <div className="text-2xl font-bold">
-                      R$ {eventos.length > 0 
-                        ? (eventos.reduce((total, evento) => total + evento.valorTotal, 0) / eventos.length).toFixed(2)
+                      R$ {events.length > 0
+                        ? (events.reduce((total, evento) => total + evento.valorTotal, 0) / events.length).toFixed(2)
                         : '0.00'}
                     </div>
                   </div>
@@ -378,9 +378,9 @@ const Estatisticas = () => {
                   <div className="rounded-lg bg-muted p-4">
                     <div className="text-sm text-muted-foreground mb-1">Percentual Médio de Sinal</div>
                     <div className="text-2xl font-bold">
-                      {eventos.length > 0 
-                        ? (eventos.reduce((total, evento) => 
-                            total + (evento.valorSinal / evento.valorTotal * 100), 0) / eventos.length).toFixed(0)
+                      {events.length > 0
+                        ? (events.reduce((total, evento) =>
+                            total + (evento.valorSinal / evento.valorTotal * 100), 0) / events.length).toFixed(0)
                         : '0'}%
                     </div>
                   </div>
@@ -394,4 +394,4 @@ const Estatisticas = () => {
   );
 };
 
-export default Estatisticas;
+export default Statistics;

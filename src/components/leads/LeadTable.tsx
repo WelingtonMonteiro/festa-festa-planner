@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Edit, Trash2, MoreVertical, Calendar, CheckCheck, PhoneOutgoing } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Lead, LeadStatus } from "@/pages/Lead";
+import { Leads, LeadStatus } from "@/pages/Leads.tsx";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -38,7 +38,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 
 interface LeadTableProps {
-  leads: Lead[];
+  leads: Leads[];
   onStatusChange: (leadId: string, newStatus: LeadStatus) => void;
   getStatusColor: (status: LeadStatus) => string;
   getStatusIcon: (status: LeadStatus) => JSX.Element | null;
@@ -62,7 +62,7 @@ const LeadTable = ({
   const handleDelete = () => {
     if (leadToDelete) {
       toast({
-        title: "Lead excluído",
+        title: "Leads excluído",
         description: "O lead foi removido com sucesso"
       });
       setDeleteConfirmOpen(false);

@@ -1,17 +1,17 @@
 
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useFestaContext } from '@/contexts/FestaContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import EventosManagement from '@/components/eventos/EventosManagement';
+import EventsManagement from '@/components/events/EventsManagement.tsx';
 
 const Eventos = () => {
   const navigate = useNavigate();
   
   const handleCadastrarEvento = () => {
-    navigate('/calendario', { state: { showNovoEventoDialog: true } });
+    navigate('/calendar', { state: { showNovoEventoDialog: true } });
   };
   
   return (
@@ -39,7 +39,7 @@ const Eventos = () => {
           <CardDescription>Visualize e gerencie todos os eventos</CardDescription>
         </CardHeader>
         <CardContent>
-          <EventosManagement />
+          <EventsManagement />
         </CardContent>
       </Card>
     </div>

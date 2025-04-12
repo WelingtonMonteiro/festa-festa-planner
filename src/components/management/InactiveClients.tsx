@@ -7,32 +7,32 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useFestaContext } from "@/contexts/FestaContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { toast } from "@/components/ui/use-toast";
 import { 
   Search, UserMinus, Phone, Mail, AlertTriangle, 
   UserCheck, MessageSquare, X
 } from "lucide-react";
 
-const ClientesInativos = () => {
-  const { clientes, atualizarCliente } = useFestaContext();
-  const [busca, setBusca] = useState("");
+const InactiveClients = () => {
+  const { clients, updateClients } = useHandleContext();
+  const [search, setSearch] = useState("");
   const navigate = useNavigate();
   
-  const clientesInativos = clientes.filter(cliente => cliente.ativo === false);
+  const inactiveClients = clients.filter(client => client.ativo === false);
   
-  const clientesFiltrados = clientesInativos.filter(
-    cliente =>
-      cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
-      cliente.telefone.includes(busca) ||
-      (cliente.email && cliente.email.toLowerCase().includes(busca.toLowerCase()))
+  const filteredClients = inactiveClients.filter(
+    client =>
+      client.nome.toLowerCase().includes(search.toLowerCase()) ||
+      client.telefone.includes(search) ||
+      (client.email && client.email.toLowerCase().includes(search.toLowerCase()))
   );
   
-  const reativarCliente = (clienteId: string) => {
+  const reactiveClient = (clienteId: string) => {
     try {
-      const cliente = clientes.find(c => c.id === clienteId);
-      if (cliente) {
-        atualizarCliente(clienteId, { ...cliente, ativo: true });
+      const client = clients.find(c => c.id === clienteId);
+      if (client) {
+        updateClients(clienteId, { ...client, ativo: true });
         toast({
           title: "Cliente reativado",
           description: "O cliente foi reativado com sucesso.",
@@ -59,13 +59,13 @@ const ClientesInativos = () => {
           <Input
             placeholder="Buscar clientes inativos..."
             className="w-full pl-8"
-            value={busca}
-            onChange={(e) => setBusca(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
         </div>
       </div>
       
-      {clientesFiltrados.length > 0 ? (
+      {filteredClients.length > 0 ? (
         <Table>
           <TableHeader>
             <TableRow>
@@ -78,27 +78,24 @@ const ClientesInativos = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {clientesFiltrados.map((cliente) => {
-              const historico = cliente.historico || [];
-              const totalEventos = historico.length;
-              const valorTotal = historico.reduce(
-                (total, evento) => total + (evento?.valorTotal || 0), 
-                0
-              );
+            {filteredClients.map((client) => {
+              const histories = client.historico || [];
+              const totalEvents = histories.length;
+              const totalValues = histories.reduce((total, event) => total + (event?.valorTotal || 0), 0);
               
               return (
-                <TableRow key={cliente.id} className="opacity-70">
-                  <TableCell className="font-medium">{cliente.nome}</TableCell>
+                <TableRow key={client.id} className="opacity-70">
+                  <TableCell className="font-medium">{client.nome}</TableCell>
                   <TableCell>
                     <div className="flex flex-col gap-1">
                       <div className="flex items-center text-sm">
                         <Phone className="mr-2 h-3 w-3" />
-                        {cliente.telefone}
+                        {client.telefone}
                       </div>
-                      {cliente.email && (
+                      {client.email && (
                         <div className="flex items-center text-sm">
                           <Mail className="mr-2 h-3 w-3" />
-                          {cliente.email}
+                          {client.email}
                         </div>
                       )}
                     </div>
@@ -109,14 +106,14 @@ const ClientesInativos = () => {
                       Inativo
                     </div>
                   </TableCell>
-                  <TableCell>{totalEventos}</TableCell>
-                  <TableCell>R$ {valorTotal.toLocaleString('pt-BR')}</TableCell>
+                  <TableCell>{totalEvents}</TableCell>
+                  <TableCell>R$ {totalValues.toLocaleString('pt-BR')}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => navigate(`/client/${cliente.id}`)}
+                        onClick={() => navigate(`/client/${client.id}`)}
                       >
                         Detalhes
                       </Button>
@@ -124,7 +121,7 @@ const ClientesInativos = () => {
                         variant="outline"
                         size="sm"
                         className="text-green-600 hover:bg-green-50"
-                        onClick={() => reativarCliente(cliente.id)}
+                        onClick={() => reactiveClient(client.id)}
                       >
                         <UserCheck className="h-3 w-3" />
                       </Button>
@@ -146,10 +143,10 @@ const ClientesInativos = () => {
         <div className="flex flex-col items-center justify-center py-8">
           <AlertTriangle className="h-12 w-12 text-muted-foreground/80" />
           <p className="mt-2 text-muted-foreground">Nenhum cliente inativo encontrado</p>
-          {busca && (
+          {search && (
             <Button 
               variant="link" 
-              onClick={() => setBusca("")}
+              onClick={() => setSearch("")}
             >
               Limpar busca
             </Button>
@@ -160,4 +157,4 @@ const ClientesInativos = () => {
   );
 };
 
-export default ClientesInativos;
+export default InactiveClients;
