@@ -32,12 +32,12 @@ const Header = () => {
     const threeDaysLater = new Date();
     threeDaysLater.setDate(today.getDate() + 3);
     
-    const eventosProximos = events.filter(evento => {
-      const dataEvento = new Date(evento.data);
-      return dataEvento >= today && dataEvento <= threeDaysLater && evento.status !== 'cancelado';
+    const nextEvents = events.filter(evento => {
+      const eventDate = new Date(evento.data);
+      return eventDate >= today && eventDate <= threeDaysLater && evento.status !== 'cancelado';
     });
     
-    eventosProximos.forEach(evento => {
+    nextEvents.forEach(evento => {
       newNotifications.push({
         id: `evento-${evento.id}`,
         title: 'Evento Próximo',
@@ -46,26 +46,26 @@ const Header = () => {
     });
     
     // Adicionar mensagens não lidas
-    const mensagensNaoLidas = messages.filter(m => !m.lida && m.remetente === 'cliente');
-    if (mensagensNaoLidas.length > 0) {
+    const unreadMessages = messages.filter(m => !m.lida && m.remetente === 'cliente');
+    if (unreadMessages.length > 0) {
       newNotifications.push({
         id: 'mensagens',
         title: 'Mensagens Não Lidas',
-        message: `Você tem ${mensagensNaoLidas.length} mensagens não lidas`
+        message: `Você tem ${unreadMessages.length} mensagens não lidas`
       });
     }
     
     setNotifications(newNotifications);
 
     // Salvar notificações no localStorage
-    const notificacoesArmazenadas = localStorage.getItem('notificacoes');
-    let notificacoesParaSalvar = notificacoesArmazenadas ? JSON.parse(notificacoesArmazenadas) : [];
+    const storageNotifications = localStorage.getItem('notificacoes');
+    let notificationsToSave = storageNotifications ? JSON.parse(storageNotifications) : [];
     
     // Adicionar novas notificações do sistema se não existirem já
     newNotifications.forEach(notification => {
-      const existsInStorage = notificacoesParaSalvar.some((n: any) => n.id === notification.id);
+      const existsInStorage = notificationsToSave.some((n: any) => n.id === notification.id);
       if (!existsInStorage) {
-        notificacoesParaSalvar.push({
+        notificationsToSave.push({
           id: notification.id,
           titulo: notification.title,
           mensagem: notification.message,
@@ -78,7 +78,7 @@ const Header = () => {
       }
     });
     
-    localStorage.setItem('notificacoes', JSON.stringify(notificacoesParaSalvar));
+    localStorage.setItem('notificacoes', JSON.stringify(notificationsToSave));
   }, [events, messages]);
   
   // Redirecionar para a página de notificações
@@ -160,10 +160,10 @@ const Header = () => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigate('/configuracoes?tab=conta')}>
+            <DropdownMenuItem onClick={() => navigate('/settings?tab=conta')}>
               Meu Perfil
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
+            <DropdownMenuItem onClick={() => navigate('/settings')}>
               Configurações
             </DropdownMenuItem>
             <DropdownMenuItem>Sair</DropdownMenuItem>
