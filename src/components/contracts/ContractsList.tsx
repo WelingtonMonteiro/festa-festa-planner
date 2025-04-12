@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Contract, ContractTemplate, Client } from '@/types';
@@ -99,23 +98,26 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       templateId: newContractTemplate !== 'none' ? newContractTemplate : undefined
     };
 
-    const newContract = addContract(contractData);
+    addContract(contractData);
     
-    // Reset form and close dialog
     setNewContractTitle('');
     setNewContractClient('');
     setNewContractTemplate('');
     setIsCreateDialogOpen(false);
     
-    // If contract was created successfully, open it in the editor
-    if (newContract) {
-      setTimeout(() => {
+    setTimeout(() => {
+      const newContract = contracts.find(c => 
+        c.title === contractData.title && 
+        c.clientId === contractData.clientId
+      );
+      
+      if (newContract) {
         setSelectedContract(newContract.id);
         setContractToEdit(newContract);
         setIsEditDialogOpen(true);
-      }, 100);
-    }
-  }, [newContractTitle, newContractClient, newContractTemplate, contractTemplates, addContract, setSelectedContract]);
+      }
+    }, 100);
+  }, [newContractTitle, newContractClient, newContractTemplate, contractTemplates, addContract, contracts, setSelectedContract]);
 
   const handleViewContract = useCallback((contract: Contract) => {
     setContractToView(contract);

@@ -33,17 +33,29 @@ const ContractEditor = ({
 }: ContractEditorProps) => {
   const [content, setContent] = useState<string>('');
   const [initialContent, setInitialContent] = useState<string>('');
+  const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const editorRef = useRef<ReactQuill>(null);
   
+  // Use this effect to only set content when the dialog is opened or the template/contract changes
   useEffect(() => {
     if (isOpen) {
       if (template) {
-        setContent(template.content);
-        setInitialContent(template.content);
+        // Delay initialization slightly to avoid freezing
+        setTimeout(() => {
+          setContent(template.content);
+          setInitialContent(template.content);
+          setIsInitializing(false);
+        }, 50);
       } else if (contract) {
-        setContent(contract.content);
-        setInitialContent(contract.content);
+        setTimeout(() => {
+          setContent(contract.content);
+          setInitialContent(contract.content);
+          setIsInitializing(false);
+        }, 50);
       }
+    } else {
+      // Reset the initializing state when the dialog closes
+      setIsInitializing(true);
     }
   }, [template, contract, isOpen]);
 
@@ -53,12 +65,13 @@ const ContractEditor = ({
       return;
     }
 
+    // Call the save function passed from the parent
     onSave(content);
     
-    // Ensure we close the dialog after saving
+    // Close the dialog after saving with a slight delay to prevent errors
     setTimeout(() => {
       onOpenChange(false);
-    }, 100);
+    }, 200);
   };
 
   const handleCancel = () => {
@@ -100,14 +113,16 @@ const ContractEditor = ({
         
         <div className="flex-1 overflow-y-auto mb-4">
           <div className="bg-white p-4 min-h-[500px]">
-            <ReactQuill 
-              ref={editorRef}
-              theme="snow" 
-              value={previewClient ? processedContent : content}
-              onChange={setContent} 
-              modules={modules}
-              className="h-[450px] mb-12"
-            />
+            {!isInitializing && (
+              <ReactQuill 
+                ref={editorRef}
+                theme="snow" 
+                value={previewClient ? processedContent : content}
+                onChange={setContent} 
+                modules={modules}
+                className="h-[450px] mb-12"
+              />
+            )}
           </div>
         </div>
         
@@ -193,6 +208,17 @@ const replaceVariables = (text: string, client: Client) => {
     '{data.hoje}': today.toLocaleDateString('pt-BR'),
     '{data.mes}': today.toLocaleDateString('pt-BR', { month: 'long' }),
     '{data.ano}': today.getFullYear().toString(),
+    // Additional placeholders for event, kit, and theme could be populated if data was available
+    '{evento.nome}': 'Nome do Evento',
+    '{evento.data}': today.toLocaleDateString('pt-BR'),
+    '{evento.local}': 'Local do Evento',
+    '{evento.valor}': 'R$ 0,00',
+    '{kit.nome}': 'Kit Básico',
+    '{kit.descricao}': 'Descrição do Kit',
+    '{kit.valor}': 'R$ 0,00',
+    '{tema.nome}': 'Tema Padrão',
+    '{tema.descricao}': 'Descrição do Tema',
+    '{tema.valor}': 'R$ 0,00',
   };
 
   let processedText = text;

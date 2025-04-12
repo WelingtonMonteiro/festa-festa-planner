@@ -1,4 +1,3 @@
-
 import { useState, useCallback } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
@@ -61,21 +60,20 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       content: `<h1>${newTemplateName}</h1><p>Insira aqui o conteúdo do contrato.</p>`
     };
     
-    const newTemplate = addContractTemplate(templateData);
+    addContractTemplate(templateData);
     
-    // Reset and close the create dialog
     setNewTemplateName('');
     setIsCreateDialogOpen(false);
     
-    // If the new template was created successfully, open it in the editor
-    if (newTemplate) {
-      setTimeout(() => {
+    setTimeout(() => {
+      const newTemplate = contractTemplates.find(t => t.name === templateData.name);
+      if (newTemplate) {
         setSelectedTemplate(newTemplate.id);
         setTemplateToEdit(newTemplate);
         setIsEditDialogOpen(true);
-      }, 100);
-    }
-  }, [newTemplateName, addContractTemplate, setSelectedTemplate]);
+      }
+    }, 100);
+  }, [newTemplateName, addContractTemplate, setSelectedTemplate, contractTemplates]);
 
   const handleEditTemplate = useCallback((template: ContractTemplate) => {
     setTemplateToEdit(template);
