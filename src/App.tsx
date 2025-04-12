@@ -18,6 +18,7 @@ import Notifications from '@/pages/Notifications';
 import Lead from '@/pages/Leads.tsx';
 import Landing from '@/pages/Landing';
 import ClientsManagement from '@/pages/ClientsManagement.tsx';
+import Contracts from '@/pages/Contracts';
 import { ThemeProvider } from '@/hooks/use-theme';
 
 function App() {
@@ -40,6 +41,7 @@ function App() {
         <Route path="/settings" element={<MainLayout><Configurations /></MainLayout>} />
         <Route path="/notifications" element={<MainLayout><Notifications /></MainLayout>} />
         <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
+        <Route path="/contracts" element={<MainLayout><Contracts /></MainLayout>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </ThemeProvider>

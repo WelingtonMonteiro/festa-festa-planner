@@ -67,3 +67,24 @@ export interface User {
   email: string;
   telefone: string;
 }
+
+export interface Contract {
+  id: string;
+  title: string;
+  content: string;
+  clientId: string;
+  createdAt: string;
+  updatedAt: string;
+  status: 'draft' | 'sent' | 'signed' | 'expired' | 'cancelled';
+  signatureUrl?: string;
+  signedAt?: string;
+  templateId?: string;
+}
+
+export interface ContractTemplate {
+  id: string;
+  name: string;
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}

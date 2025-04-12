@@ -6,9 +6,10 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, MessageCircle, Facebook, Instagram, Phone } from "lucide-react";
+import { Send, MessageCircle, Facebook, Instagram, Phone, FileText, Link2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
+import ContractMessageSender from "@/components/contracts/ContractMessageSender";
 import { toast } from "sonner";
 
 const Messages = () => {
@@ -102,6 +103,16 @@ const Messages = () => {
               <Facebook className="h-4 w-4" /> Facebook
             </TabsTrigger>
           </TabsList>
+          
+          {selectedClient && (
+            <div className="flex gap-2">
+              <ContractMessageSender clientId={selectedClient} />
+              <Button variant="outline" size="sm" asChild>
+                <Link2 className="h-4 w-4 mr-1" />
+                <a href="/contracts" target="_blank">Contratos</a>
+              </Button>
+            </div>
+          )}
         </div>
         
         <div className="grid grid-cols-12 gap-4 h-[calc(100vh-240px)]">

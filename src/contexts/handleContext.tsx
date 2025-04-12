@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Client, Kit, Them, Event, Message, Statistic, User } from '../types';
+import { Client, Kit, Them, Event, Message, Statistic, User, Contract, ContractTemplate } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
 import { toast } from '@/hooks/use-toast';
 
@@ -11,6 +11,8 @@ interface HandleContextType {
   messages: Message[];
   statistics: Statistic;
   users: User;
+  contracts: Contract[];
+  contractTemplates: ContractTemplate[];
   
   addClients: (cliente: Omit<Client, 'id' | 'historico'>) => void;
   updateClients: (id: string, cliente: Partial<Client>) => void;
@@ -32,6 +34,16 @@ interface HandleContextType {
   markMessageAsRead: (id: string) => void;
   
   updateStatistic: () => void;
+
+  addContractTemplate: (template: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateContractTemplate: (id: string, template: Partial<ContractTemplate>) => void;
+  removeContractTemplate: (id: string) => void;
+  
+  addContract: (contract: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateContract: (id: string, contract: Partial<Contract>) => void;
+  removeContract: (id: string) => void;
+  sendContractToClient: (contractId: string, clientId: string) => void;
+  signContract: (contractId: string, signatureUrl: string) => void;
 }
 
 const HandleContext = createContext<HandleContextType | undefined>(undefined);
@@ -63,6 +75,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [temas, setTemas] = useState<Them[]>([]);
   const [eventos, setEventos] = useState<Event[]>([]);
   const [mensagens, setMensagens] = useState<Message[]>([]);
+  const [contratos, setContratos] = useState<Contract[]>([]);
+  const [modelosContrato, setModelosContrato] = useState<ContractTemplate[]>([]);
   const [estatisticas, setEstatisticas] = useState<Statistic>({
     eventosPorMes: {},
     kitsPopulares: [],
@@ -82,6 +96,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const loadedTemas = localStorage.getItem('temas');
     const loadedEventos = localStorage.getItem('events');
     const loadedMensagens = localStorage.getItem('mensagens');
+    const loadedContratos = localStorage.getItem('contratos');
+    const loadedModelosContrato = localStorage.getItem('modelosContrato');
     
     const clientesWithActiveStatus = loadedClientes 
       ? JSON.parse(loadedClientes) 
@@ -92,6 +108,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
     setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
     setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
+    setContratos(loadedContratos ? JSON.parse(loadedContratos) : []);
+    setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
     
     const loadedUsuario = localStorage.getItem('usuario');
     if (loadedUsuario) {
@@ -115,8 +133,11 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     if (mensagens.length) localStorage.setItem('mensagens', JSON.stringify(mensagens));
     
+    if (contratos.length) localStorage.setItem('contratos', JSON.stringify(contratos));
+    if (modelosContrato.length) localStorage.setItem('modelosContrato', JSON.stringify(modelosContrato));
+    
     localStorage.setItem('usuario', JSON.stringify(usuario));
-  }, [clientes, kits, temas, eventos, mensagens, usuario]);
+  }, [clientes, kits, temas, eventos, mensagens, usuario, contratos, modelosContrato]);
   
   useEffect(() => {
     atualizarEstatisticas();
@@ -340,6 +361,117 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setEstatisticas(novasEstatisticas);
   };
   
+  const adicionarModeloContrato = (modelo: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const novoModelo: ContractTemplate = {
+      ...modelo,
+      id: `ct${Date.now().toString()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    setModelosContrato([...modelosContrato, novoModelo]);
+    toast({ title: "Modelo de contrato adicionado", description: `${modelo.name} foi adicionado com sucesso.` });
+    return novoModelo;
+  };
+  
+  const atualizarModeloContrato = (id: string, modeloAtualizado: Partial<ContractTemplate>) => {
+    setModelosContrato(modelosContrato.map(m => 
+      m.id === id ? { ...m, ...modeloAtualizado, updatedAt: new Date().toISOString() } : m
+    ));
+    toast({ title: "Modelo atualizado", description: "O modelo de contrato foi atualizado com sucesso." });
+  };
+  
+  const excluirModeloContrato = (id: string) => {
+    const modeloEmUso = contratos.some(c => c.templateId === id);
+    if (modeloEmUso) {
+      toast({ 
+        title: "Operação não permitida", 
+        description: "Este modelo está associado a contratos e não pode ser excluído.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    const modeloRemovido = modelosContrato.find(m => m.id === id);
+    setModelosContrato(modelosContrato.filter(m => m.id !== id));
+    
+    if (modeloRemovido) {
+      toast({ title: "Modelo removido", description: `${modeloRemovido.name} foi removido com sucesso.` });
+    }
+  };
+  
+  const adicionarContrato = (contrato: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const novoContrato: Contract = {
+      ...contrato,
+      id: `c${Date.now().toString()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    };
+    setContratos([...contratos, novoContrato]);
+    toast({ title: "Contrato adicionado", description: `${contrato.title} foi adicionado com sucesso.` });
+    return novoContrato;
+  };
+  
+  const atualizarContrato = (id: string, contratoAtualizado: Partial<Contract>) => {
+    setContratos(contratos.map(c => 
+      c.id === id ? { ...c, ...contratoAtualizado, updatedAt: new Date().toISOString() } : c
+    ));
+    toast({ title: "Contrato atualizado", description: "O contrato foi atualizado com sucesso." });
+  };
+  
+  const excluirContrato = (id: string) => {
+    const contratoRemovido = contratos.find(c => c.id === id);
+    setContratos(contratos.filter(c => c.id !== id));
+    
+    if (contratoRemovido) {
+      toast({ title: "Contrato removido", description: `${contratoRemovido.title} foi removido com sucesso.` });
+    }
+  };
+  
+  const enviarContratoParaCliente = (contractId: string, clientId: string) => {
+    const contrato = contratos.find(c => c.id === contractId);
+    
+    if (!contrato) {
+      toast({ 
+        title: "Erro", 
+        description: "Contrato não encontrado.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    adicionarMensagem({
+      remetente: 'empresa',
+      clienteId: clientId,
+      conteudo: `Um novo contrato "${contrato.title}" foi enviado para você. Por favor, revise e assine.`,
+      lida: true
+    });
+    
+    atualizarContrato(contractId, { status: 'sent' });
+    
+    toast({ title: "Contrato enviado", description: "O contrato foi enviado para o cliente com sucesso." });
+  };
+  
+  const assinarContrato = (contractId: string, signatureUrl: string) => {
+    const contrato = contratos.find(c => c.id === contractId);
+    
+    if (!contrato) {
+      toast({ 
+        title: "Erro", 
+        description: "Contrato não encontrado.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    atualizarContrato(contractId, {
+      status: 'signed',
+      signatureUrl,
+      signedAt: new Date().toISOString()
+    });
+    
+    toast({ title: "Contrato assinado", description: "O contrato foi assinado com sucesso." });
+  };
+  
   return (
     <HandleContext.Provider value={{
       clients: clientes,
@@ -349,6 +481,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       messages: mensagens,
       statistics: estatisticas,
       users: usuario,
+      contracts: contratos,
+      contractTemplates: modelosContrato,
       addClients: adicionarCliente,
       updateClients: atualizarCliente,
       removeClients: excluirCliente,
@@ -363,7 +497,15 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       removeEvent: excluirEvento,
       addMessage: adicionarMensagem,
       markMessageAsRead: marcarMensagemComoLida,
-      updateStatistic: atualizarEstatisticas
+      updateStatistic: atualizarEstatisticas,
+      addContractTemplate: adicionarModeloContrato,
+      updateContractTemplate: atualizarModeloContrato,
+      removeContractTemplate: excluirModeloContrato,
+      addContract: adicionarContrato,
+      updateContract: atualizarContrato,
+      removeContract: excluirContrato,
+      sendContractToClient: enviarContratoParaCliente,
+      signContract: assinarContrato
     }}>
       {children}
     </HandleContext.Provider>
