@@ -10,9 +10,6 @@ import {
   DialogTitle 
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-
-// Add TinyMCE editor
-<lov-add-dependency>react-quill@^2.0.0</lov-add-dependency>
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 

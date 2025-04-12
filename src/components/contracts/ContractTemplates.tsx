@@ -53,11 +53,13 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       content: `<h1>${newTemplateName}</h1><p>Insira aqui o conteúdo do contrato.</p>`
     });
 
-    setNewTemplateName('');
-    setIsCreateDialogOpen(false);
-    setSelectedTemplate(newTemplate.id);
-    setIsEditDialogOpen(true);
-    setTemplateToEdit(newTemplate);
+    if (newTemplate) {
+      setNewTemplateName('');
+      setIsCreateDialogOpen(false);
+      setSelectedTemplate(newTemplate.id);
+      setIsEditDialogOpen(true);
+      setTemplateToEdit(newTemplate);
+    }
   };
 
   const handleEditTemplate = (template: ContractTemplate) => {
@@ -84,7 +86,9 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       content: template.content
     });
 
-    toast.success(`Modelo "${template.name}" copiado com sucesso`);
+    if (copiedTemplate) {
+      toast.success(`Modelo "${template.name}" copiado com sucesso`);
+    }
   };
 
   const filteredTemplates = contractTemplates.filter(template => 
