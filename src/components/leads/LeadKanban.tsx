@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Leads, LeadStatus } from "@/pages/Leads";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -142,7 +143,7 @@ const LeadKanban = ({
       </div>
       
       <ScrollArea className="w-full h-[calc(100vh-220px)]">
-        <div className="flex gap-6 pb-4 min-w-full" style={{ width: "max-content" }}>
+        <div className="flex gap-6 pb-4 overflow-x-auto" style={{ width: "max-content", minWidth: "100%" }}>
           {allColumns.map((column) => {
             const columnLeads = leads.filter((lead) => lead.status === column.id);
             const isCustomColumn = customColumns.some(c => c.id === column.id);
