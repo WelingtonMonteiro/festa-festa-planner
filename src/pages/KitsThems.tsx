@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { Package, Tag, Edit, Trash2, PlusCircle, Check, X, Image, Upload } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import StorageToggle from '@/components/layout/StorageToggle';
 
 const KitsThems = () => {
   const { kits, thems, addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
@@ -237,6 +239,9 @@ const KitsThems = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Kits & Temas</h1>
+        <div className="flex items-center gap-2">
+          <StorageToggle />
+        </div>
       </div>
       
       <Tabs defaultValue="kits" className="w-full">

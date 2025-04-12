@@ -2,6 +2,9 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Client, Kit, Them, Event, Message, Statistic, User, Contract, ContractTemplate } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
 import { toast } from '@/hooks/use-toast';
+import { kitService } from '@/services/kitService';
+import { themService } from '@/services/themService';
+import { useStorage } from './storageContext';
 
 interface HandleContextType {
   clients: Client[];
@@ -89,55 +92,106 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     email: "admin@festadecoracoes.com",
     telefone: "(11) 98765-4321"
   });
+
+  const { storageType, isInitialized } = useStorage();
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    const loadedClientes = localStorage.getItem('clients');
-    const loadedKits = localStorage.getItem('kits');
-    const loadedTemas = localStorage.getItem('temas');
-    const loadedEventos = localStorage.getItem('events');
-    const loadedMensagens = localStorage.getItem('mensagens');
-    const loadedContratos = localStorage.getItem('contratos');
-    const loadedModelosContrato = localStorage.getItem('modelosContrato');
+    if (!isInitialized) return;
+
+    const loadData = async () => {
+      setIsLoading(true);
+      
+      if (storageType === 'localStorage') {
+        const loadedClientes = localStorage.getItem('clients');
+        const loadedKits = localStorage.getItem('kits');
+        const loadedTemas = localStorage.getItem('temas');
+        const loadedEventos = localStorage.getItem('events');
+        const loadedMensagens = localStorage.getItem('mensagens');
+        const loadedContratos = localStorage.getItem('contratos');
+        const loadedModelosContrato = localStorage.getItem('modelosContrato');
+        
+        const clientesWithActiveStatus = loadedClientes 
+          ? JSON.parse(loadedClientes) 
+          : clientesMock.map(c => ({ ...c, ativo: true }));
+        
+        setClientes(clientesWithActiveStatus);
+        setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
+        setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
+        setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
+        setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
+        setContratos(loadedContratos ? JSON.parse(loadedContratos) : []);
+        setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
+      } else {
+        try {
+          const supabaseKits = await kitService.getAll();
+          setKits(supabaseKits.length > 0 ? supabaseKits : kitsMock);
+          
+          const supabaseThems = await themService.getAll(supabaseKits.length > 0 ? supabaseKits : kitsMock);
+          setTemas(supabaseThems.length > 0 ? supabaseThems : temasMock);
+          
+          const loadedClientes = localStorage.getItem('clients');
+          const loadedEventos = localStorage.getItem('events');
+          const loadedMensagens = localStorage.getItem('mensagens');
+          const loadedContratos = localStorage.getItem('contratos');
+          const loadedModelosContrato = localStorage.getItem('modelosContrato');
+          
+          const clientesWithActiveStatus = loadedClientes 
+            ? JSON.parse(loadedClientes) 
+            : clientesMock.map(c => ({ ...c, ativo: true }));
+          
+          setClientes(clientesWithActiveStatus);
+          setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
+          setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
+          setContratos(loadedContratos ? JSON.parse(loadedContratos) : []);
+          setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
+        } catch (error) {
+          console.error('Failed to load data from Supabase:', error);
+          toast({ title: "Erro ao carregar dados", description: "Falha ao carregar dados do Supabase", variant: "destructive" });
+          
+          const loadedKits = localStorage.getItem('kits');
+          const loadedTemas = localStorage.getItem('temas');
+          setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
+          setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
+        }
+      }
+      
+      const loadedUsuario = localStorage.getItem('usuario');
+      if (loadedUsuario) {
+        setUsuario(JSON.parse(loadedUsuario));
+      }
+      
+      setIsLoading(false);
+    };
     
-    const clientesWithActiveStatus = loadedClientes 
-      ? JSON.parse(loadedClientes) 
-      : clientesMock.map(c => ({ ...c, ativo: true }));
-    
-    setClientes(clientesWithActiveStatus);
-    setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
-    setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
-    setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
-    setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
-    setContratos(loadedContratos ? JSON.parse(loadedContratos) : []);
-    setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
-    
-    const loadedUsuario = localStorage.getItem('usuario');
-    if (loadedUsuario) {
-      setUsuario(JSON.parse(loadedUsuario));
-    }
-  }, []);
+    loadData();
+  }, [storageType, isInitialized]);
   
   useEffect(() => {
-    if (clientes.length) {
-      const clientesForStorage = prepareForStorage(clientes);
-      localStorage.setItem('clients', JSON.stringify(clientesForStorage));
+    if (isLoading || !isInitialized) return;
+    
+    if (storageType === 'localStorage') {
+      if (clientes.length) {
+        const clientesForStorage = prepareForStorage(clientes);
+        localStorage.setItem('clients', JSON.stringify(clientesForStorage));
+      }
+      
+      if (kits.length) localStorage.setItem('kits', JSON.stringify(kits));
+      if (temas.length) localStorage.setItem('temas', JSON.stringify(temas));
+      
+      if (eventos.length) {
+        const eventosForStorage = prepareForStorage(eventos);
+        localStorage.setItem('events', JSON.stringify(eventosForStorage));
+      }
+      
+      if (mensagens.length) localStorage.setItem('mensagens', JSON.stringify(mensagens));
+      
+      if (contratos.length) localStorage.setItem('contratos', JSON.stringify(contratos));
+      if (modelosContrato.length) localStorage.setItem('modelosContrato', JSON.stringify(modelosContrato));
     }
-    
-    if (kits.length) localStorage.setItem('kits', JSON.stringify(kits));
-    if (temas.length) localStorage.setItem('temas', JSON.stringify(temas));
-    
-    if (eventos.length) {
-      const eventosForStorage = prepareForStorage(eventos);
-      localStorage.setItem('events', JSON.stringify(eventosForStorage));
-    }
-    
-    if (mensagens.length) localStorage.setItem('mensagens', JSON.stringify(mensagens));
-    
-    if (contratos.length) localStorage.setItem('contratos', JSON.stringify(contratos));
-    if (modelosContrato.length) localStorage.setItem('modelosContrato', JSON.stringify(modelosContrato));
     
     localStorage.setItem('usuario', JSON.stringify(usuario));
-  }, [clientes, kits, temas, eventos, mensagens, usuario, contratos, modelosContrato]);
+  }, [clientes, kits, temas, eventos, mensagens, usuario, contratos, modelosContrato, storageType, isLoading, isInitialized]);
   
   useEffect(() => {
     atualizarEstatisticas();
@@ -182,24 +236,58 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
   
-  const adicionarKit = (kit: Omit<Kit, 'id' | 'vezes_alugado'>) => {
-    const novoKit: Kit = {
-      ...kit,
-      id: `k${Date.now().toString()}`,
-      vezes_alugado: 0
-    };
-    setKits([...kits, novoKit]);
-    toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso.` });
+  const adicionarKit = async (kit: Omit<Kit, 'id' | 'vezes_alugado'>) => {
+    if (storageType === 'localStorage') {
+      const novoKit: Kit = {
+        ...kit,
+        id: `k${Date.now().toString()}`,
+        vezes_alugado: 0
+      };
+      setKits([...kits, novoKit]);
+      toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso.` });
+      return novoKit;
+    } else {
+      try {
+        const novoKit = await kitService.create(kit);
+        if (novoKit) {
+          setKits([...kits, novoKit]);
+          toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso.` });
+          return novoKit;
+        }
+        return null;
+      } catch (error) {
+        console.error('Failed to add kit to Supabase:', error);
+        toast({ title: "Erro", description: "Falha ao adicionar kit no Supabase.", variant: "destructive" });
+        return null;
+      }
+    }
   };
   
-  const atualizarKit = (id: string, kitAtualizado: Partial<Kit>) => {
-    setKits(kits.map(k => 
-      k.id === id ? { ...k, ...kitAtualizado } : k
-    ));
-    toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas." });
+  const atualizarKit = async (id: string, kitAtualizado: Partial<Kit>) => {
+    if (storageType === 'localStorage') {
+      setKits(kits.map(k => 
+        k.id === id ? { ...k, ...kitAtualizado } : k
+      ));
+      toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas." });
+      return kits.find(k => k.id === id);
+    } else {
+      try {
+        const updatedKit = await kitService.update(id, kitAtualizado);
+        if (updatedKit) {
+          setKits(kits.map(k => k.id === id ? updatedKit : k));
+          toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas." });
+          return updatedKit;
+        }
+        return null;
+      } catch (error) {
+        console.error('Failed to update kit in Supabase:', error);
+        toast({ title: "Erro", description: "Falha ao atualizar kit no Supabase.", variant: "destructive" });
+        return null;
+      }
+    }
   };
   
-  const excluirKit = (id: string) => {
+  const excluirKit = async (id: string) => {
     const kitEmUso = eventos.some(e => e.kit.id === id);
     if (kitEmUso) {
       toast({ 
@@ -207,7 +295,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         description: "Este kit está associado a events e não pode ser excluído.",
         variant: "destructive" 
       });
-      return;
+      return false;
     }
     
     setTemas(temas.map(tema => ({
@@ -216,31 +304,86 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     })));
     
     const kitRemovido = kits.find(k => k.id === id);
-    setKits(kits.filter(k => k.id !== id));
     
-    if (kitRemovido) {
-      toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso.` });
+    if (storageType === 'localStorage') {
+      setKits(kits.filter(k => k.id !== id));
+      
+      if (kitRemovido) {
+        toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso.` });
+      }
+      return true;
+    } else {
+      try {
+        const result = await kitService.delete(id);
+        if (result) {
+          setKits(kits.filter(k => k.id !== id));
+          
+          if (kitRemovido) {
+            toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso.` });
+          }
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('Failed to delete kit from Supabase:', error);
+        toast({ title: "Erro", description: "Falha ao remover kit do Supabase.", variant: "destructive" });
+        return false;
+      }
     }
   };
   
-  const adicionarTema = (tema: Omit<Them, 'id' | 'vezes_alugado'>) => {
-    const novoTema: Them = {
-      ...tema,
-      id: `t${Date.now().toString()}`,
-      vezes_alugado: 0
-    };
-    setTemas([...temas, novoTema]);
-    toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
+  const adicionarTema = async (tema: Omit<Them, 'id' | 'vezes_alugado'>) => {
+    if (storageType === 'localStorage') {
+      const novoTema: Them = {
+        ...tema,
+        id: `t${Date.now().toString()}`,
+        vezes_alugado: 0
+      };
+      setTemas([...temas, novoTema]);
+      toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
+      return novoTema;
+    } else {
+      try {
+        const novoTema = await themService.create(tema, kits);
+        if (novoTema) {
+          setTemas([...temas, novoTema]);
+          toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
+          return novoTema;
+        }
+        return null;
+      } catch (error) {
+        console.error('Failed to add them to Supabase:', error);
+        toast({ title: "Erro", description: "Falha ao adicionar tema no Supabase.", variant: "destructive" });
+        return null;
+      }
+    }
   };
   
-  const atualizarTema = (id: string, temaAtualizado: Partial<Them>) => {
-    setTemas(temas.map(t => 
-      t.id === id ? { ...t, ...temaAtualizado } : t
-    ));
-    toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas." });
+  const atualizarTema = async (id: string, temaAtualizado: Partial<Them>) => {
+    if (storageType === 'localStorage') {
+      setTemas(temas.map(t => 
+        t.id === id ? { ...t, ...temaAtualizado } : t
+      ));
+      toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas." });
+      return temas.find(t => t.id === id);
+    } else {
+      try {
+        const updatedThem = await themService.update(id, temaAtualizado, kits);
+        if (updatedThem) {
+          setTemas(temas.map(t => t.id === id ? updatedThem : t));
+          toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas." });
+          return updatedThem;
+        }
+        return null;
+      } catch (error) {
+        console.error('Failed to update them in Supabase:', error);
+        toast({ title: "Erro", description: "Falha ao atualizar tema no Supabase.", variant: "destructive" });
+        return null;
+      }
+    }
   };
   
-  const excluirTema = (id: string) => {
+  const excluirTema = async (id: string) => {
     const temaEmUso = eventos.some(e => e.tema?.id === id);
     if (temaEmUso) {
       toast({ 
@@ -248,14 +391,35 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         description: "Este tema está associado a events e não pode ser excluído.",
         variant: "destructive" 
       });
-      return;
+      return false;
     }
     
     const temaRemovido = temas.find(t => t.id === id);
-    setTemas(temas.filter(t => t.id !== id));
     
-    if (temaRemovido) {
-      toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso.` });
+    if (storageType === 'localStorage') {
+      setTemas(temas.filter(t => t.id !== id));
+      
+      if (temaRemovido) {
+        toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso.` });
+      }
+      return true;
+    } else {
+      try {
+        const result = await themService.delete(id);
+        if (result) {
+          setTemas(temas.filter(t => t.id !== id));
+          
+          if (temaRemovido) {
+            toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso.` });
+          }
+          return true;
+        }
+        return false;
+      } catch (error) {
+        console.error('Failed to delete them from Supabase:', error);
+        toast({ title: "Erro", description: "Falha ao remover tema do Supabase.", variant: "destructive" });
+        return false;
+      }
     }
   };
   
@@ -471,6 +635,10 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     toast({ title: "Contrato assinado", description: "O contrato foi assinado com sucesso." });
   };
+  
+  if (!isInitialized) {
+    return null;
+  }
   
   return (
     <HandleContext.Provider value={{
