@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -16,7 +17,8 @@ import {
   ChevronLeft,
   FileText,
   InfoIcon,
-  UserPlus
+  UserPlus,
+  ScrollText
 } from 'lucide-react';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
@@ -75,6 +77,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       path: '/kits-themes', 
       name: 'Kits & Temas', 
       icon: <Package className="h-5 w-5" /> 
+    },
+    { 
+      path: '/contracts', 
+      name: 'Contratos', 
+      icon: <ScrollText className="h-5 w-5" /> 
     },
     { 
       path: '/financial', 

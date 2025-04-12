@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format } from "date-fns";
@@ -11,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import ContractMessageSender from "@/components/contracts/ContractMessageSender";
 import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const Messages = () => {
   const { messages: messages, clients: clients, addMessage: addMessage, markMessageAsRead: markMessageAsRead } = useHandleContext();
@@ -22,37 +22,33 @@ const Messages = () => {
     messages.some(m => m.clienteId === client.id)
   );
   
-  // Function to get client name based on client ID
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
     return client ? client.nome : 'Client';
   };
   
-  // Helper function to format date
   const formatDate = (date: string) => {
     return format(new Date(date), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR });
   };
 
-  // Format date for chat in a more compact way
   const formatMessageTime = (date: string) => {
     return format(new Date(date), "HH:mm", { locale: ptBR });
   };
   
-  // Filter messages for selected client
   const filteredMessages = selectedClient 
     ? messages
         .filter(m => m.clienteId === selectedClient)
         .sort((a, b) => new Date(a.datahora).getTime() - new Date(b.datahora).getTime())
     : [];
     
-  // Mark messages as read when viewed
-  if (selectedClient) {
-    filteredMessages
-      .filter(m => !m.lida && m.remetente === 'cliente')
-      .forEach(m => markMessageAsRead(m.id));
-  }
+  useEffect(() => {
+    if (selectedClient) {
+      filteredMessages
+        .filter(m => !m.lida && m.remetente === 'cliente')
+        .forEach(m => markMessageAsRead(m.id));
+    }
+  }, [selectedClient, filteredMessages, markMessageAsRead]);
   
-  // Send new message
   const sendMessage = () => {
     if (!newMessage.trim() || !selectedClient) return;
     
@@ -67,7 +63,6 @@ const Messages = () => {
     setNewMessage('');
   };
   
-  // Get platform icon
   const getPlatformIcon = (platform: 'whatsapp' | 'instagram' | 'facebook') => {
     switch(platform) {
       case 'whatsapp':
@@ -108,15 +103,16 @@ const Messages = () => {
             <div className="flex gap-2">
               <ContractMessageSender clientId={selectedClient} />
               <Button variant="outline" size="sm" asChild>
-                <Link2 className="h-4 w-4 mr-1" />
-                <a href="/contracts" target="_blank">Contratos</a>
+                <Link to="/contracts">
+                  <Link2 className="h-4 w-4 mr-1" />
+                  Contratos
+                </Link>
               </Button>
             </div>
           )}
         </div>
         
         <div className="grid grid-cols-12 gap-4 h-[calc(100vh-240px)]">
-          {/* Client list - 4 columns */}
           <div className="col-span-4 bg-secondary/10 rounded-lg overflow-y-auto h-full">
             <div className="p-3 border-b">
               <h3 className="font-medium">Conversations</h3>
@@ -187,7 +183,6 @@ const Messages = () => {
             )}
           </div>
           
-          {/* Chat - 8 columns */}
           <div className="col-span-8 bg-card border rounded-lg flex flex-col h-full">
             {!selectedClient ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -195,7 +190,6 @@ const Messages = () => {
               </div>
             ) : (
               <>
-                {/* Chat header */}
                 <div className="p-3 border-b flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <Avatar>
@@ -213,7 +207,6 @@ const Messages = () => {
                   </div>
                 </div>
                 
-                {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {filteredMessages.map(message => (
                     <div
@@ -240,7 +233,6 @@ const Messages = () => {
                   ))}
                 </div>
                 
-                {/* Input to send message */}
                 <div className="p-3 border-t">
                   <form 
                     className="flex gap-2" 
