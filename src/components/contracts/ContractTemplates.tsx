@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,14 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Search, Plus, MoreVertical, Edit, Copy, Trash, FileText } from 'lucide-react';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Search, Plus, MoreVertical, Edit, Copy, Trash, FileText, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -32,7 +40,7 @@ interface ContractTemplatesProps {
 }
 
 const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTemplatesProps) => {
-  const { contractTemplates, addContractTemplate, updateContractTemplate, removeContractTemplate } = useHandleContext();
+  const { contractTemplates, clients, addContractTemplate, updateContractTemplate, removeContractTemplate } = useHandleContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -40,8 +48,9 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
   const [newTemplateName, setNewTemplateName] = useState('');
   const [templateToEdit, setTemplateToEdit] = useState<ContractTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
+  const [previewClientId, setPreviewClientId] = useState<string>('');
 
-  const handleCreateTemplate = () => {
+  const handleCreateTemplate = useCallback(() => {
     if (!newTemplateName.trim()) {
       toast.error('O nome do modelo não pode estar vazio');
       return;
@@ -52,28 +61,29 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       content: `<h1>${newTemplateName}</h1><p>Insira aqui o conteúdo do contrato.</p>`
     };
     
-    addContractTemplate(templateData);
+    const newTemplate = addContractTemplate(templateData);
     
-    setTimeout(() => {
-      const newTemplate = contractTemplates.find(t => t.name === newTemplateName.trim());
-      
-      if (newTemplate) {
-        setNewTemplateName('');
-        setIsCreateDialogOpen(false);
+    // Reset and close the create dialog
+    setNewTemplateName('');
+    setIsCreateDialogOpen(false);
+    
+    // If the new template was created successfully, open it in the editor
+    if (newTemplate) {
+      setTimeout(() => {
         setSelectedTemplate(newTemplate.id);
-        setIsEditDialogOpen(true);
         setTemplateToEdit(newTemplate);
-      }
-    }, 0);
-  };
+        setIsEditDialogOpen(true);
+      }, 100);
+    }
+  }, [newTemplateName, addContractTemplate, setSelectedTemplate]);
 
-  const handleEditTemplate = (template: ContractTemplate) => {
+  const handleEditTemplate = useCallback((template: ContractTemplate) => {
     setTemplateToEdit(template);
     setSelectedTemplate(template.id);
     setIsEditDialogOpen(true);
-  };
+  }, [setSelectedTemplate]);
 
-  const handleDeleteTemplate = () => {
+  const handleDeleteTemplate = useCallback(() => {
     if (templateToDelete) {
       removeContractTemplate(templateToDelete);
       setTemplateToDelete(null);
@@ -83,9 +93,9 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
         setSelectedTemplate(null);
       }
     }
-  };
+  }, [templateToDelete, removeContractTemplate, selectedTemplate, setSelectedTemplate]);
 
-  const handleCopyTemplate = (template: ContractTemplate) => {
+  const handleCopyTemplate = useCallback((template: ContractTemplate) => {
     const copyData = {
       name: `${template.name} (Cópia)`,
       content: template.content
@@ -93,7 +103,18 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
     
     addContractTemplate(copyData);
     toast.success(`Modelo "${template.name}" copiado com sucesso`);
-  };
+  }, [addContractTemplate]);
+
+  const handleSaveTemplate = useCallback((content: string) => {
+    if (templateToEdit) {
+      updateContractTemplate(templateToEdit.id, { content });
+      setTemplateToEdit(null);
+      setIsEditDialogOpen(false);
+      toast.success('Modelo salvo com sucesso');
+    }
+  }, [templateToEdit, updateContractTemplate]);
+
+  const previewClient = previewClientId ? clients.find(c => c.id === previewClientId) : undefined;
 
   const filteredTemplates = contractTemplates.filter(template => 
     template.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -212,16 +233,51 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       </Dialog>
 
       {templateToEdit && (
-        <ContractEditor
-          isOpen={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          template={templateToEdit}
-          onSave={(content) => {
-            updateContractTemplate(templateToEdit.id, { content });
-            setIsEditDialogOpen(false);
+        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
             setTemplateToEdit(null);
-          }}
-        />
+          }
+        }}>
+          <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+            <DialogHeader>
+              <DialogTitle>Editar Modelo: {templateToEdit.name}</DialogTitle>
+              <DialogDescription>
+                Edite o conteúdo do modelo de contrato e adicione variáveis conforme necessário.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="mb-4">
+              <label htmlFor="previewClient" className="text-sm font-medium">
+                Cliente para visualização de variáveis (opcional)
+              </label>
+              <Select
+                value={previewClientId}
+                onValueChange={setPreviewClientId}
+              >
+                <SelectTrigger id="previewClient" className="mt-1">
+                  <SelectValue placeholder="Selecione um cliente para visualizar" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Nenhum cliente</SelectItem>
+                  {clients.map(client => (
+                    <SelectItem key={client.id} value={client.id}>
+                      {client.nome}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <ContractEditor
+              isOpen={isEditDialogOpen}
+              onOpenChange={setIsEditDialogOpen}
+              template={templateToEdit}
+              onSave={handleSaveTemplate}
+              previewClient={previewClient}
+            />
+          </DialogContent>
+        </Dialog>
       )}
     </>
   );

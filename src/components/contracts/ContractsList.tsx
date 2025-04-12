@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useCallback } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Contract, ContractTemplate, Client } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -71,7 +72,7 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
   const [contractToView, setContractToView] = useState<Contract | null>(null);
   const [contractToDelete, setContractToDelete] = useState<string | null>(null);
 
-  const handleCreateContract = () => {
+  const handleCreateContract = useCallback(() => {
     if (!newContractTitle.trim()) {
       toast.error('O título do contrato não pode estar vazio');
       return;
@@ -83,7 +84,7 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
     }
 
     let content = '<p>Conteúdo do contrato...</p>';
-    if (newContractTemplate) {
+    if (newContractTemplate && newContractTemplate !== 'none') {
       const template = contractTemplates.find(t => t.id === newContractTemplate);
       if (template) {
         content = template.content;
@@ -95,43 +96,40 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       content: content,
       clientId: newContractClient,
       status: 'draft' as const,
-      templateId: newContractTemplate || undefined
+      templateId: newContractTemplate !== 'none' ? newContractTemplate : undefined
     };
 
-    addContract(contractData);
+    const newContract = addContract(contractData);
     
-    setTimeout(() => {
-      const newContract = contracts.find(c => 
-        c.title === newContractTitle.trim() && 
-        c.clientId === newContractClient &&
-        c.status === 'draft'
-      );
-  
-      if (newContract) {
-        setNewContractTitle('');
-        setNewContractClient('');
-        setNewContractTemplate('');
-        setIsCreateDialogOpen(false);
+    // Reset form and close dialog
+    setNewContractTitle('');
+    setNewContractClient('');
+    setNewContractTemplate('');
+    setIsCreateDialogOpen(false);
+    
+    // If contract was created successfully, open it in the editor
+    if (newContract) {
+      setTimeout(() => {
         setSelectedContract(newContract.id);
         setContractToEdit(newContract);
         setIsEditDialogOpen(true);
-      }
-    }, 0);
-  };
+      }, 100);
+    }
+  }, [newContractTitle, newContractClient, newContractTemplate, contractTemplates, addContract, setSelectedContract]);
 
-  const handleViewContract = (contract: Contract) => {
+  const handleViewContract = useCallback((contract: Contract) => {
     setContractToView(contract);
     setSelectedContract(contract.id);
     setIsViewDialogOpen(true);
-  };
+  }, [setSelectedContract]);
 
-  const handleEditContract = (contract: Contract) => {
+  const handleEditContract = useCallback((contract: Contract) => {
     setContractToEdit(contract);
     setSelectedContract(contract.id);
     setIsEditDialogOpen(true);
-  };
+  }, [setSelectedContract]);
 
-  const handleDeleteContract = () => {
+  const handleDeleteContract = useCallback(() => {
     if (contractToDelete) {
       removeContract(contractToDelete);
       setContractToDelete(null);
@@ -141,9 +139,9 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
         setSelectedContract(null);
       }
     }
-  };
+  }, [contractToDelete, removeContract, selectedContract, setSelectedContract]);
 
-  const handleCopyContract = (contract: Contract) => {
+  const handleCopyContract = useCallback((contract: Contract) => {
     const copyData = {
       title: `${contract.title} (Cópia)`,
       content: contract.content,
@@ -153,7 +151,16 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
 
     addContract(copyData);
     toast.success(`Contrato "${contract.title}" copiado com sucesso`);
-  };
+  }, [addContract]);
+
+  const handleSaveContract = useCallback((content: string) => {
+    if (contractToEdit) {
+      updateContract(contractToEdit.id, { content });
+      setIsEditDialogOpen(false);
+      setContractToEdit(null);
+      toast.success('Contrato salvo com sucesso');
+    }
+  }, [contractToEdit, updateContract]);
 
   const getClientById = (id: string): Client | undefined => {
     return clients.find(client => client.id === id);
@@ -346,13 +353,12 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       {contractToEdit && (
         <ContractEditor
           isOpen={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          contract={contractToEdit}
-          onSave={(content) => {
-            updateContract(contractToEdit.id, { content });
-            setIsEditDialogOpen(false);
-            setContractToEdit(null);
+          onOpenChange={(open) => {
+            setIsEditDialogOpen(open);
+            if (!open) setContractToEdit(null);
           }}
+          contract={contractToEdit}
+          onSave={handleSaveContract}
         />
       )}
 
@@ -361,7 +367,10 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
           contract={contractToView}
           client={getClientById(contractToView.clientId)}
           isOpen={isViewDialogOpen}
-          onOpenChange={setIsViewDialogOpen}
+          onOpenChange={(open) => {
+            setIsViewDialogOpen(open);
+            if (!open) setContractToView(null);
+          }}
         />
       )}
     </>
