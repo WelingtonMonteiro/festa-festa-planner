@@ -6,11 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CheckCircle, Clock, Layout, MessageSquare, Settings, Smartphone, Users } from "lucide-react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import LoginHeader from '@/components/landing/LoginHeader';
 
 const Landing = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,96 +25,95 @@ const Landing = () => {
   const features = [
     {
       icon: <Calendar className="h-10 w-10 text-primary" />,
-      title: "Event Management",
-      description: "Schedule and manage all your events in one place with our intuitive calendar."
+      title: "Gestão de Eventos",
+      description: "Agende e gerencie todos os seus eventos em um só lugar com nosso calendário intuitivo."
     },
     {
       icon: <Users className="h-10 w-10 text-primary" />,
-      title: "Client Management",
-      description: "Keep track of all your clients, their preferences, and history."
+      title: "Gestão de Clientes",
+      description: "Acompanhe todos os seus clientes, suas preferências e histórico."
     },
     {
       icon: <MessageSquare className="h-10 w-10 text-primary" />,
-      title: "Messaging",
-      description: "Communicate with clients directly through our integrated messaging system."
+      title: "Mensagens",
+      description: "Comunique-se com os clientes diretamente através do nosso sistema integrado de mensagens."
     },
     {
       icon: <Layout className="h-10 w-10 text-primary" />,
-      title: "Custom Themes",
-      description: "Choose from a variety of themes and kits for your events."
+      title: "Temas Personalizados",
+      description: "Escolha entre uma variedade de temas e kits para os seus eventos."
     },
     {
       icon: <Settings className="h-10 w-10 text-primary" />,
-      title: "Reports & Analytics",
-      description: "Get detailed insights on your business performance."
+      title: "Relatórios e Análises",
+      description: "Obtenha insights detalhados sobre o desempenho do seu negócio."
     },
     {
       icon: <Smartphone className="h-10 w-10 text-primary" />,
-      title: "Mobile Access",
-      description: "Access your event planner on any device, anytime, anywhere."
+      title: "Acesso Mobile",
+      description: "Acesse seu planejador de eventos em qualquer dispositivo, a qualquer hora, em qualquer lugar."
     }
   ];
 
   const testimonials = [
     {
-      quote: "This event planning system has transformed how I manage my business. I can now handle twice as many events with half the stress.",
-      author: "Sarah Johnson, Event Planner"
+      quote: "Este sistema de planejamento de eventos transformou a maneira como gerencio meu negócio. Agora posso lidar com o dobro de eventos com metade do estresse.",
+      author: "Sarah Johnson, Planejadora de Eventos"
     },
     {
-      quote: "The client management features alone are worth the investment. My customers love how organized their events are now.",
-      author: "Michael Rodriguez, Party Coordinator"
+      quote: "Os recursos de gerenciamento de clientes por si só já valem o investimento. Meus clientes adoram como os eventos deles estão organizados agora.",
+      author: "Miguel Rodriguez, Coordenador de Festas"
     },
     {
-      quote: "I used to spend hours on administrative tasks. Now I can focus on what matters - creating amazing events for my clients.",
-      author: "Emma Chen, Wedding Planner"
+      quote: "Eu costumava gastar horas em tarefas administrativas. Agora posso me concentrar no que importa - criar eventos incríveis para meus clientes.",
+      author: "Ana Chen, Planejadora de Casamentos"
     }
   ];
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Header com opção de login */}
+      <LoginHeader onLoginClick={() => setLoginModalOpen(true)} />
+
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-festa-primary/10 via-background to-festa-secondary/10 py-20">
         <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-16">
           <div className="flex-1 space-y-6">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-              Simplify Your <span className="bg-gradient-to-r from-festa-primary via-festa-secondary to-festa-accent text-transparent bg-clip-text">Event Planning</span> Business
+              Simplifique seu <span className="bg-gradient-to-r from-festa-primary via-festa-secondary to-festa-accent text-transparent bg-clip-text">Negócio de Eventos</span>
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
-              The all-in-one platform for professional event planners to manage clients, events, inventory, and finances in one place.
+              A plataforma completa para organizadores de eventos gerenciarem clientes, eventos, inventário e finanças em um só lugar.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button 
                 size="lg" 
                 className="text-lg px-8"
-                onClick={() => {
-                  // Scroll to login section
-                  document.getElementById('login-section')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                onClick={() => setLoginModalOpen(true)}
               >
-                Get Started
+                Começar Agora
               </Button>
               <Button 
                 variant="outline" 
                 size="lg" 
                 className="text-lg px-8"
                 onClick={() => {
-                  // Scroll to features section
                   document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                Learn More
+                Saiba Mais
               </Button>
             </div>
           </div>
           <div className="flex-1 relative min-h-[400px] w-full rounded-lg overflow-hidden shadow-xl border">
             <img 
               src="/placeholder.svg" 
-              alt="Dashboard Preview" 
+              alt="Prévia do Dashboard" 
               className="absolute inset-0 w-full h-full object-cover" 
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent flex items-end">
               <div className="p-4 text-white">
-                <p className="text-sm font-medium">Dashboard Overview</p>
+                <p className="text-sm font-medium">Visão Geral do Dashboard</p>
               </div>
             </div>
           </div>
@@ -123,10 +125,10 @@ const Landing = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need to Run Your Event Business
+              Tudo o que Você Precisa para Gerenciar seu Negócio
             </h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Our platform provides all the tools you need to manage events efficiently and grow your business.
+              Nossa plataforma fornece todas as ferramentas necessárias para gerenciar eventos com eficiência e expandir seu negócio.
             </p>
           </div>
           
@@ -150,9 +152,9 @@ const Landing = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">See Our Platform in Action</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Veja Nossa Plataforma em Ação</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Take a look at some of the key features and interfaces of our event planning system.
+              Confira algumas das principais características e interfaces do nosso sistema de planejamento de eventos.
             </p>
           </div>
           
@@ -161,10 +163,10 @@ const Landing = () => {
               <CarouselItem>
                 <div className="p-1">
                   <div className="overflow-hidden rounded-xl border shadow-lg">
-                    <img src="/placeholder.svg" alt="Calendar View" className="w-full aspect-video object-cover" />
+                    <img src="/placeholder.svg" alt="Visualização de Calendário" className="w-full aspect-video object-cover" />
                     <div className="p-4 bg-card">
-                      <h3 className="font-medium text-lg">Calendar Management</h3>
-                      <p className="text-muted-foreground">View and manage all your events in an intuitive calendar interface.</p>
+                      <h3 className="font-medium text-lg">Gerenciamento de Calendário</h3>
+                      <p className="text-muted-foreground">Visualize e gerencie todos os seus eventos em uma interface intuitiva de calendário.</p>
                     </div>
                   </div>
                 </div>
@@ -172,10 +174,10 @@ const Landing = () => {
               <CarouselItem>
                 <div className="p-1">
                   <div className="overflow-hidden rounded-xl border shadow-lg">
-                    <img src="/placeholder.svg" alt="Client Dashboard" className="w-full aspect-video object-cover" />
+                    <img src="/placeholder.svg" alt="Dashboard de Clientes" className="w-full aspect-video object-cover" />
                     <div className="p-4 bg-card">
-                      <h3 className="font-medium text-lg">Client Dashboard</h3>
-                      <p className="text-muted-foreground">Keep track of all client information, preferences and history.</p>
+                      <h3 className="font-medium text-lg">Dashboard de Clientes</h3>
+                      <p className="text-muted-foreground">Acompanhe todas as informações dos clientes, preferências e histórico.</p>
                     </div>
                   </div>
                 </div>
@@ -183,10 +185,10 @@ const Landing = () => {
               <CarouselItem>
                 <div className="p-1">
                   <div className="overflow-hidden rounded-xl border shadow-lg">
-                    <img src="/placeholder.svg" alt="Theme Selection" className="w-full aspect-video object-cover" />
+                    <img src="/placeholder.svg" alt="Seleção de Temas" className="w-full aspect-video object-cover" />
                     <div className="p-4 bg-card">
-                      <h3 className="font-medium text-lg">Theme Selection</h3>
-                      <p className="text-muted-foreground">Browse and select from multiple party themes and kits.</p>
+                      <h3 className="font-medium text-lg">Seleção de Temas</h3>
+                      <p className="text-muted-foreground">Navegue e selecione entre múltiplos temas e kits para festas.</p>
                     </div>
                   </div>
                 </div>
@@ -204,9 +206,9 @@ const Landing = () => {
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Why Choose Our Platform?</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Por Que Escolher Nossa Plataforma?</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Here's why event planners trust our system to help run their businesses.
+              Veja por que organizadores de eventos confiam em nosso sistema para gerenciar seus negócios.
             </p>
           </div>
           
@@ -216,8 +218,8 @@ const Landing = () => {
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">Time Savings</h3>
-                <p className="text-muted-foreground">Save up to 15 hours per week on administrative tasks and event coordination.</p>
+                <h3 className="text-lg font-medium mb-2">Economia de Tempo</h3>
+                <p className="text-muted-foreground">Economize até 15 horas por semana em tarefas administrativas e coordenação de eventos.</p>
               </div>
             </div>
             
@@ -226,8 +228,8 @@ const Landing = () => {
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">Increased Revenue</h3>
-                <p className="text-muted-foreground">On average, our users report a 30% increase in business capacity and revenue.</p>
+                <h3 className="text-lg font-medium mb-2">Aumento de Receita</h3>
+                <p className="text-muted-foreground">Em média, nossos usuários relatam um aumento de 30% na capacidade de negócios e receita.</p>
               </div>
             </div>
             
@@ -236,8 +238,8 @@ const Landing = () => {
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">Client Satisfaction</h3>
-                <p className="text-muted-foreground">Better organization leads to happier clients and more referrals.</p>
+                <h3 className="text-lg font-medium mb-2">Satisfação do Cliente</h3>
+                <p className="text-muted-foreground">Melhor organização leva a clientes mais satisfeitos e mais indicações.</p>
               </div>
             </div>
             
@@ -246,8 +248,8 @@ const Landing = () => {
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">Comprehensive Solution</h3>
-                <p className="text-muted-foreground">All your tools in one place instead of juggling multiple software systems.</p>
+                <h3 className="text-lg font-medium mb-2">Solução Completa</h3>
+                <p className="text-muted-foreground">Todas as suas ferramentas em um só lugar, em vez de lidar com vários sistemas de software.</p>
               </div>
             </div>
             
@@ -256,8 +258,8 @@ const Landing = () => {
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">Data Security</h3>
-                <p className="text-muted-foreground">Your business and client data is securely stored and backed up.</p>
+                <h3 className="text-lg font-medium mb-2">Segurança de Dados</h3>
+                <p className="text-muted-foreground">Seus dados de negócios e de clientes são armazenados e backupeados de forma segura.</p>
               </div>
             </div>
             
@@ -266,8 +268,8 @@ const Landing = () => {
                 <CheckCircle className="h-6 w-6 text-primary" />
               </div>
               <div>
-                <h3 className="text-lg font-medium mb-2">Always Available</h3>
-                <p className="text-muted-foreground">Access your event management system 24/7 from any device, anywhere.</p>
+                <h3 className="text-lg font-medium mb-2">Sempre Disponível</h3>
+                <p className="text-muted-foreground">Acesse seu sistema de gerenciamento de eventos 24/7 de qualquer dispositivo, em qualquer lugar.</p>
               </div>
             </div>
           </div>
@@ -278,9 +280,9 @@ const Landing = () => {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">What Our Users Say</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">O Que Nossos Usuários Dizem</h2>
             <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Don't just take our word for it. Here's what professional event planners have to say about our platform.
+              Não acredite apenas em nossa palavra. Veja o que organizadores de eventos profissionais dizem sobre nossa plataforma.
             </p>
           </div>
           
@@ -303,94 +305,35 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Login Section */}
-      <section id="login-section" className="py-20 bg-gradient-to-b from-muted/30 to-background">
-        <div className="container mx-auto px-4">
-          <div className="max-w-md mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Log in to your account</CardTitle>
-                <CardDescription>
-                  Enter your credentials to access the event planning system
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-sm font-medium">
-                      Email
-                    </label>
-                    <Input 
-                      id="email"
-                      type="email" 
-                      value={email} 
-                      onChange={(e) => setEmail(e.target.value)} 
-                      placeholder="name@example.com"
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label htmlFor="password" className="text-sm font-medium">
-                        Password
-                      </label>
-                      <Button type="button" variant="link" className="p-0 h-auto text-xs">
-                        Forgot password?
-                      </Button>
-                    </div>
-                    <Input 
-                      id="password"
-                      type="password" 
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <Button type="submit" className="w-full">Log in</Button>
-                </form>
-              </CardContent>
-              <CardFooter className="flex justify-center">
-                <p className="text-sm text-muted-foreground">
-                  Don't have an account?{" "}
-                  <Button variant="link" className="p-0 h-auto">
-                    Contact us
-                  </Button>
-                </p>
-              </CardFooter>
-            </Card>
-          </div>
-        </div>
-      </section>
-
       {/* Footer */}
       <footer className="bg-muted py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-6 md:mb-0">
               <h3 className="text-2xl font-bold">Festa Planner</h3>
-              <p className="text-muted-foreground mt-2">The complete event management solution</p>
+              <p className="text-muted-foreground mt-2">A solução completa para gerenciamento de eventos</p>
             </div>
             <div className="flex space-x-8">
               <div>
-                <h4 className="font-medium mb-3">Product</h4>
+                <h4 className="font-medium mb-3">Produto</h4>
                 <ul className="space-y-2">
-                  <li><Button variant="link" className="p-0 h-auto">Features</Button></li>
-                  <li><Button variant="link" className="p-0 h-auto">Pricing</Button></li>
+                  <li><Button variant="link" className="p-0 h-auto">Recursos</Button></li>
+                  <li><Button variant="link" className="p-0 h-auto">Preços</Button></li>
                   <li><Button variant="link" className="p-0 h-auto">FAQ</Button></li>
                 </ul>
               </div>
               <div>
-                <h4 className="font-medium mb-3">Company</h4>
+                <h4 className="font-medium mb-3">Empresa</h4>
                 <ul className="space-y-2">
-                  <li><Button variant="link" className="p-0 h-auto">About</Button></li>
-                  <li><Button variant="link" className="p-0 h-auto">Contact</Button></li>
-                  <li><Button variant="link" className="p-0 h-auto">Privacy</Button></li>
+                  <li><Button variant="link" className="p-0 h-auto">Sobre</Button></li>
+                  <li><Button variant="link" className="p-0 h-auto">Contato</Button></li>
+                  <li><Button variant="link" className="p-0 h-auto">Privacidade</Button></li>
                 </ul>
               </div>
             </div>
           </div>
           <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-muted-foreground">© 2025 Festa Planner. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">© 2025 Festa Planner. Todos os direitos reservados.</p>
             <div className="flex space-x-4 mt-4 md:mt-0">
               <Button variant="ghost" size="icon" className="rounded-full">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
@@ -416,6 +359,61 @@ const Landing = () => {
           </div>
         </div>
       </footer>
+
+      {/* Modal de Login */}
+      <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">Entrar na sua conta</DialogTitle>
+            <DialogDescription>
+              Digite suas credenciais para acessar o sistema de planejamento de eventos
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleLogin} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input 
+                id="email"
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="nome@exemplo.com"
+                required
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Senha
+                </label>
+                <Button type="button" variant="link" className="p-0 h-auto text-xs">
+                  Esqueceu a senha?
+                </Button>
+              </div>
+              <Input 
+                id="password"
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <Button type="submit" className="w-full">Entrar</Button>
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                Não tem uma conta?{" "}
+                <Button variant="link" className="p-0 h-auto">
+                  Entre em contato
+                </Button>
+              </p>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
