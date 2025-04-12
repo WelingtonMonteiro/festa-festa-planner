@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Leads, LeadStatus } from "@/pages/Leads";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,7 +54,6 @@ const LeadKanban = ({
   const [isDeleteColumnDialogOpen, setIsDeleteColumnDialogOpen] = useState(false);
   const [dragOverColumnId, setDragOverColumnId] = useState<LeadStatus | null>(null);
 
-  // Default columns
   const defaultColumns: KanbanColumn[] = [
     { id: "novo", title: "Novos", icon: <UserPlus className="h-4 w-4" />, color: "bg-blue-500" },
     { id: "contato", title: "Em Contato", icon: <PhoneCall className="h-4 w-4" />, color: "bg-yellow-500" },
@@ -90,17 +88,15 @@ const LeadKanban = ({
   const handleAddColumn = () => {
     if (!newColumnTitle.trim()) return;
     
-    // Create a custom column ID based on the title
     const customId = newColumnTitle.toLowerCase().replace(/\s+/g, "-") as LeadStatus;
     
     const newColumn: KanbanColumn = {
       id: customId,
       title: newColumnTitle,
       icon: <Plus className="h-4 w-4" />,
-      color: "bg-gray-500" // Default color for custom columns
+      color: "bg-gray-500"
     };
     
-    // Add new column to the right
     setCustomColumns([...customColumns, newColumn]);
     setNewColumnTitle("");
     setIsAddColumnDialogOpen(false);
@@ -145,7 +141,7 @@ const LeadKanban = ({
         </Button>
       </div>
       
-      <ScrollArea className="w-full" orientation="horizontal">
+      <ScrollArea className="w-full h-[calc(100vh-220px)]">
         <div className="flex gap-6 pb-4 min-w-full" style={{ width: "max-content" }}>
           {allColumns.map((column) => {
             const columnLeads = leads.filter((lead) => lead.status === column.id);
@@ -264,7 +260,6 @@ const LeadKanban = ({
         </div>
       </ScrollArea>
 
-      {/* Dialog for adding a new column */}
       <Dialog open={isAddColumnDialogOpen} onOpenChange={setIsAddColumnDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -287,7 +282,6 @@ const LeadKanban = ({
         </DialogContent>
       </Dialog>
 
-      {/* Dialog for deleting a column */}
       <Dialog open={isDeleteColumnDialogOpen} onOpenChange={setIsDeleteColumnDialogOpen}>
         <DialogContent>
           <DialogHeader>
