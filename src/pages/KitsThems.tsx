@@ -8,12 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { Package, Tag, Edit, Trash2, PlusCircle, Check, X, Image, Upload } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const KitsThems = () => {
   const { kits, thems, addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
   
   const [kitDialogOpen, setKitDialogOpen] = useState(false);
   const [themDialogOpen, setThemDialogOpen] = useState(false);
+  const [deleteKitDialogOpen, setDeleteKitDialogOpen] = useState(false);
+  const [deleteThemDialogOpen, setDeleteThemDialogOpen] = useState(false);
+  const [kitToDelete, setKitToDelete] = useState<string | null>(null);
+  const [themToDelete, setThemToDelete] = useState<string | null>(null);
   const [editingKit, setEditingKit] = useState<string | null>(null);
   const [editingThem, setEditingThem] = useState<string | null>(null);
   
@@ -201,6 +206,32 @@ const KitsThems = () => {
     const roi = them.valorGasto > 0 ? ((receitaTotal / them.valorGasto) - 1) * 100 : 0;
     return roi.toFixed(2);
   };
+
+  const handleDeleteKitClick = (id: string) => {
+    setKitToDelete(id);
+    setDeleteKitDialogOpen(true);
+  };
+
+  const handleDeleteThemClick = (id: string) => {
+    setThemToDelete(id);
+    setDeleteThemDialogOpen(true);
+  };
+
+  const confirmDeleteKit = () => {
+    if (kitToDelete) {
+      removeKit(kitToDelete);
+      setDeleteKitDialogOpen(false);
+      setKitToDelete(null);
+    }
+  };
+
+  const confirmDeleteThem = () => {
+    if (themToDelete) {
+      removeThems(themToDelete);
+      setDeleteThemDialogOpen(false);
+      setThemToDelete(null);
+    }
+  };
   
   return (
     <div className="space-y-6">
@@ -261,7 +292,7 @@ const KitsThems = () => {
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      onClick={() => removeKit(kit.id)}
+                      onClick={() => handleDeleteKitClick(kit.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -351,7 +382,7 @@ const KitsThems = () => {
                     <Button 
                       variant="outline" 
                       size="icon" 
-                      onClick={() => removeThems(tema.id)}
+                      onClick={() => handleDeleteThemClick(tema.id)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -669,6 +700,40 @@ const KitsThems = () => {
           </form>
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteKitDialogOpen} onOpenChange={setDeleteKitDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Kit</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este kit? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteKitDialogOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteKit} className="bg-destructive hover:bg-destructive/90">
+              Sim, excluir kit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={deleteThemDialogOpen} onOpenChange={setDeleteThemDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Tema</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este tema? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteThemDialogOpen(false)}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDeleteThem} className="bg-destructive hover:bg-destructive/90">
+              Sim, excluir tema
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
