@@ -137,7 +137,7 @@ export const kitService = {
         .limit(1);
       
       if (checkError && checkError.code === '42P01') { // Table doesn't exist
-        // Create the table
+        // Create the table via RPC
         const { error } = await supabase.rpc('create_kits_table');
         
         if (error) {

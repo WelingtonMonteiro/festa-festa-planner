@@ -24,6 +24,43 @@ export interface ThemRecord {
   created_at?: string;
 }
 
+// Extended Database type definition for Supabase
+export interface Database {
+  public: {
+    Tables: {
+      kits: {
+        Row: KitRecord;
+        Insert: Omit<KitRecord, "id" | "created_at">;
+        Update: Partial<Omit<KitRecord, "id" | "created_at">>;
+      };
+      thems: {
+        Row: ThemRecord;
+        Insert: Omit<ThemRecord, "id" | "created_at">;
+        Update: Partial<Omit<ThemRecord, "id" | "created_at">>;
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      create_kits_table: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      create_thems_table: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+    CompositeTypes: {
+      [_ in never]: never;
+    };
+  };
+}
+
 // Convert from database model to application model
 export const kitFromRecord = (record: KitRecord): Kit => {
   return {

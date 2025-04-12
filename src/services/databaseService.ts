@@ -1,59 +1,10 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { setupSupabaseDatabase } from "./migrationScripts";
 
 export const databaseService = {
   async setupDatabase() {
-    // Create SQL function for kits table if not exists
-    await supabase.rpc('create_kits_table').catch(error => {
-      // If function doesn't exist, create it
-      if (error.message.includes('does not exist')) {
-        return supabase.sql`
-          CREATE OR REPLACE FUNCTION create_kits_table()
-          RETURNS void AS $$
-          BEGIN
-            CREATE TABLE IF NOT EXISTS kits (
-              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-              nome TEXT NOT NULL,
-              descricao TEXT NOT NULL,
-              itens TEXT[] NOT NULL DEFAULT '{}',
-              preco NUMERIC NOT NULL DEFAULT 0,
-              imagens TEXT[] NOT NULL DEFAULT '{}',
-              vezes_alugado INTEGER NOT NULL DEFAULT 0,
-              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            );
-          END;
-          $$ LANGUAGE plpgsql;
-        `;
-      }
-    });
-
-    // Create SQL function for thems table if not exists
-    await supabase.rpc('create_thems_table').catch(error => {
-      // If function doesn't exist, create it
-      if (error.message.includes('does not exist')) {
-        return supabase.sql`
-          CREATE OR REPLACE FUNCTION create_thems_table()
-          RETURNS void AS $$
-          BEGIN
-            CREATE TABLE IF NOT EXISTS thems (
-              id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-              nome TEXT NOT NULL,
-              descricao TEXT NOT NULL,
-              imagens TEXT[] NOT NULL DEFAULT '{}',
-              valorGasto NUMERIC NOT NULL DEFAULT 0,
-              vezes_alugado INTEGER NOT NULL DEFAULT 0,
-              kits_ids TEXT[] NOT NULL DEFAULT '{}',
-              created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-            );
-          END;
-          $$ LANGUAGE plpgsql;
-        `;
-      }
-    });
-
-    // Create the tables
-    await supabase.rpc('create_kits_table').catch(console.error);
-    await supabase.rpc('create_thems_table').catch(console.error);
+    return await setupSupabaseDatabase();
   },
 
   async migrateLocalStorageToSupabase() {
@@ -67,7 +18,7 @@ export const databaseService = {
         for (const kit of kits) {
           const { error } = await supabase
             .from('kits')
-            .insert([{
+            .insert({
               id: kit.id,
               nome: kit.nome,
               descricao: kit.descricao,
@@ -75,8 +26,9 @@ export const databaseService = {
               preco: kit.preco,
               imagens: kit.imagens,
               vezes_alugado: kit.vezes_alugado
-            }]);
-          
+            })
+            .single();
+            
           if (error && error.code !== '23505') { // Ignore unique violation errors
             console.error('Error migrating kit:', error);
           }
@@ -92,7 +44,7 @@ export const databaseService = {
         for (const them of thems) {
           const { error } = await supabase
             .from('thems')
-            .insert([{
+            .insert({
               id: them.id,
               nome: them.nome,
               descricao: them.descricao,
@@ -100,8 +52,9 @@ export const databaseService = {
               valorGasto: them.valorGasto,
               vezes_alugado: them.vezes_alugado,
               kits_ids: them.kits.map((kit: any) => kit.id)
-            }]);
-          
+            })
+            .single();
+            
           if (error && error.code !== '23505') { // Ignore unique violation errors
             console.error('Error migrating them:', error);
           }

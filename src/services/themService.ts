@@ -147,7 +147,7 @@ export const themService = {
         .limit(1);
       
       if (checkError && checkError.code === '42P01') { // Table doesn't exist
-        // Create the table
+        // Create the table via RPC
         const { error } = await supabase.rpc('create_thems_table');
         
         if (error) {
