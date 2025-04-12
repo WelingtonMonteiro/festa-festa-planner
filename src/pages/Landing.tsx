@@ -107,13 +107,28 @@ const Landing = () => {
 
   const pricingPlans = [
     {
-      name: "Básico",
-      price: "R$99",
+      name: "Starter",
+      price: "R$29,90",
       period: "/mês",
       description: "Perfeito para profissionais individuais",
       features: [
         "Até 15 eventos por mês",
         "Até 50 clientes",
+        "Gerenciamento de Temas e Kits"
+        "Gerenciamento de calendário",
+        "Suporte por email"
+      ]
+    },
+    {
+      name: "Básico",
+      price: "R$99",
+      period: "/mês",
+      description: "Perfeito para profissionais individuais",
+      features: [        
+        "Até 30 eventos por mês",
+        "Gerenciamento de Clientes",
+        "Gerenciamento de Temas e Kits"
+        "Financeiro"
         "Gerenciamento de calendário",
         "Suporte por email"
       ]
