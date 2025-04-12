@@ -24,6 +24,7 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface LeadKanbanProps {
   leads: Leads[];
@@ -52,6 +53,7 @@ const LeadKanban = ({
   const [newColumnTitle, setNewColumnTitle] = useState("");
   const [deleteColumnId, setDeleteColumnId] = useState<LeadStatus | null>(null);
   const [isDeleteColumnDialogOpen, setIsDeleteColumnDialogOpen] = useState(false);
+  const [dragOverColumnId, setDragOverColumnId] = useState<LeadStatus | null>(null);
 
   // Default columns
   const defaultColumns: KanbanColumn[] = [
@@ -68,14 +70,20 @@ const LeadKanban = ({
     setDraggedLead(leadId);
   };
 
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, columnId: LeadStatus) => {
     e.preventDefault();
+    setDragOverColumnId(columnId);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverColumnId(null);
   };
 
   const handleDrop = (newStatus: LeadStatus) => {
     if (draggedLead) {
       onStatusChange(draggedLead, newStatus);
       setDraggedLead(null);
+      setDragOverColumnId(null);
     }
   };
 
@@ -92,6 +100,7 @@ const LeadKanban = ({
       color: "bg-gray-500" // Default color for custom columns
     };
     
+    // Add new column to the right
     setCustomColumns([...customColumns, newColumn]);
     setNewColumnTitle("");
     setIsAddColumnDialogOpen(false);
@@ -136,120 +145,124 @@ const LeadKanban = ({
         </Button>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 overflow-x-auto">
-        {allColumns.map((column) => {
-          const columnLeads = leads.filter((lead) => lead.status === column.id);
-          const isCustomColumn = customColumns.some(c => c.id === column.id);
-          
-          return (
-            <div 
-              key={column.id}
-              className="min-w-[280px] h-fit"
-              onDragOver={handleDragOver}
-              onDrop={() => handleDrop(column.id)}
-            >
-              <Card>
-                <CardHeader className={`${column.color} text-white rounded-t-lg flex flex-row items-center justify-between p-3`}>
-                  <CardTitle className="text-base font-medium flex items-center gap-2">
-                    {column.icon} {column.title}
-                    <Badge className="ml-2 bg-white/20">
-                      {columnLeads.length}
-                    </Badge>
-                  </CardTitle>
-                  
-                  {isCustomColumn && (
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-6 w-6 text-white hover:bg-white/20"
-                      onClick={() => confirmDeleteColumn(column.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  )}
-                </CardHeader>
-                <CardContent className="p-3">
-                  <div className="flex flex-col gap-3">
-                    {columnLeads.length === 0 ? (
-                      <div className="py-8 text-center text-muted-foreground text-sm">
-                        Nenhum lead neste status
-                      </div>
-                    ) : (
-                      columnLeads.map((lead) => (
-                        <Card 
-                          key={lead.id}
-                          className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                          draggable
-                          onDragStart={() => handleDragStart(lead.id)}
-                        >
-                          <CardContent className="p-3">
-                            <div className="flex items-start justify-between">
-                              <div>
-                                <h3 className="font-medium">{lead.nome}</h3>
-                                <div className="text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <Mail className="h-3 w-3" /> 
-                                    <a href={`mailto:${lead.email}`} className="text-blue-500 hover:underline">
-                                      {lead.email}
-                                    </a>
-                                  </div>
-                                  <div className="flex items-center gap-1 mt-1">
-                                    <PhoneCall className="h-3 w-3" /> 
-                                    <span>{lead.telefone}</span>
-                                  </div>
-                                </div>
-                                <div className="mt-2 text-sm">
-                                  <span className="font-medium">Tipo:</span> {lead.tipoFesta}
-                                </div>
-                                {lead.valorOrcamento && (
-                                  <div className="mt-1 text-sm">
-                                    <span className="font-medium">Orçamento:</span> {formatCurrency(lead.valorOrcamento)}
-                                  </div>
-                                )}
-                                {lead.dataInteresse && (
-                                  <div className="mt-1 text-sm">
-                                    <span className="font-medium">Data:</span> {format(lead.dataInteresse, "dd/MM/yyyy", { locale: ptBR })}
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Abrir menu</span>
-                                    <MoreVertical className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>Editar Lead</DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem>Alterar Status Para:</DropdownMenuItem>
-                                  
-                                  {allColumns
-                                    .filter((col) => col.id !== lead.status)
-                                    .map((col) => (
-                                      <DropdownMenuItem 
-                                        key={col.id}
-                                        onClick={() => onStatusChange(lead.id, col.id)}
-                                      >
-                                        <span className="ml-6">{col.title}</span>
-                                      </DropdownMenuItem>
-                                    ))
-                                  }
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))
+      <ScrollArea className="w-full" orientation="horizontal">
+        <div className="flex gap-6 pb-4 min-w-full" style={{ width: "max-content" }}>
+          {allColumns.map((column) => {
+            const columnLeads = leads.filter((lead) => lead.status === column.id);
+            const isCustomColumn = customColumns.some(c => c.id === column.id);
+            const isOver = dragOverColumnId === column.id;
+            
+            return (
+              <div 
+                key={column.id}
+                className={`min-w-[280px] h-fit ${isOver ? 'scale-105 transition-transform shadow-xl ring-2 ring-primary' : ''}`}
+                onDragOver={(e) => handleDragOver(e, column.id)}
+                onDragLeave={handleDragLeave}
+                onDrop={() => handleDrop(column.id)}
+              >
+                <Card className={isOver ? 'opacity-90' : ''}>
+                  <CardHeader className={`${column.color} text-white rounded-t-lg flex flex-row items-center justify-between p-3`}>
+                    <CardTitle className="text-base font-medium flex items-center gap-2">
+                      {column.icon} {column.title}
+                      <Badge className="ml-2 bg-white/20">
+                        {columnLeads.length}
+                      </Badge>
+                    </CardTitle>
+                    
+                    {isCustomColumn && (
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-6 w-6 text-white hover:bg-white/20"
+                        onClick={() => confirmDeleteColumn(column.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          );
-        })}
-      </div>
+                  </CardHeader>
+                  <CardContent className="p-3">
+                    <div className="flex flex-col gap-3">
+                      {columnLeads.length === 0 ? (
+                        <div className="py-8 text-center text-muted-foreground text-sm">
+                          Nenhum lead neste status
+                        </div>
+                      ) : (
+                        columnLeads.map((lead) => (
+                          <Card 
+                            key={lead.id}
+                            className="shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                            draggable
+                            onDragStart={() => handleDragStart(lead.id)}
+                          >
+                            <CardContent className="p-3">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <h3 className="font-medium">{lead.nome}</h3>
+                                  <div className="text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <Mail className="h-3 w-3" /> 
+                                      <a href={`mailto:${lead.email}`} className="text-blue-500 hover:underline">
+                                        {lead.email}
+                                      </a>
+                                    </div>
+                                    <div className="flex items-center gap-1 mt-1">
+                                      <PhoneCall className="h-3 w-3" /> 
+                                      <span>{lead.telefone}</span>
+                                    </div>
+                                  </div>
+                                  <div className="mt-2 text-sm">
+                                    <span className="font-medium">Tipo:</span> {lead.tipoFesta}
+                                  </div>
+                                  {lead.valorOrcamento && (
+                                    <div className="mt-1 text-sm">
+                                      <span className="font-medium">Orçamento:</span> {formatCurrency(lead.valorOrcamento)}
+                                    </div>
+                                  )}
+                                  {lead.dataInteresse && (
+                                    <div className="mt-1 text-sm">
+                                      <span className="font-medium">Data:</span> {format(lead.dataInteresse, "dd/MM/yyyy", { locale: ptBR })}
+                                    </div>
+                                  )}
+                                </div>
+                                
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                                      <span className="sr-only">Abrir menu</span>
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem>Editar Lead</DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem>Alterar Status Para:</DropdownMenuItem>
+                                    
+                                    {allColumns
+                                      .filter((col) => col.id !== lead.status)
+                                      .map((col) => (
+                                        <DropdownMenuItem 
+                                          key={col.id}
+                                          onClick={() => onStatusChange(lead.id, col.id)}
+                                        >
+                                          <span className="ml-6">{col.title}</span>
+                                        </DropdownMenuItem>
+                                      ))
+                                    }
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            );
+          })}
+        </div>
+      </ScrollArea>
 
       {/* Dialog for adding a new column */}
       <Dialog open={isAddColumnDialogOpen} onOpenChange={setIsAddColumnDialogOpen}>
