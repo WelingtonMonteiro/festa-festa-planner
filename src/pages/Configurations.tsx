@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,7 +17,7 @@ import {
   Palette
 } from "lucide-react";
 import { toast } from "sonner";
-import { useHandleContext } from "@/contexts/handleContext.tsx";
+import { useHandleContext } from "@/contexts";
 import { useTheme } from "@/hooks/use-theme";
 
 const Configurations = () => {

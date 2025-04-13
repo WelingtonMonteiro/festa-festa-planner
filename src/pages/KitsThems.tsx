@@ -1,8 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useHandleContext } from '@/contexts/handleContext.tsx';
+import { useHandleContext } from '@/contexts';
 import { Package, Tag } from 'lucide-react';
 import { toast } from 'sonner';
 import StorageToggle from '@/components/layout/StorageToggle';
@@ -340,7 +339,6 @@ const KitsThems = () => {
     }
   };
   
-  // O restante do componente permanece o mesmo
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -385,7 +383,6 @@ const KitsThems = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Kit Form Dialog */}
       <Dialog open={kitDialogOpen} onOpenChange={setKitDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -408,7 +405,6 @@ const KitsThems = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Theme Form Dialog */}
       <Dialog open={themDialogOpen} onOpenChange={setThemDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -432,7 +428,6 @@ const KitsThems = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialogs */}
       <DeleteConfirmDialog 
         open={deleteKitDialogOpen}
         onOpenChange={setDeleteKitDialogOpen}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,7 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useHandleContext } from '@/contexts/handleContext.tsx';
+import { useHandleContext } from '@/contexts';
 import { format, isSameDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarPlus, Clock, MapPin } from 'lucide-react';

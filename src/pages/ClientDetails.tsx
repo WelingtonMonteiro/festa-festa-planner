@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { useHandleContext } from "@/contexts/handleContext.tsx";
+import { useHandleContext } from "@/contexts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -66,7 +66,7 @@ const ClientDetails = () => {
   
   const totalEventos = historico.length;
   const valorTotalGasto = historico.reduce(
-    (total, evento) => total + (evento?.valorTotal || 0),
+    (total, evento) => total + (Number(evento?.valorTotal) || 0),
     0
   );
   
@@ -319,7 +319,7 @@ const ClientDetails = () => {
                       
                       const valorTotal = cliente.historico
                         .filter(e => e.kit?.id === kitId)
-                        .reduce((acc, evento) => acc + evento.valorTotal, 0);
+                        .reduce((acc, evento) => acc + (Number(evento.valorTotal) || 0), 0);
                       
                       return (
                         <div key={kitId} className="flex items-center justify-between rounded-lg border p-3">
@@ -362,7 +362,7 @@ const ClientDetails = () => {
                       
                       const valorTotal = cliente.historico
                         .filter(e => e.tema?.id === temaId)
-                        .reduce((acc, evento) => acc + evento.valorTotal, 0);
+                        .reduce((acc, evento) => acc + (Number(evento.valorTotal) || 0), 0);
                       
                       return (
                         <div key={temaId} className="flex items-center justify-between rounded-lg border p-3">

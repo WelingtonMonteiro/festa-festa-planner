@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HandleContext } from './handleContext';
 import { Client, Event, Message, Contract, ContractTemplate, Kit, Them } from '@/types';
@@ -17,6 +16,15 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [contractTemplates, setContractTemplates] = useState<ContractTemplate[]>([]);
   const [kits, setKits] = useState<Kit[]>([]);
   const [themes, setThemes] = useState<Them[]>([]);
+
+  // Stats for backward compatibility
+  const statistics = {
+    eventosPorMes: {},
+    kitsPopulares: [],
+    temasPorMes: {},
+    temasPorAno: {},
+    faturamentoMensal: {}
+  };
 
   // Load data on initialization
   useEffect(() => {
@@ -264,6 +272,7 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         kits,
         themes,
         thems: themes, // Add this for backward compatibility
+        statistics, // Add this for backward compatibility
         addClients,
         updateClients,
         removeClients,

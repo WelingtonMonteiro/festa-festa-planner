@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { useHandleContext } from '@/contexts/handleContext.tsx';
+import { useHandleContext } from "@/contexts";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -26,11 +25,9 @@ const Notifications = () => {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
-  // Generate notifications based on events and messages
   useEffect(() => {
     const newNotifications: Notification[] = [];
     
-    // Check for upcoming events (in the next 3 days)
     const today = new Date();
     const threeDaysLater = new Date();
     threeDaysLater.setDate(today.getDate() + 3);
@@ -52,7 +49,6 @@ const Notifications = () => {
       });
     });
     
-    // Add unread messages
     const unreadMessages = messages.filter(m => !m.lida && m.remetente === 'cliente');
     unreadMessages.forEach(message => {
       newNotifications.push({
@@ -66,19 +62,15 @@ const Notifications = () => {
       });
     });
     
-    // Retrieve notifications from localStorage if they exist
     const storedNotifications = localStorage.getItem('notifications');
     const existingNotifications = storedNotifications ? JSON.parse(storedNotifications) : [];
     
-    // Combine existing notifications with new ones
     const allNotifications = [...existingNotifications, ...newNotifications];
     
-    // Remove duplicates (based on ID)
     const uniqueNotifications = Array.from(
       new Map(allNotifications.map(item => [item.id, item])).values()
     );
     
-    // Sort by date (most recent first)
     uniqueNotifications.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
     
     setNotifications(uniqueNotifications);
@@ -137,7 +129,6 @@ const Notifications = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Notification details modal - modified to show full content */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -174,7 +165,6 @@ const Notifications = () => {
   );
 };
 
-// Helper function to render the notification list
 const renderNotifications = (
   notifications: Notification[], 
   openDetails: (notification: Notification) => void
