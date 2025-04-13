@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 
-// Tipos de armazenamento suportados
+// Tipos de acesso à API suportados
 export type ApiType = 'local' | 'rest';
 
 interface ApiContextType {
@@ -39,13 +39,14 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setApiType = (type: ApiType) => {
     setApiTypeState(type);
     localStorage.setItem('adminApiPreference', type);
-    toast.success(`Tipo de API alterado para ${type === 'local' ? 'Local' : 'REST'}`);
+    
+    // Não mostramos toast aqui pois isso é controlado pela página de configurações
   };
 
   const setApiUrl = (url: string) => {
     setApiUrlState(url);
     localStorage.setItem('adminApiUrl', url);
-    toast.success('URL da API atualizada com sucesso');
+    // Não mostramos toast aqui pois isso é controlado pela página de configurações
   };
 
   return (

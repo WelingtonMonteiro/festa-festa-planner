@@ -5,50 +5,65 @@ import { useApi } from "@/contexts/apiContext";
 import { Database, HardDrive, Link, Server } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const AdminSettings = () => {
-  // Configurações de armazenamento
-  const { storageType } = useStorage();
-  const [selectedStorage, setSelectedStorage] = useState<'localStorage' | 'supabase'>(storageType);
-  
-  // Configurações de API
+  // Tipo de armazenamento/acesso
+  const { storageType, setStorageType } = useStorage();
   const { apiType, apiUrl, setApiType, setApiUrl } = useApi();
-  const [selectedApiType, setSelectedApiType] = useState<'local' | 'rest'>(apiType);
+  
+  // Estado unificado de armazenamento/acesso
+  const [selectedDataSource, setSelectedDataSource] = useState<'localStorage' | 'supabase' | 'rest'>(
+    apiType === 'rest' ? 'rest' : storageType
+  );
+  
+  // Estado para URL da API
   const [apiUrlInput, setApiUrlInput] = useState<string>(apiUrl);
   
   // Atualizar estados quando os valores dos contextos mudarem
   useEffect(() => {
-    setSelectedStorage(storageType);
-  }, [storageType]);
-  
-  useEffect(() => {
-    setSelectedApiType(apiType);
+    if (apiType === 'rest') {
+      setSelectedDataSource('rest');
+    } else {
+      setSelectedDataSource(storageType);
+    }
     setApiUrlInput(apiUrl);
-  }, [apiType, apiUrl]);
+  }, [apiType, apiUrl, storageType]);
   
   // Manipuladores de eventos
-  const handleStorageChange = (value: 'localStorage' | 'supabase') => {
-    setSelectedStorage(value);
-    localStorage.setItem('adminStoragePreference', value);
-    toast.success(`Configuração de armazenamento padrão alterada para ${value === 'localStorage' ? 'Armazenamento Local' : 'Supabase'}`);
-    toast.info(`As alterações terão efeito após recarregar a página`, {
-      duration: 5000,
-      action: {
-        label: "Recarregar agora",
-        onClick: () => window.location.reload(),
-      },
-    });
-  };
-  
-  const handleApiTypeChange = (value: 'local' | 'rest') => {
-    setSelectedApiType(value);
-    setApiType(value);
+  const handleDataSourceChange = (value: 'localStorage' | 'supabase' | 'rest') => {
+    setSelectedDataSource(value);
+    
+    if (value === 'rest') {
+      // Se selecionar REST API, configura API REST
+      setApiType('rest');
+      // Mantém o tipo de armazenamento atual para possíveis operações locais
+      localStorage.setItem('adminApiPreference', 'rest');
+    } else {
+      // Se selecionar localStorage ou supabase, configura para acesso local
+      setApiType('local');
+      setStorageType(value);
+      localStorage.setItem('adminStoragePreference', value);
+      localStorage.setItem('adminApiPreference', 'local');
+    }
+    
+    toast.success(`Configuração de dados alterada para ${
+      value === 'localStorage' ? 'Armazenamento Local' : 
+      value === 'supabase' ? 'Supabase' : 'API REST'
+    }`);
+    
+    if (value !== 'rest') {
+      toast.info(`As alterações terão efeito após recarregar a página`, {
+        duration: 5000,
+        action: {
+          label: "Recarregar agora",
+          onClick: () => window.location.reload(),
+        },
+      });
+    }
   };
   
   const handleApiUrlSave = () => {
@@ -61,6 +76,7 @@ const AdminSettings = () => {
       // Validação básica de URL
       new URL(apiUrlInput);
       setApiUrl(apiUrlInput);
+      toast.success("URL da API atualizada com sucesso");
     } catch (e) {
       toast.error("URL inválida. Por favor, forneça uma URL completa (ex: https://api.exemplo.com)");
     }
@@ -79,13 +95,13 @@ const AdminSettings = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-8">
-            {/* Seção de Configurações de Armazenamento */}
+            {/* Seção Unificada de Configurações de Dados */}
             <div>
-              <h2 className="text-lg font-semibold mb-4">Armazenamento Padrão</h2>
+              <h2 className="text-lg font-semibold mb-4">Fonte de Dados Padrão</h2>
               <div className="space-y-4">
                 <RadioGroup 
-                  value={selectedStorage} 
-                  onValueChange={(value) => handleStorageChange(value as 'localStorage' | 'supabase')}
+                  value={selectedDataSource} 
+                  onValueChange={(value) => handleDataSourceChange(value as 'localStorage' | 'supabase' | 'rest')}
                   className="gap-4"
                 >
                   <div className="flex items-center space-x-2">
@@ -102,33 +118,6 @@ const AdminSettings = () => {
                       Supabase (Banco de dados na nuvem)
                     </Label>
                   </div>
-                </RadioGroup>
-                
-                <div className="text-sm text-muted-foreground">
-                  A configuração atual é: <span className="font-semibold">{storageType === 'localStorage' ? 'Armazenamento Local' : 'Supabase'}</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Separador */}
-            <div className="border-t border-border" />
-            
-            {/* Seção de Configurações de API */}
-            <div>
-              <h2 className="text-lg font-semibold mb-4">Acesso à API</h2>
-              <div className="space-y-4">
-                <RadioGroup 
-                  value={selectedApiType} 
-                  onValueChange={(value) => handleApiTypeChange(value as 'local' | 'rest')}
-                  className="gap-4"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="local" id="local-api" />
-                    <Label htmlFor="local-api" className="flex items-center gap-2">
-                      <HardDrive className="h-4 w-4" /> 
-                      Acesso Local (localStorage/Supabase)
-                    </Label>
-                  </div>
                   <div className="flex items-center space-x-2">
                     <RadioGroupItem value="rest" id="rest-api" />
                     <Label htmlFor="rest-api" className="flex items-center gap-2">
@@ -138,8 +127,8 @@ const AdminSettings = () => {
                   </div>
                 </RadioGroup>
                 
-                {selectedApiType === 'rest' && (
-                  <div className="mt-4 space-y-3">
+                {selectedDataSource === 'rest' && (
+                  <div className="mt-4 pl-6 space-y-3">
                     <Label htmlFor="api-url">URL da API</Label>
                     <div className="flex space-x-2">
                       <Input 
@@ -161,10 +150,12 @@ const AdminSettings = () => {
                 
                 <div className="text-sm text-muted-foreground">
                   A configuração atual é: <span className="font-semibold">
-                    {apiType === 'local' ? 'Acesso Local' : 'API REST'}
+                    {selectedDataSource === 'localStorage' ? 'Armazenamento Local' : 
+                     selectedDataSource === 'supabase' ? 'Supabase' : 'API REST'}
                   </span>
                 </div>
-                {apiType === 'rest' && apiUrl && (
+                
+                {selectedDataSource === 'rest' && apiUrl && (
                   <p className="text-sm text-muted-foreground flex items-center gap-1">
                     <Link className="h-3 w-3" />
                     URL: <span className="font-mono text-xs">{apiUrl}</span>
@@ -175,11 +166,16 @@ const AdminSettings = () => {
             
             <div className="text-sm text-muted-foreground mt-4 border-t border-border pt-4">
               <p>
-                Estas configurações definem como o sistema armazena e acessa os dados.
+                Esta configuração define como o sistema armazena e acessa os dados.
               </p>
               <p className="mt-2">
-                No modo de acesso local, os dados são acessados diretamente via localStorage ou Supabase. 
-                No modo API REST, os dados são acessados via chamadas HTTP para a API configurada.
+                No modo <strong>Armazenamento Local</strong>, os dados são armazenados no navegador.
+              </p>
+              <p className="mt-2">
+                No modo <strong>Supabase</strong>, os dados são armazenados no banco de dados na nuvem.
+              </p>
+              <p className="mt-2">
+                No modo <strong>API REST</strong>, os dados são acessados via chamadas HTTP para a API configurada.
               </p>
             </div>
           </div>
