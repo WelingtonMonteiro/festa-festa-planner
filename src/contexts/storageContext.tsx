@@ -19,9 +19,17 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // Check if the user has a preference
   useEffect(() => {
-    const savedStorageType = localStorage.getItem('preferredStorage');
-    if (savedStorageType === 'supabase' || savedStorageType === 'localStorage') {
-      setStorageTypeState(savedStorageType);
+    // Primeiro verifica na configuração do administrador
+    const adminStoragePreference = localStorage.getItem('adminStoragePreference');
+    
+    if (adminStoragePreference === 'supabase' || adminStoragePreference === 'localStorage') {
+      setStorageTypeState(adminStoragePreference as StorageType);
+    } else {
+      // Se não existe preferência de administrador, usa a preferência do usuário
+      const savedStorageType = localStorage.getItem('preferredStorage');
+      if (savedStorageType === 'supabase' || savedStorageType === 'localStorage') {
+        setStorageTypeState(savedStorageType as StorageType);
+      }
     }
     setIsInitialized(true);
   }, []);

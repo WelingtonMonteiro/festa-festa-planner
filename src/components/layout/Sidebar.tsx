@@ -18,7 +18,8 @@ import {
   FileText,
   InfoIcon,
   UserPlus,
-  ScrollText
+  ScrollText,
+  ShieldAlert
 } from 'lucide-react';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
@@ -38,6 +39,9 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   const storageNotifications = localStorage.getItem('notificacoes');
   const notifications = storageNotifications ? JSON.parse(storageNotifications) : [];
   const unreadNotifications = notifications.filter((n: any) => !n.lida).length;
+
+  // Simula check de permissão de admin - em produção seria checado via contexto de autenticação
+  const isAdmin = true; // Temporariamente habilitado para todos
   
   const toggleCollapsed = () => {
     const newState = !collapsed;
@@ -116,6 +120,15 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <Settings className="h-5 w-5" /> 
     }
   ];
+
+  // Itens do menu de administrador
+  const adminItems = [
+    {
+      path: '/admin/settings',
+      name: 'Configurações',
+      icon: <Settings className="h-5 w-5" />
+    }
+  ];
   
   return (
     <nav 
@@ -164,6 +177,38 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
             </li>
           ))}
         </ul>
+        
+        {/* Seção de Administrador */}
+        {isAdmin && (
+          <div className={cn("mt-6 border-t pt-4", collapsed ? "border-t-0" : "")}>
+            {!collapsed && (
+              <h3 className="mb-2 px-2 text-xs font-semibold text-sidebar-foreground/70 flex items-center">
+                <ShieldAlert className="h-3 w-3 mr-1" />
+                ADMINISTRADOR
+              </h3>
+            )}
+            <ul className="space-y-2" role="menu">
+              {adminItems.map((item) => (
+                <li key={item.path} role="menuitem">
+                  <Link
+                    to={item.path}
+                    className={cn(
+                      "flex items-center rounded-lg p-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      location.pathname === item.path 
+                        ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium" 
+                        : "text-sidebar-foreground"
+                    )}
+                  >
+                    <div className="relative">
+                      {item.icon}
+                    </div>
+                    {!collapsed && <span className="ml-3">{item.name}</span>}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         
         {!collapsed && (
           <div className="mt-6 border-t pt-4">

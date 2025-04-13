@@ -19,6 +19,7 @@ import Lead from '@/pages/Leads.tsx';
 import Landing from '@/pages/Landing';
 import ClientsManagement from '@/pages/ClientsManagement.tsx';
 import Contracts from '@/pages/Contracts';
+import AdminSettings from '@/pages/AdminSettings';
 import { ThemeProvider } from '@/hooks/use-theme';
 import { StorageProvider } from '@/contexts/storageContext';
 import { FestaProvider } from '@/contexts/handleContext';
@@ -46,6 +47,7 @@ function App() {
             <Route path="/notifications" element={<MainLayout><Notifications /></MainLayout>} />
             <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
             <Route path="/contracts" element={<MainLayout><Contracts /></MainLayout>} />
+            <Route path="/admin/settings" element={<MainLayout><AdminSettings /></MainLayout>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </FestaProvider>
