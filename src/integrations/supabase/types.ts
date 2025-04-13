@@ -9,13 +9,85 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      kits: {
+        Row: {
+          created_at: string | null
+          descricao: string
+          id: string
+          imagens: string[]
+          itens: string[]
+          nome: string
+          preco: number
+          vezes_alugado: number
+        }
+        Insert: {
+          created_at?: string | null
+          descricao: string
+          id?: string
+          imagens?: string[]
+          itens?: string[]
+          nome: string
+          preco?: number
+          vezes_alugado?: number
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string
+          id?: string
+          imagens?: string[]
+          itens?: string[]
+          nome?: string
+          preco?: number
+          vezes_alugado?: number
+        }
+        Relationships: []
+      }
+      thems: {
+        Row: {
+          created_at: string | null
+          descricao: string
+          id: string
+          imagens: string[]
+          kits_ids: string[]
+          nome: string
+          valorgasto: number
+          vezes_alugado: number
+        }
+        Insert: {
+          created_at?: string | null
+          descricao: string
+          id?: string
+          imagens?: string[]
+          kits_ids?: string[]
+          nome: string
+          valorgasto?: number
+          vezes_alugado?: number
+        }
+        Update: {
+          created_at?: string | null
+          descricao?: string
+          id?: string
+          imagens?: string[]
+          kits_ids?: string[]
+          nome?: string
+          valorgasto?: number
+          vezes_alugado?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_kits_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
+      create_thems_table: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

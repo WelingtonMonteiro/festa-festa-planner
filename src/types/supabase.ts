@@ -1,6 +1,10 @@
 
 // Custom Supabase types for our application
 import { Kit, Them } from './index';
+import { Database as GeneratedDatabase } from '@/integrations/supabase/types';
+
+// Reuse the generated types from Supabase to ensure compatibility
+export type Database = GeneratedDatabase;
 
 export interface KitRecord {
   id: string;
@@ -22,43 +26,6 @@ export interface ThemRecord {
   vezes_alugado: number;
   kits_ids: string[]; // We'll store references to kits
   created_at?: string;
-}
-
-// Extended Database type definition for Supabase
-export interface Database {
-  public: {
-    Tables: {
-      kits: {
-        Row: KitRecord;
-        Insert: Omit<KitRecord, "id" | "created_at">;
-        Update: Partial<Omit<KitRecord, "id" | "created_at">>;
-      };
-      thems: {
-        Row: ThemRecord;
-        Insert: Omit<ThemRecord, "id" | "created_at">;
-        Update: Partial<Omit<ThemRecord, "id" | "created_at">>;
-      };
-    };
-    Views: {
-      [_ in never]: never;
-    };
-    Functions: {
-      create_kits_table: {
-        Args: Record<string, never>;
-        Returns: undefined;
-      };
-      create_thems_table: {
-        Args: Record<string, never>;
-        Returns: undefined;
-      };
-    };
-    Enums: {
-      [_ in never]: never;
-    };
-    CompositeTypes: {
-      [_ in never]: never;
-    };
-  };
 }
 
 // Convert from database model to application model
