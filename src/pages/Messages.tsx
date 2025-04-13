@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useHandleContext } from "@/contexts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -43,7 +44,8 @@ const Messages = () => {
         remetente: 'empresa',
         clienteId: selectedClient,
         conteudo: newMessage,
-        lida: false
+        lida: false,
+        datahora: new Date().toISOString()
       });
       setNewMessage("");
     }

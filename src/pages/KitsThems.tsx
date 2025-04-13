@@ -41,7 +41,7 @@ const KitsThems = () => {
     setEditingThem(null);
   };
   
-  const handleKitSubmit = async (kitData: Omit<Kit, 'id' | 'vezes_alugado'>) => {
+  const handleKitSubmit = async (kitData: Omit<Kit, 'id'>) => {
     setIsLoading(true);
     
     try {

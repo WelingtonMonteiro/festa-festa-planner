@@ -182,7 +182,7 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const newMessage: Message = {
       ...message,
       id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
+      datahora: new Date().toISOString(),
       read: false
     };
     
