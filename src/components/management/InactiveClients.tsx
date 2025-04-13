@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
@@ -6,10 +7,12 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Check, Search, User, X } from "lucide-react";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { toast } from "@/components/ui/use-toast";
-import { useHandleContext } from "@/contexts/handleContext";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { 
+  Search, UserMinus, Phone, Mail, AlertTriangle, 
+  UserCheck, MessageSquare, X
+} from "lucide-react";
 
 const InactiveClients = () => {
   const { clients, updateClients } = useHandleContext();
@@ -25,16 +28,15 @@ const InactiveClients = () => {
       (client.email && client.email.toLowerCase().includes(search.toLowerCase()))
   );
   
-  const reativarCliente = (clienteId: string) => {
+  const reactiveClient = (clienteId: string) => {
     try {
-      const cliente = clients.find(c => c.id === clienteId);
-      if (cliente) {
-        updateClients(clienteId, { ...cliente, ativo: true });
+      const client = clients.find(c => c.id === clienteId);
+      if (client) {
+        updateClients(clienteId, { ...client, ativo: true });
         toast({
           title: "Cliente reativado",
           description: "O cliente foi reativado com sucesso.",
         });
-        navigate('/client-management');
       }
     } catch (error) {
       toast({
@@ -48,7 +50,10 @@ const InactiveClients = () => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Clientes Inativos</h2>
+        <div className="flex items-center">
+          <UserMinus className="text-gray-500 mr-2 h-5 w-5" />
+          <h2 className="text-xl font-semibold">Clientes Inativos</h2>
+        </div>
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           <Input
@@ -66,9 +71,9 @@ const InactiveClients = () => {
             <TableRow>
               <TableHead>Nome</TableHead>
               <TableHead>Contato</TableHead>
-              <TableHead>Eventos</TableHead>
-              <TableHead>Valor Total</TableHead>
-              <TableHead>Último Evento</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Eventos Passados</TableHead>
+              <TableHead>Valor Total Histórico</TableHead>
               <TableHead className="text-right">Ações</TableHead>
             </TableRow>
           </TableHeader>
@@ -78,22 +83,31 @@ const InactiveClients = () => {
               const totalEvents = histories.length;
               const totalValues = histories.reduce((total, event) => total + (event?.valorTotal || 0), 0);
               
-              const lastedEvent = histories.length > 0
-                ? new Date(histories.sort((a, b) =>
-                    new Date(b.data).getTime() - new Date(a.data).getTime()
-                  )[0].data).toLocaleDateString('pt-BR')
-                : "Nenhum";
-              
               return (
-                <TableRow key={client.id}>
+                <TableRow key={client.id} className="opacity-70">
                   <TableCell className="font-medium">{client.nome}</TableCell>
                   <TableCell>
-                    {client.telefone}
-                    {client.email && <><br/>{client.email}</>}
+                    <div className="flex flex-col gap-1">
+                      <div className="flex items-center text-sm">
+                        <Phone className="mr-2 h-3 w-3" />
+                        {client.telefone}
+                      </div>
+                      {client.email && (
+                        <div className="flex items-center text-sm">
+                          <Mail className="mr-2 h-3 w-3" />
+                          {client.email}
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center text-destructive">
+                      <X className="mr-1 h-4 w-4" />
+                      Inativo
+                    </div>
                   </TableCell>
                   <TableCell>{totalEvents}</TableCell>
                   <TableCell>R$ {totalValues.toLocaleString('pt-BR')}</TableCell>
-                  <TableCell>{lastedEvent}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 
@@ -103,31 +117,21 @@ const InactiveClients = () => {
                       >
                         Detalhes
                       </Button>
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button 
-                            variant="outline"
-                            size="sm"
-                            className="text-green-600 hover:bg-green-50"
-                          >
-                            <Check className="h-3 w-3" />
-                          </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                          <AlertDialogHeader>
-                            <AlertDialogTitle>Reativar cliente</AlertDialogTitle>
-                            <AlertDialogDescription>
-                              Tem certeza de que deseja reativar este cliente?
-                            </AlertDialogDescription>
-                          </AlertDialogHeader>
-                          <AlertDialogFooter>
-                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                            <AlertDialogAction onClick={() => reativarCliente(client.id)}>
-                              Reativar
-                            </AlertDialogAction>
-                          </AlertDialogFooter>
-                        </AlertDialogContent>
-                      </AlertDialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-green-600 hover:bg-green-50"
+                        onClick={() => reactiveClient(client.id)}
+                      >
+                        <UserCheck className="h-3 w-3" />
+                      </Button>
+                      <Button 
+                        variant="secondary" 
+                        size="sm"
+                      >
+                        <MessageSquare className="mr-1 h-3 w-3" />
+                        Contatar
+                      </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -137,8 +141,8 @@ const InactiveClients = () => {
         </Table>
       ) : (
         <div className="flex flex-col items-center justify-center py-8">
-          <User className="h-12 w-12 text-muted-foreground/80" />
-          <p className="mt-2 text-muted-foreground">Nenhum cliente inativo encontrado com esta busca</p>
+          <AlertTriangle className="h-12 w-12 text-muted-foreground/80" />
+          <p className="mt-2 text-muted-foreground">Nenhum cliente inativo encontrado</p>
           {search && (
             <Button 
               variant="link" 

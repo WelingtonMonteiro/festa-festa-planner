@@ -1,14 +1,14 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CalendarDays, ClipboardCheck, Clock, DollarSign, PartyPopper, Tag, Users } from "lucide-react";
-import { useHandleContext } from "@/contexts/handleContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { format, isSameDay } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 
 const Dashboard = () => {
-  const { clients, events, themes, kits } = useHandleContext();
+  const { clients, thems, events, statistics } = useHandleContext();
   const navigate = useNavigate();
   
   // Estatísticas e cálculos
@@ -24,7 +24,7 @@ const Dashboard = () => {
     .filter(e => e.status === 'finalizado')
     .reduce((total, evento) => total + evento.valorTotal, 0);
   
-  const temasMaisPopulares = themes
+  const temasMaisPopulares = thems
     .sort((a, b) => b.vezes_alugado - a.vezes_alugado)
     .slice(0, 3);
   

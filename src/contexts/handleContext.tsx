@@ -5,9 +5,6 @@ import { toast } from '@/hooks/use-toast';
 import { kitService } from '@/services/kitService';
 import { themService } from '@/services/themService';
 import { useStorage } from './storageContext';
-import { useApi } from './apiContext';
-import { kitRestService } from '@/services/api/kitRestService';
-import { themRestService } from '@/services/api/themRestService';
 
 interface HandleContextType {
   clients: Client[];
@@ -97,58 +94,35 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   });
 
   const { storageType, isInitialized } = useStorage();
-  const { isRestApi, apiUrl, isApiInitialized } = useApi();
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
-    if (!isInitialized || !isApiInitialized) return;
+    if (!isInitialized) return;
 
     const loadData = async () => {
       setIsLoading(true);
       
-      if (isRestApi) {
-        try {
-          if (!apiUrl) {
-            console.error('URL da API REST não configurada');
-            toast({ 
-              title: "Erro de configuração", 
-              description: "URL da API REST não configurada. Por favor, configure na página de Administração.", 
-              variant: "destructive" 
-            });
-            
-            const loadedKits = localStorage.getItem('kits');
-            const loadedTemas = localStorage.getItem('temas');
-            setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
-            setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
-            
-            loadLocalStorageData();
-          } else {
-            console.log('Carregando dados da API REST:', apiUrl);
-            
-            const restKits = await kitRestService.getAll(apiUrl);
-            setKits(restKits.length > 0 ? restKits : kitsMock);
-            
-            const restThems = await themRestService.getAll(apiUrl, restKits.length > 0 ? restKits : kitsMock);
-            setTemas(restThems.length > 0 ? restThems : temasMock);
-            
-            loadLocalStorageData();
-          }
-        } catch (error) {
-          console.error('Falha ao carregar dados da API REST:', error);
-          toast({ 
-            title: "Erro ao carregar dados", 
-            description: "Falha ao carregar dados da API REST. Usando dados locais.", 
-            variant: "destructive" 
-          });
-          
-          const loadedKits = localStorage.getItem('kits');
-          const loadedTemas = localStorage.getItem('temas');
-          setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
-          setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
-          
-          loadLocalStorageData();
-        }
-      } else if (storageType === 'supabase') {
+      if (storageType === 'localStorage') {
+        const loadedClientes = localStorage.getItem('clients');
+        const loadedKits = localStorage.getItem('kits');
+        const loadedTemas = localStorage.getItem('temas');
+        const loadedEventos = localStorage.getItem('events');
+        const loadedMensagens = localStorage.getItem('mensagens');
+        const loadedContratos = localStorage.getItem('contratos');
+        const loadedModelosContrato = localStorage.getItem('modelosContrato');
+        
+        const clientesWithActiveStatus = loadedClientes 
+          ? JSON.parse(loadedClientes) 
+          : clientesMock.map(c => ({ ...c, ativo: true }));
+        
+        setClientes(clientesWithActiveStatus);
+        setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
+        setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
+        setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
+        setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
+        setContratos(loadedContratos ? JSON.parse(loadedContratos) : []);
+        setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
+      } else {
         try {
           const supabaseKits = await kitService.getAll();
           setKits(supabaseKits.length > 0 ? supabaseKits : kitsMock);
@@ -156,29 +130,30 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           const supabaseThems = await themService.getAll(supabaseKits.length > 0 ? supabaseKits : kitsMock);
           setTemas(supabaseThems.length > 0 ? supabaseThems : temasMock);
           
-          loadLocalStorageData();
+          const loadedClientes = localStorage.getItem('clients');
+          const loadedEventos = localStorage.getItem('events');
+          const loadedMensagens = localStorage.getItem('mensagens');
+          const loadedContratos = localStorage.getItem('contratos');
+          const loadedModelosContrato = localStorage.getItem('modelosContrato');
+          
+          const clientesWithActiveStatus = loadedClientes 
+            ? JSON.parse(loadedClientes) 
+            : clientesMock.map(c => ({ ...c, ativo: true }));
+          
+          setClientes(clientesWithActiveStatus);
+          setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
+          setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
+          setContratos(loadedContratos ? JSON.parse(loadedContratos) : []);
+          setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
         } catch (error) {
-          console.error('Falha ao carregar dados do Supabase:', error);
-          toast({ 
-            title: "Erro ao carregar dados", 
-            description: "Falha ao carregar dados do Supabase. Usando dados locais.", 
-            variant: "destructive" 
-          });
+          console.error('Failed to load data from Supabase:', error);
+          toast({ title: "Erro ao carregar dados", description: "Falha ao carregar dados do Supabase", variant: "destructive" });
           
           const loadedKits = localStorage.getItem('kits');
           const loadedTemas = localStorage.getItem('temas');
           setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
           setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
-          
-          loadLocalStorageData();
         }
-      } else {
-        const loadedKits = localStorage.getItem('kits');
-        const loadedTemas = localStorage.getItem('temas');
-        setKits(loadedKits ? JSON.parse(loadedKits) : kitsMock);
-        setTemas(loadedTemas ? JSON.parse(loadedTemas) : temasMock);
-        
-        loadLocalStorageData();
       }
       
       const loadedUsuario = localStorage.getItem('usuario');
@@ -189,31 +164,13 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setIsLoading(false);
     };
     
-    const loadLocalStorageData = () => {
-      const loadedClientes = localStorage.getItem('clients');
-      const loadedEventos = localStorage.getItem('events');
-      const loadedMensagens = localStorage.getItem('mensagens');
-      const loadedContratos = localStorage.getItem('contratos');
-      const loadedModelosContrato = localStorage.getItem('modelosContrato');
-      
-      const clientesWithActiveStatus = loadedClientes 
-        ? JSON.parse(loadedClientes) 
-        : clientesMock.map(c => ({ ...c, ativo: true }));
-      
-      setClientes(clientesWithActiveStatus);
-      setEventos(loadedEventos ? JSON.parse(loadedEventos) : eventosMock);
-      setMensagens(loadedMensagens ? JSON.parse(loadedMensagens) : mensagensMock);
-      setContratos(loadedContratos ? JSON.parse(loadedContratos) : []);
-      setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
-    };
-    
     loadData();
-  }, [storageType, isInitialized, isRestApi, apiUrl, isApiInitialized]);
+  }, [storageType, isInitialized]);
   
   useEffect(() => {
     if (isLoading || !isInitialized) return;
     
-    if (storageType === 'localStorage' && !isRestApi) {
+    if (storageType === 'localStorage') {
       if (clientes.length) {
         const clientesForStorage = prepareForStorage(clientes);
         localStorage.setItem('clients', JSON.stringify(clientesForStorage));
@@ -231,24 +188,10 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       
       if (contratos.length) localStorage.setItem('contratos', JSON.stringify(contratos));
       if (modelosContrato.length) localStorage.setItem('modelosContrato', JSON.stringify(modelosContrato));
-    } else {
-      if (clientes.length) {
-        const clientesForStorage = prepareForStorage(clientes);
-        localStorage.setItem('clients', JSON.stringify(clientesForStorage));
-      }
-      
-      if (eventos.length) {
-        const eventosForStorage = prepareForStorage(eventos);
-        localStorage.setItem('events', JSON.stringify(eventosForStorage));
-      }
-      
-      if (mensagens.length) localStorage.setItem('mensagens', JSON.stringify(mensagens));
-      if (contratos.length) localStorage.setItem('contratos', JSON.stringify(contratos));
-      if (modelosContrato.length) localStorage.setItem('modelosContrato', JSON.stringify(modelosContrato));
     }
     
     localStorage.setItem('usuario', JSON.stringify(usuario));
-  }, [clientes, kits, temas, eventos, mensagens, usuario, contratos, modelosContrato, storageType, isLoading, isInitialized, isRestApi]);
+  }, [clientes, kits, temas, eventos, mensagens, usuario, contratos, modelosContrato, storageType, isLoading, isInitialized]);
   
   useEffect(() => {
     atualizarEstatisticas();
@@ -294,26 +237,16 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
   
   const adicionarKit = async (kit: Omit<Kit, 'id' | 'vezes_alugado'>) => {
-    if (isRestApi) {
-      if (!apiUrl) {
-        toast({ title: "Erro", description: "URL da API REST não configurada.", variant: "destructive" });
-        return null;
-      }
-      
-      try {
-        const novoKit = await kitRestService.create(kit, apiUrl);
-        if (novoKit) {
-          setKits([...kits, novoKit]);
-          toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso via API REST.` });
-          return novoKit;
-        }
-        return null;
-      } catch (error) {
-        console.error('Falha ao adicionar kit via API REST:', error);
-        toast({ title: "Erro", description: "Falha ao adicionar kit via API REST.", variant: "destructive" });
-        return null;
-      }
-    } else if (storageType === 'supabase') {
+    if (storageType === 'localStorage') {
+      const novoKit: Kit = {
+        ...kit,
+        id: `k${Date.now().toString()}`,
+        vezes_alugado: 0
+      };
+      setKits([...kits, novoKit]);
+      toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso.` });
+      return novoKit;
+    } else {
       try {
         const novoKit = await kitService.create(kit);
         if (novoKit) {
@@ -327,39 +260,17 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toast({ title: "Erro", description: "Falha ao adicionar kit no Supabase.", variant: "destructive" });
         return null;
       }
-    } else {
-      const novoKit: Kit = {
-        ...kit,
-        id: `k${Date.now().toString()}`,
-        vezes_alugado: 0
-      };
-      setKits([...kits, novoKit]);
-      toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso.` });
-      return novoKit;
     }
   };
   
   const atualizarKit = async (id: string, kitAtualizado: Partial<Kit>) => {
-    if (isRestApi) {
-      if (!apiUrl) {
-        toast({ title: "Erro", description: "URL da API REST não configurada.", variant: "destructive" });
-        return null;
-      }
-      
-      try {
-        const updatedKit = await kitRestService.update(id, kitAtualizado, apiUrl);
-        if (updatedKit) {
-          setKits(kits.map(k => k.id === id ? updatedKit : k));
-          toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas via API REST." });
-          return updatedKit;
-        }
-        return null;
-      } catch (error) {
-        console.error('Falha ao atualizar kit via API REST:', error);
-        toast({ title: "Erro", description: "Falha ao atualizar kit via API REST.", variant: "destructive" });
-        return null;
-      }
-    } else if (storageType === 'supabase') {
+    if (storageType === 'localStorage') {
+      setKits(kits.map(k => 
+        k.id === id ? { ...k, ...kitAtualizado } : k
+      ));
+      toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas." });
+      return kits.find(k => k.id === id);
+    } else {
       try {
         const updatedKit = await kitService.update(id, kitAtualizado);
         if (updatedKit) {
@@ -373,12 +284,6 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toast({ title: "Erro", description: "Falha ao atualizar kit no Supabase.", variant: "destructive" });
         return null;
       }
-    } else {
-      setKits(kits.map(k => 
-        k.id === id ? { ...k, ...kitAtualizado } : k
-      ));
-      toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas." });
-      return kits.find(k => k.id === id);
     }
   };
   
@@ -400,29 +305,14 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const kitRemovido = kits.find(k => k.id === id);
     
-    if (isRestApi) {
-      if (!apiUrl) {
-        toast({ title: "Erro", description: "URL da API REST não configurada.", variant: "destructive" });
-        return false;
-      }
+    if (storageType === 'localStorage') {
+      setKits(kits.filter(k => k.id !== id));
       
-      try {
-        const result = await kitRestService.delete(id, apiUrl);
-        if (result) {
-          setKits(kits.filter(k => k.id !== id));
-          
-          if (kitRemovido) {
-            toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso via API REST.` });
-          }
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error('Falha ao excluir kit via API REST:', error);
-        toast({ title: "Erro", description: "Falha ao excluir kit via API REST.", variant: "destructive" });
-        return false;
+      if (kitRemovido) {
+        toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso.` });
       }
-    } else if (storageType === 'supabase') {
+      return true;
+    } else {
       try {
         const result = await kitService.delete(id);
         if (result) {
@@ -439,37 +329,20 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toast({ title: "Erro", description: "Falha ao remover kit do Supabase.", variant: "destructive" });
         return false;
       }
-    } else {
-      setKits(kits.filter(k => k.id !== id));
-      
-      if (kitRemovido) {
-        toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso.` });
-      }
-      return true;
     }
   };
   
   const adicionarTema = async (tema: Omit<Them, 'id' | 'vezes_alugado'>) => {
-    if (isRestApi) {
-      if (!apiUrl) {
-        toast({ title: "Erro", description: "URL da API REST não configurada.", variant: "destructive" });
-        return null;
-      }
-      
-      try {
-        const novoTema = await themRestService.create(tema, apiUrl);
-        if (novoTema) {
-          setTemas([...temas, novoTema]);
-          toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso via API REST.` });
-          return novoTema;
-        }
-        return null;
-      } catch (error) {
-        console.error('Falha ao adicionar tema via API REST:', error);
-        toast({ title: "Erro", description: "Falha ao adicionar tema via API REST.", variant: "destructive" });
-        return null;
-      }
-    } else if (storageType === 'supabase') {
+    if (storageType === 'localStorage') {
+      const novoTema: Them = {
+        ...tema,
+        id: `t${Date.now().toString()}`,
+        vezes_alugado: 0
+      };
+      setTemas([...temas, novoTema]);
+      toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
+      return novoTema;
+    } else {
       try {
         const novoTema = await themService.create(tema, kits);
         if (novoTema) {
@@ -483,39 +356,17 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toast({ title: "Erro", description: "Falha ao adicionar tema no Supabase.", variant: "destructive" });
         return null;
       }
-    } else {
-      const novoTema: Them = {
-        ...tema,
-        id: `t${Date.now().toString()}`,
-        vezes_alugado: 0
-      };
-      setTemas([...temas, novoTema]);
-      toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
-      return novoTema;
     }
   };
   
   const atualizarTema = async (id: string, temaAtualizado: Partial<Them>) => {
-    if (isRestApi) {
-      if (!apiUrl) {
-        toast({ title: "Erro", description: "URL da API REST não configurada.", variant: "destructive" });
-        return null;
-      }
-      
-      try {
-        const updatedThem = await themRestService.update(id, temaAtualizado, apiUrl);
-        if (updatedThem) {
-          setTemas(temas.map(t => t.id === id ? updatedThem : t));
-          toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas via API REST." });
-          return updatedThem;
-        }
-        return null;
-      } catch (error) {
-        console.error('Falha ao atualizar tema via API REST:', error);
-        toast({ title: "Erro", description: "Falha ao atualizar tema via API REST.", variant: "destructive" });
-        return null;
-      }
-    } else if (storageType === 'supabase') {
+    if (storageType === 'localStorage') {
+      setTemas(temas.map(t => 
+        t.id === id ? { ...t, ...temaAtualizado } : t
+      ));
+      toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas." });
+      return temas.find(t => t.id === id);
+    } else {
       try {
         const updatedThem = await themService.update(id, temaAtualizado, kits);
         if (updatedThem) {
@@ -529,12 +380,6 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toast({ title: "Erro", description: "Falha ao atualizar tema no Supabase.", variant: "destructive" });
         return null;
       }
-    } else {
-      setTemas(temas.map(t => 
-        t.id === id ? { ...t, ...temaAtualizado } : t
-      ));
-      toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas." });
-      return temas.find(t => t.id === id);
     }
   };
   
@@ -551,29 +396,14 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     const temaRemovido = temas.find(t => t.id === id);
     
-    if (isRestApi) {
-      if (!apiUrl) {
-        toast({ title: "Erro", description: "URL da API REST não configurada.", variant: "destructive" });
-        return false;
-      }
+    if (storageType === 'localStorage') {
+      setTemas(temas.filter(t => t.id !== id));
       
-      try {
-        const result = await themRestService.delete(id, apiUrl);
-        if (result) {
-          setTemas(temas.filter(t => t.id !== id));
-          
-          if (temaRemovido) {
-            toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso via API REST.` });
-          }
-          return true;
-        }
-        return false;
-      } catch (error) {
-        console.error('Falha ao excluir tema via API REST:', error);
-        toast({ title: "Erro", description: "Falha ao excluir tema via API REST.", variant: "destructive" });
-        return false;
+      if (temaRemovido) {
+        toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso.` });
       }
-    } else if (storageType === 'supabase') {
+      return true;
+    } else {
       try {
         const result = await themService.delete(id);
         if (result) {
@@ -590,13 +420,6 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         toast({ title: "Erro", description: "Falha ao remover tema do Supabase.", variant: "destructive" });
         return false;
       }
-    } else {
-      setTemas(temas.filter(t => t.id !== id));
-      
-      if (temaRemovido) {
-        toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso.` });
-      }
-      return true;
     }
   };
   
@@ -739,7 +562,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       toast({ title: "Modelo removido", description: `${modeloRemovido.name} foi removido com sucesso.` });
     }
   };
-
+  
   const adicionarContrato = (contrato: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => {
     const novoContrato: Contract = {
       ...contrato,
@@ -748,51 +571,71 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updatedAt: new Date().toISOString()
     };
     setContratos([...contratos, novoContrato]);
-    toast({ title: "Contrato criado", description: "O contrato foi criado com sucesso." });
+    toast({ title: "Contrato adicionado", description: `${contrato.title} foi adicionado com sucesso.` });
     return novoContrato;
   };
-
+  
   const atualizarContrato = (id: string, contratoAtualizado: Partial<Contract>) => {
     setContratos(contratos.map(c => 
       c.id === id ? { ...c, ...contratoAtualizado, updatedAt: new Date().toISOString() } : c
     ));
     toast({ title: "Contrato atualizado", description: "O contrato foi atualizado com sucesso." });
   };
-
+  
   const excluirContrato = (id: string) => {
+    const contratoRemovido = contratos.find(c => c.id === id);
     setContratos(contratos.filter(c => c.id !== id));
-    toast({ title: "Contrato removido", description: "O contrato foi removido com sucesso." });
-  };
-
-  const enviarContratoParaCliente = (contratoId: string, clienteId: string) => {
-    const contratoAtualizado = contratos.find(c => c.id === contratoId);
-    if (contratoAtualizado) {
-      atualizarContrato(contratoId, { status: 'sent' });
-      
-      adicionarMensagem({
-        remetente: 'empresa',
-        clienteId: clienteId,
-        conteudo: `Um novo contrato foi enviado para você. Por favor, revise e assine.`,
-        lida: false
-      });
-      
-      toast({ title: "Contrato enviado", description: "O contrato foi enviado para o cliente." });
+    
+    if (contratoRemovido) {
+      toast({ title: "Contrato removido", description: `${contratoRemovido.title} foi removido com sucesso.` });
     }
   };
-
-  const assinarContrato = (contratoId: string, urlAssinatura: string) => {
-    const contratoAtualizado = contratos.find(c => c.id === contratoId);
-    if (contratoAtualizado) {
-      atualizarContrato(contratoId, { 
-        status: 'signed', 
-        signatureUrl: urlAssinatura,
-        signedAt: new Date().toISOString()
+  
+  const enviarContratoParaCliente = (contractId: string, clientId: string) => {
+    const contrato = contratos.find(c => c.id === contractId);
+    
+    if (!contrato) {
+      toast({ 
+        title: "Erro", 
+        description: "Contrato não encontrado.",
+        variant: "destructive" 
       });
-      
-      toast({ title: "Contrato assinado", description: "O contrato foi assinado com sucesso." });
+      return;
     }
+    
+    adicionarMensagem({
+      remetente: 'empresa',
+      clienteId: clientId,
+      conteudo: `Um novo contrato "${contrato.title}" foi enviado para você. Por favor, revise e assine.`,
+      lida: true
+    });
+    
+    atualizarContrato(contractId, { status: 'sent' });
+    
+    toast({ title: "Contrato enviado", description: "O contrato foi enviado para o cliente com sucesso." });
   };
-
+  
+  const assinarContrato = (contractId: string, signatureUrl: string) => {
+    const contrato = contratos.find(c => c.id === contractId);
+    
+    if (!contrato) {
+      toast({ 
+        title: "Erro", 
+        description: "Contrato não encontrado.",
+        variant: "destructive" 
+      });
+      return;
+    }
+    
+    atualizarContrato(contractId, {
+      status: 'signed',
+      signatureUrl,
+      signedAt: new Date().toISOString()
+    });
+    
+    toast({ title: "Contrato assinado", description: "O contrato foi assinado com sucesso." });
+  };
+  
   return (
     <HandleContext.Provider value={{
       clients: clientes,
@@ -804,32 +647,24 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       users: usuario,
       contracts: contratos,
       contractTemplates: modelosContrato,
-      
       addClients: adicionarCliente,
       updateClients: atualizarCliente,
       removeClients: excluirCliente,
-      
       addKit: adicionarKit,
       updateKit: atualizarKit,
       removeKit: excluirKit,
-      
       addThems: adicionarTema,
       updateThems: atualizarTema,
       removeThems: excluirTema,
-      
       addEvent: adicionarEvento,
       updateEvent: atualizarEvento,
       removeEvent: excluirEvento,
-      
       addMessage: adicionarMensagem,
       markMessageAsRead: marcarMensagemComoLida,
-      
       updateStatistic: atualizarEstatisticas,
-      
       addContractTemplate: adicionarModeloContrato,
       updateContractTemplate: atualizarModeloContrato,
       removeContractTemplate: excluirModeloContrato,
-      
       addContract: adicionarContrato,
       updateContract: atualizarContrato,
       removeContract: excluirContrato,
@@ -841,10 +676,10 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   );
 };
 
-export const useHandle = () => {
+export const useHandleContext = () => {
   const context = useContext(HandleContext);
   if (context === undefined) {
-    throw new Error('useHandle must be used within a FestaProvider');
+    throw new Error('useHandleContext must be used within a FestaProvider');
   }
   return context;
 };

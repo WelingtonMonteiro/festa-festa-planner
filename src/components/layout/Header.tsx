@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { useHandleContext } from '@/contexts/handleContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';

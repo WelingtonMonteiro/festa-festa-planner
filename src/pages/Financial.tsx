@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useHandleContext } from '@/contexts/handleContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { useLocation } from 'react-router-dom';
 import { 
   Tabs, 

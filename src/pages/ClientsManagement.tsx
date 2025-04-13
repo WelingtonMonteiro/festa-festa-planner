@@ -6,7 +6,7 @@ import {
   Users, AlertCircle, Clock, CalendarX, 
   DollarSign, CalendarCheck, Calendar 
 } from "lucide-react";
-import { useHandleContext } from "@/contexts/handleContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import ActiveClients from "@/components/management/ActiveClients.tsx";
 import ClientesPagamentosAtrasados from "@/components/management/LatePaymentsClients.tsx";
 import CanceledClients from "@/components/management/CanceledClients.tsx";

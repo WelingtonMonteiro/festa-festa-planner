@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch"; 
 import { toast } from "@/components/ui/use-toast";
-import { useHandleContext } from "@/contexts/handleContext";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 
 // Schema de validação
 const formSchema = z.object({
@@ -99,7 +100,6 @@ const NewClientDialog = ({
           email: values.email || "",
           endereco: values.endereco,
           ativo: values.ativo,
-          historico: [] // Add this line to provide the required historico property
         });
         toast({
           title: "Cliente adicionado",

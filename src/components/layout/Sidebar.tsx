@@ -21,7 +21,7 @@ import {
   ScrollText,
   ShieldAlert
 } from 'lucide-react';
-import { useHandleContext } from '@/contexts/handleContext';
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
 
 interface SidebarProps {

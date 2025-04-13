@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { useHandleContext } from "@/contexts";
+import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import { 
   Table, 
@@ -42,13 +43,11 @@ const EventsManagement = () => {
   ];
 
   const handleStatusChange = (eventoId: string, newStatus: string) => {
-    if (updateEvent) {
-      updateEvent(eventoId, { status: newStatus as any });
-      toast({
-        title: "Status atualizado",
-        description: `O status do evento foi alterado para ${newStatus}`,
-      });
-    }
+    updateEvent(eventoId, { status: newStatus as any });
+    toast({
+      title: "Status atualizado",
+      description: `O status do evento foi alterado para ${newStatus}`,
+    });
   };
 
   const navigateToCalendar = (date: string) => {
