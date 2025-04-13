@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -60,9 +59,7 @@ const KitsThems = () => {
           
           if (newKit) {
             addKit({
-              ...kitData,
-              id: newKit.id,
-              vezes_alugado: 0
+              ...newKit
             });
             toast.success('Kit adicionado com sucesso ao Supabase');
           }
@@ -111,9 +108,7 @@ const KitsThems = () => {
           
           if (newThem) {
             addThems({
-              ...themData,
-              id: newThem.id,
-              vezes_alugado: 0
+              ...newThem
             });
             toast.success('Tema adicionado com sucesso ao Supabase');
           }
