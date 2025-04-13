@@ -237,7 +237,7 @@ const Landing = () => {
                   <CardTitle>{feature.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <div className="text-muted-foreground">{feature.description}</div>
                 </CardContent>
               </Card>
             ))}
@@ -263,7 +263,7 @@ const Landing = () => {
                     <img src="/placeholder.svg" alt="Visualização de Calendário" className="w-full aspect-video object-cover" />
                     <div className="p-4 bg-card">
                       <h3 className="font-medium text-lg">Gerenciamento de Calendário</h3>
-                      <p className="text-muted-foreground">Visualize e gerencie todos os seus eventos em uma interface intuitiva de calendário.</p>
+                      <div className="text-muted-foreground">Visualize e gerencie todos os seus eventos em uma interface intuitiva de calendário.</div>
                     </div>
                   </div>
                 </div>
@@ -274,7 +274,7 @@ const Landing = () => {
                     <img src="/placeholder.svg" alt="Dashboard de Clientes" className="w-full aspect-video object-cover" />
                     <div className="p-4 bg-card">
                       <h3 className="font-medium text-lg">Dashboard de Clientes</h3>
-                      <p className="text-muted-foreground">Acompanhe todas as informações dos clientes, preferências e histórico.</p>
+                      <div className="text-muted-foreground">Acompanhe todas as informações dos clientes, preferências e histórico.</div>
                     </div>
                   </div>
                 </div>
@@ -285,7 +285,7 @@ const Landing = () => {
                     <img src="/placeholder.svg" alt="Seleção de Temas" className="w-full aspect-video object-cover" />
                     <div className="p-4 bg-card">
                       <h3 className="font-medium text-lg">Seleção de Temas</h3>
-                      <p className="text-muted-foreground">Navegue e selecione entre múltiplos temas e kits para festas.</p>
+                      <div className="text-muted-foreground">Navegue e selecione entre múltiplos temas e kits para festas.</div>
                     </div>
                   </div>
                 </div>
@@ -316,7 +316,7 @@ const Landing = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium mb-2">Economia de Tempo</h3>
-                <p className="text-muted-foreground">Economize até 15 horas por semana em tarefas administrativas e coordenação de eventos.</p>
+                <div className="text-muted-foreground">Economize até 15 horas por semana em tarefas administrativas e coordenação de eventos.</div>
               </div>
             </div>
             
@@ -326,7 +326,7 @@ const Landing = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium mb-2">Aumento de Receita</h3>
-                <p className="text-muted-foreground">Em média, nossos usuários relatam um aumento de 30% na capacidade de negócios e receita.</p>
+                <div className="text-muted-foreground">Em média, nossos usuários relatam um aumento de 30% na capacidade de negócios e receita.</div>
               </div>
             </div>
             
@@ -336,7 +336,7 @@ const Landing = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium mb-2">Satisfação do Cliente</h3>
-                <p className="text-muted-foreground">Melhor organização leva a clientes mais satisfeitos e mais indicações.</p>
+                <div className="text-muted-foreground">Melhor organização leva a clientes mais satisfeitos e mais indicações.</div>
               </div>
             </div>
             
@@ -346,7 +346,7 @@ const Landing = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium mb-2">Solução Completa</h3>
-                <p className="text-muted-foreground">Todas as suas ferramentas em um só lugar, em vez de lidar com vários sistemas de software.</p>
+                <div className="text-muted-foreground">Todas as suas ferramentas em um só lugar, em vez de lidar com vários sistemas de software.</div>
               </div>
             </div>
             
@@ -356,7 +356,7 @@ const Landing = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium mb-2">Segurança de Dados</h3>
-                <p className="text-muted-foreground">Seus dados de negócios e de clientes são armazenados e backupeados de forma segura.</p>
+                <div className="text-muted-foreground">Seus dados de negócios e de clientes são armazenados e backupeados de forma segura.</div>
               </div>
             </div>
             
@@ -366,7 +366,7 @@ const Landing = () => {
               </div>
               <div>
                 <h3 className="text-lg font-medium mb-2">Sempre Disponível</h3>
-                <p className="text-muted-foreground">Acesse seu sistema de gerenciamento de eventos 24/7 de qualquer dispositivo, em qualquer lugar.</p>
+                <div className="text-muted-foreground">Acesse seu sistema de gerenciamento de eventos 24/7 de qualquer dispositivo, em qualquer lugar.</div>
               </div>
             </div>
           </div>
