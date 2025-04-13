@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -58,9 +59,7 @@ const KitsThems = () => {
           const newKit = await kitService.create(kitData);
           
           if (newKit) {
-            addKit({
-              ...newKit
-            });
+            addKit(newKit);
             toast.success('Kit adicionado com sucesso ao Supabase');
           }
         }
@@ -68,8 +67,10 @@ const KitsThems = () => {
         // Lógica existente para localStorage
         if (editingKit) {
           updateKit(editingKit, kitData);
+          toast.success('Kit atualizado com sucesso no armazenamento local');
         } else {
           addKit(kitData);
+          toast.success('Kit adicionado com sucesso ao armazenamento local');
         }
       }
     } catch (error) {
@@ -107,9 +108,7 @@ const KitsThems = () => {
           const newThem = await themService.create(themData, kits);
           
           if (newThem) {
-            addThems({
-              ...newThem
-            });
+            addThems(newThem);
             toast.success('Tema adicionado com sucesso ao Supabase');
           }
         }
@@ -117,8 +116,10 @@ const KitsThems = () => {
         // Lógica existente para localStorage
         if (editingThem) {
           updateThems(editingThem, themData);
+          toast.success('Tema atualizado com sucesso no armazenamento local');
         } else {
           addThems(themData);
+          toast.success('Tema adicionado com sucesso ao armazenamento local');
         }
       }
     } catch (error) {
@@ -169,6 +170,7 @@ const KitsThems = () => {
         } else {
           // Lógica existente para localStorage
           removeKit(kitToDelete);
+          toast.success('Kit excluído com sucesso do armazenamento local');
         }
       } catch (error) {
         console.error('Erro ao excluir kit:', error);
@@ -199,6 +201,7 @@ const KitsThems = () => {
         } else {
           // Lógica existente para localStorage
           removeThems(themToDelete);
+          toast.success('Tema excluído com sucesso do armazenamento local');
         }
       } catch (error) {
         console.error('Erro ao excluir tema:', error);

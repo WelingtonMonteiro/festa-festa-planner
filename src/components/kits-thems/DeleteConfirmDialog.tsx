@@ -26,6 +26,7 @@ const DeleteConfirmDialog = ({
       await onConfirm();
     } finally {
       setIsDeleting(false);
+      // Not calling onOpenChange here since it's already managed by the parent component
     }
   };
 
@@ -39,7 +40,7 @@ const DeleteConfirmDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => onOpenChange(false)} disabled={isDeleting}>
+          <AlertDialogCancel disabled={isDeleting}>
             Cancelar
           </AlertDialogCancel>
           <AlertDialogAction 
