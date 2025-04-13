@@ -1,5 +1,5 @@
 import { createContext, useContext } from 'react';
-import { Client, Event, Message, Contract, ContractTemplate, Kit, Theme } from '@/types';
+import { Client, Event, Message, Contract, ContractTemplate, Kit, Them } from '@/types';
 
 interface HandleContextType {
   // Data collections
@@ -9,7 +9,7 @@ interface HandleContextType {
   contracts: Contract[];
   contractTemplates: ContractTemplate[];
   kits: Kit[];
-  themes: Theme[];
+  themes: Them[];
   
   // Client methods
   addClients: (client: Omit<Client, 'id'>) => void;
@@ -21,9 +21,14 @@ interface HandleContextType {
   sendContractToClient: (contractId: string, clientId: string) => void;
   
   // Contract template methods
-  addContractTemplate: (template: Omit<ContractTemplate, 'id' | 'createdAt'>) => void;
+  addContractTemplate: (template: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateContractTemplate: (id: string, templateData: Partial<ContractTemplate>) => void;
   removeContractTemplate: (id: string) => void;
+  
+  // Contract methods
+  addContract: (contract: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateContract: (id: string, contract: Partial<Contract>) => void;
+  removeContract: (id: string) => void;
   
   // Other methods needed by your components
 }
