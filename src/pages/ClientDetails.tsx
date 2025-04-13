@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -32,15 +31,12 @@ const ClientDetails = () => {
   const { clients, removeClients } = useHandleContext();
   const [dialogEdicaoAberto, setDialogEdicaoAberto] = useState(false);
   
-  // Encontrar cliente pelo ID
   const cliente = clients.find((c) => c.id === id);
   
-  // Verifica se o cliente existe e, caso exista, garante que o historico existe
   if (cliente && !cliente.historico) {
     cliente.historico = [];
   }
   
-  // Redirecionar se o cliente não for encontrado
   useEffect(() => {
     if (!cliente && id) {
       navigate("/clients");
@@ -66,17 +62,14 @@ const ClientDetails = () => {
     );
   }
   
-  // Certifique-se de que historico existe e é um array
   const historico = cliente.historico || [];
   
-  // Calcular estatísticas do cliente
   const totalEventos = historico.length;
   const valorTotalGasto = historico.reduce(
     (total, evento) => total + (evento?.valorTotal || 0),
     0
   );
   
-  // Contar kits alugados
   const kitsAlugados = historico.reduce((acc, evento) => {
     if (evento?.kit) {
       const kitId = evento.kit.id;
@@ -85,7 +78,6 @@ const ClientDetails = () => {
     return acc;
   }, {} as Record<string, number>);
   
-  // Contar temas alugados
   const temasAlugados = historico.reduce((acc, evento) => {
     if (evento?.tema) {
       const temaId = evento.tema.id;
@@ -94,7 +86,6 @@ const ClientDetails = () => {
     return acc;
   }, {} as Record<string, number>);
   
-  // Obter status dos events
   const statusEventos = historico.reduce((acc, evento) => {
     if (evento?.status) {
       acc[evento.status] = (acc[evento.status] || 0) + 1;
@@ -109,7 +100,6 @@ const ClientDetails = () => {
   
   return (
     <div className="space-y-6">
-      {/* Cabeçalho */}
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div className="flex items-center space-x-2">
           <Button 
@@ -171,13 +161,14 @@ const ClientDetails = () => {
         </div>
       </div>
       
-      {/* Informações do cliente */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardContent className="flex flex-row items-center justify-between p-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total de Eventos</p>
-              <p className="text-2xl font-bold">{totalEventos}</p>
+              <p className="text-2xl font-bold">
+                {totalEventos}
+              </p>
             </div>
             <div className="rounded-full bg-blue-100 p-2 dark:bg-blue-900">
               <CalendarDays className="h-6 w-6 text-blue-700 dark:text-blue-300" />
@@ -226,7 +217,6 @@ const ClientDetails = () => {
         </Card>
       </div>
       
-      {/* Conteúdo em abas */}
       <Tabs defaultValue="historico">
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="historico">Histórico</TabsTrigger>
@@ -234,7 +224,6 @@ const ClientDetails = () => {
           <TabsTrigger value="mapa">Mapa</TabsTrigger>
         </TabsList>
         
-        {/* Histórico de events */}
         <TabsContent value="historico">
           <Card>
             <CardHeader>
@@ -312,10 +301,8 @@ const ClientDetails = () => {
           </Card>
         </TabsContent>
         
-        {/* Estatísticas */}
         <TabsContent value="estatisticas">
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Kits alugados */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -339,7 +326,7 @@ const ClientDetails = () => {
                           <div>
                             <div className="font-medium">{kit.nome}</div>
                             <div className="text-sm text-muted-foreground">
-                              {quantidade} {quantidade > 1 ? "vezes" : "vez"}
+                              {quantidade} {Number(quantidade) > 1 ? "vezes" : "vez"}
                             </div>
                           </div>
                           <div className="text-right font-medium">
@@ -359,7 +346,6 @@ const ClientDetails = () => {
               </CardContent>
             </Card>
             
-            {/* Temas alugados */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center">
@@ -383,7 +369,7 @@ const ClientDetails = () => {
                           <div>
                             <div className="font-medium">{tema.nome}</div>
                             <div className="text-sm text-muted-foreground">
-                              {quantidade} {quantidade > 1 ? "vezes" : "vez"}
+                              {quantidade} {Number(quantidade) > 1 ? "vezes" : "vez"}
                             </div>
                           </div>
                           <div className="text-right font-medium">
@@ -405,7 +391,6 @@ const ClientDetails = () => {
           </div>
         </TabsContent>
         
-        {/* Mapa de events */}
         <TabsContent value="mapa">
           <Card className="min-h-[500px]">
             <CardHeader>
@@ -421,7 +406,6 @@ const ClientDetails = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Diálogo de edição */}
       <NewClientDialog
         open={dialogEdicaoAberto}
         onOpenChange={setDialogEdicaoAberto}

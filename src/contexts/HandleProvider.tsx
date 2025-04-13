@@ -263,6 +263,7 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         contractTemplates,
         kits,
         themes,
+        thems: themes, // Add this for backward compatibility
         addClients,
         updateClients,
         removeClients,

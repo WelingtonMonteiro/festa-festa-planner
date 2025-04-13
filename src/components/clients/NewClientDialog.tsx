@@ -99,6 +99,7 @@ const NewClientDialog = ({
           email: values.email || "",
           endereco: values.endereco,
           ativo: values.ativo,
+          historico: [] // Add this line to provide the required historico property
         });
         toast({
           title: "Cliente adicionado",

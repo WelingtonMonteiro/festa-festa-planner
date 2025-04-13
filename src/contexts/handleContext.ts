@@ -30,6 +30,16 @@ interface HandleContextType {
   addContract: (contract: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateContract: (id: string, contract: Partial<Contract>) => void;
   removeContract: (id: string) => void;
+  
+  // Additional methods for backward compatibility
+  thems?: Them[];
+  statistics?: {
+    eventosPorMes: Record<string, number>;
+    kitsPopulares: Array<{kit: string, quantidade: number}>;
+    temasPorMes: Record<string, Record<string, number>>;
+    temasPorAno: Record<string, number>;
+    faturamentoMensal: Record<string, number>;
+  };
 }
 
 export const HandleContext = createContext<HandleContextType | undefined>(undefined);

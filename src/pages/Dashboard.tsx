@@ -8,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { Progress } from "@/components/ui/progress";
 
 const Dashboard = () => {
-  const { clients, thems, events, statistics } = useHandleContext();
+  const { clients, events, themes, kits } = useHandleContext();
   const navigate = useNavigate();
   
   // Estatísticas e cálculos
@@ -24,7 +24,7 @@ const Dashboard = () => {
     .filter(e => e.status === 'finalizado')
     .reduce((total, evento) => total + evento.valorTotal, 0);
   
-  const temasMaisPopulares = thems
+  const temasMaisPopulares = themes
     .sort((a, b) => b.vezes_alugado - a.vezes_alugado)
     .slice(0, 3);
   
