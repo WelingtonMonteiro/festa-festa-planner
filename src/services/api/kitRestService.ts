@@ -66,7 +66,7 @@ export const kitRestService = {
   async update(id: string, kit: Partial<Kit>, apiUrl: string): Promise<Kit | null> {
     try {
       const response = await fetch(`${apiUrl}/kits/${id}`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -98,8 +98,8 @@ export const kitRestService = {
       
       return true;
     } catch (error) {
-      console.error('Falha ao excluir kit da API:', error);
-      toast.error('Falha ao excluir kit da API REST');
+      console.error('Falha ao excluir kit na API:', error);
+      toast.error('Falha ao excluir kit na API REST');
       return false;
     }
   }
