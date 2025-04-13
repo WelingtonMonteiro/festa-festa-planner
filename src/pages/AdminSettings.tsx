@@ -2,13 +2,14 @@
 import { useEffect, useState } from "react";
 import { useStorage } from "@/contexts/storageContext";
 import { useApi } from "@/contexts/apiContext";
-import { Database, HardDrive, Link, Server } from "lucide-react";
+import { Database, HardDrive, Link, Server, Globe } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 const AdminSettings = () => {
   // Tipo de armazenamento/acesso
@@ -77,8 +78,45 @@ const AdminSettings = () => {
       new URL(apiUrlInput);
       setApiUrl(apiUrlInput);
       toast.success("URL da API atualizada com sucesso");
+      
+      if (apiType === 'rest') {
+        toast.info(`As alterações terão efeito após recarregar a página`, {
+          duration: 5000,
+          action: {
+            label: "Recarregar agora",
+            onClick: () => window.location.reload(),
+          },
+        });
+      }
     } catch (e) {
       toast.error("URL inválida. Por favor, forneça uma URL completa (ex: https://api.exemplo.com)");
+    }
+  };
+  
+  const handleTestApi = async () => {
+    if (!apiUrlInput) {
+      toast.error("Por favor, configure uma URL de API antes de testar");
+      return;
+    }
+    
+    toast.loading("Testando conexão com a API...");
+    
+    try {
+      // Teste simples para verificar se a API está respondendo
+      const response = await fetch(`${apiUrlInput}/ping`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        toast.success("Conexão com a API estabelecida com sucesso!");
+      } else {
+        toast.error(`Erro ao conectar com a API: ${response.status} ${response.statusText}`);
+      }
+    } catch (error) {
+      toast.error(`Falha ao conectar com a API: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
     }
   };
   
@@ -141,10 +179,32 @@ const AdminSettings = () => {
                       <Button onClick={handleApiUrlSave} type="button">
                         Salvar
                       </Button>
+                      <Button onClick={handleTestApi} variant="outline" type="button">
+                        Testar
+                      </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Insira a URL base da API REST que será usada para chamadas.
                     </p>
+                    
+                    {selectedDataSource === 'rest' && apiUrl && (
+                      <Alert className="mt-3 bg-muted">
+                        <Globe className="h-4 w-4" />
+                        <AlertTitle>API REST Ativa</AlertTitle>
+                        <AlertDescription>
+                          <p className="text-sm">
+                            O sistema está usando a API REST para acessar dados. Certifique-se de que sua API siga os padrões de endpoints:
+                          </p>
+                          <ul className="text-xs mt-2 space-y-1 list-disc pl-5">
+                            <li><code>/kits</code> - Listar e criar kits</li>
+                            <li><code>/kits/:id</code> - Obter, atualizar e excluir um kit</li>
+                            <li><code>/thems</code> - Listar e criar temas</li>
+                            <li><code>/thems/:id</code> - Obter, atualizar e excluir um tema</li>
+                            <li><code>/ping</code> - Endpoint para verificar status da API</li>
+                          </ul>
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </div>
                 )}
                 
