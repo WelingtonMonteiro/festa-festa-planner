@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { BrowserRouter as Router } from 'react-router-dom';
 import { AppRoutes } from './routes';
 import { Toaster } from '@/components/ui/toaster';
 import { ApiProvider } from './contexts/apiContext';
@@ -12,10 +11,8 @@ function App() {
     <ThemeProvider defaultTheme="light" storageKey="festa-theme">
       <ApiProvider>
         <HandleProvider>
-          <Router>
-            <AppRoutes />
-            <Toaster />
-          </Router>
+          <AppRoutes />
+          <Toaster />
         </HandleProvider>
       </ApiProvider>
     </ThemeProvider>
