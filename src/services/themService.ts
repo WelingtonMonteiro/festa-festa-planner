@@ -51,11 +51,11 @@ export const themService = {
       // Get kit ids from the kits array
       const kits_ids = them.kits.map(kit => kit.id);
       
-      const newThem: Omit<ThemRecord, 'id' | 'created_at'> = {
+      const newThem: any = {
         nome: them.nome,
         descricao: them.descricao,
         imagens: them.imagens,
-        valorGasto: them.valorGasto,
+        valorgasto: them.valorGasto, // Use valorgasto instead of valorGasto to match DB field
         vezes_alugado: 0,
         kits_ids: kits_ids
       };
@@ -83,11 +83,11 @@ export const themService = {
   async update(id: string, them: Partial<Them>, allKits: Kit[]): Promise<Them | null> {
     try {
       // Calculate which values to update
-      const updateData: Partial<ThemRecord> = {
+      const updateData: any = {
         nome: them.nome,
         descricao: them.descricao,
         imagens: them.imagens,
-        valorGasto: them.valorGasto,
+        valorgasto: them.valorGasto, // Use valorgasto instead of valorGasto to match DB field
         vezes_alugado: them.vezes_alugado
       };
       

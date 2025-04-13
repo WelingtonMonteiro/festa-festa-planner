@@ -1,7 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { setupSupabaseDatabase } from "./migrationScripts";
-import { KitRecord, ThemRecord } from "@/types/supabase";
 
 export const databaseService = {
   async setupDatabase() {
@@ -50,7 +49,7 @@ export const databaseService = {
               nome: them.nome,
               descricao: them.descricao,
               imagens: them.imagens,
-              valorGasto: them.valorGasto,
+              valorgasto: them.valorGasto, // Use valorgasto instead of valorGasto to match DB field
               vezes_alugado: them.vezes_alugado,
               kits_ids: them.kits.map((kit: any) => kit.id)
             })

@@ -41,7 +41,7 @@ export const kitFromRecord = (record: KitRecord): Kit => {
   };
 };
 
-export const themFromRecord = (record: ThemRecord, allKits: Kit[]): Them => {
+export const themFromRecord = (record: any, allKits: Kit[]): Them => {
   // Find all kits that are referenced by this theme
   const kits = allKits.filter(kit => record.kits_ids.includes(kit.id));
   
@@ -50,7 +50,7 @@ export const themFromRecord = (record: ThemRecord, allKits: Kit[]): Them => {
     nome: record.nome,
     descricao: record.descricao,
     imagens: record.imagens,
-    valorGasto: record.valorGasto,
+    valorGasto: record.valorgasto || 0, // Map DB field 'valorgasto' to 'valorGasto'
     vezes_alugado: record.vezes_alugado,
     kits: kits
   };
