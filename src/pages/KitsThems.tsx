@@ -53,6 +53,8 @@ const KitsThems = () => {
           if (updatedKit) {
             updateKit(editingKit, kitData);
             toast.success('Kit atualizado com sucesso no Supabase');
+          } else {
+            throw new Error('Falha ao atualizar kit no Supabase');
           }
         } else {
           // Criar no Supabase
@@ -61,6 +63,8 @@ const KitsThems = () => {
           if (newKit) {
             addKit(newKit);
             toast.success('Kit adicionado com sucesso ao Supabase');
+          } else {
+            throw new Error('Falha ao adicionar kit ao Supabase');
           }
         }
       } else {
@@ -102,6 +106,8 @@ const KitsThems = () => {
           if (updatedThem) {
             updateThems(editingThem, themData);
             toast.success('Tema atualizado com sucesso no Supabase');
+          } else {
+            throw new Error('Falha ao atualizar tema no Supabase');
           }
         } else {
           // Criar no Supabase
@@ -110,6 +116,8 @@ const KitsThems = () => {
           if (newThem) {
             addThems(newThem);
             toast.success('Tema adicionado com sucesso ao Supabase');
+          } else {
+            throw new Error('Falha ao adicionar tema ao Supabase');
           }
         }
       } else {

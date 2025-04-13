@@ -6,7 +6,7 @@ import { useState } from 'react';
 interface DeleteConfirmDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
   title: string;
   description: string;
 }
@@ -26,7 +26,7 @@ const DeleteConfirmDialog = ({
       await onConfirm();
     } finally {
       setIsDeleting(false);
-      // Not calling onOpenChange here since it's already managed by the parent component
+      onOpenChange(false);
     }
   };
 

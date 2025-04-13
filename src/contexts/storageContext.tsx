@@ -47,6 +47,10 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
             }
           }
         }
+        
+        setStorageTypeState(type);
+        localStorage.setItem('preferredStorage', type);
+        toast.success(`Usando Supabase para dados`);
       } catch (error) {
         console.error('Failed to set up Supabase:', error);
         toast.error('Falha ao configurar o Supabase. Usando localStorage.');
@@ -54,11 +58,11 @@ export const StorageProvider: React.FC<{ children: React.ReactNode }> = ({ child
         localStorage.setItem('preferredStorage', 'localStorage');
         return;
       }
+    } else {
+      setStorageTypeState(type);
+      localStorage.setItem('preferredStorage', type);
+      toast.success(`Usando Armazenamento local para dados`);
     }
-    
-    setStorageTypeState(type);
-    localStorage.setItem('preferredStorage', type);
-    toast.success(`Usando ${type === 'supabase' ? 'Supabase' : 'Armazenamento local'} para dados`);
   };
 
   return (
