@@ -15,10 +15,14 @@ import { Kit, Them } from '@/types';
 import { kitService } from '@/services/kitService';
 import { themService } from '@/services/themService';
 import { useStorage } from '@/contexts/storageContext';
+import { useApi } from '@/contexts/apiContext';
+import { kitRestService } from '@/services/api/kitRestService';
+import { themRestService } from '@/services/api/themRestService';
 
 const KitsThems = () => {
   const { kits, thems, addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
   const { storageType } = useStorage();
+  const { isRestApi, apiUrl } = useApi();
   
   const [kitDialogOpen, setKitDialogOpen] = useState(false);
   const [themDialogOpen, setThemDialogOpen] = useState(false);
@@ -42,7 +46,45 @@ const KitsThems = () => {
     setIsLoading(true);
     
     try {
-      if (storageType === 'supabase') {
+      // Se estiver usando API REST
+      if (isRestApi) {
+        if (!apiUrl) {
+          toast.error("URL da API REST não configurada");
+          setIsLoading(false);
+          return;
+        }
+        
+        if (editingKit) {
+          // Atualizar via REST API
+          const updatedKit = await kitRestService.update(
+            editingKit, 
+            {
+              ...kitData,
+              vezes_alugado: kits.find(k => k.id === editingKit)?.vezes_alugado || 0
+            },
+            apiUrl
+          );
+          
+          if (updatedKit) {
+            updateKit(editingKit, kitData);
+            toast.success('Kit atualizado com sucesso via API REST');
+          } else {
+            throw new Error('Falha ao atualizar kit na API REST');
+          }
+        } else {
+          // Criar via REST API
+          const newKit = await kitRestService.create(kitData, apiUrl);
+          
+          if (newKit) {
+            addKit(newKit);
+            toast.success('Kit adicionado com sucesso via API REST');
+          } else {
+            throw new Error('Falha ao adicionar kit via API REST');
+          }
+        }
+      }
+      // Se estiver usando Supabase
+      else if (storageType === 'supabase') {
         if (editingKit) {
           // Atualizar no Supabase
           const updatedKit = await kitService.update(editingKit, {
@@ -68,7 +110,7 @@ const KitsThems = () => {
           }
         }
       } else {
-        // Lógica existente para localStorage
+        // Lógica para localStorage
         if (editingKit) {
           updateKit(editingKit, kitData);
           toast.success('Kit atualizado com sucesso no armazenamento local');
@@ -91,7 +133,45 @@ const KitsThems = () => {
     setIsLoading(true);
     
     try {
-      if (storageType === 'supabase') {
+      // Se estiver usando API REST
+      if (isRestApi) {
+        if (!apiUrl) {
+          toast.error("URL da API REST não configurada");
+          setIsLoading(false);
+          return;
+        }
+        
+        if (editingThem) {
+          // Atualizar via REST API
+          const updatedThem = await themRestService.update(
+            editingThem, 
+            {
+              ...themData,
+              vezes_alugado: thems.find(t => t.id === editingThem)?.vezes_alugado || 0
+            },
+            apiUrl
+          );
+          
+          if (updatedThem) {
+            updateThems(editingThem, themData);
+            toast.success('Tema atualizado com sucesso via API REST');
+          } else {
+            throw new Error('Falha ao atualizar tema via API REST');
+          }
+        } else {
+          // Criar via REST API
+          const newThem = await themRestService.create(themData, apiUrl);
+          
+          if (newThem) {
+            addThems(newThem);
+            toast.success('Tema adicionado com sucesso via API REST');
+          } else {
+            throw new Error('Falha ao adicionar tema via API REST');
+          }
+        }
+      }
+      // Se estiver usando Supabase
+      else if (storageType === 'supabase') {
         if (editingThem) {
           // Atualizar no Supabase
           const updatedThem = await themService.update(
@@ -121,7 +201,7 @@ const KitsThems = () => {
           }
         }
       } else {
-        // Lógica existente para localStorage
+        // Lógica para localStorage
         if (editingThem) {
           updateThems(editingThem, themData);
           toast.success('Tema atualizado com sucesso no armazenamento local');
@@ -165,7 +245,26 @@ const KitsThems = () => {
       setIsLoading(true);
       
       try {
-        if (storageType === 'supabase') {
+        // Se estiver usando API REST
+        if (isRestApi) {
+          if (!apiUrl) {
+            toast.error("URL da API REST não configurada");
+            setIsLoading(false);
+            return;
+          }
+          
+          // Excluir da API REST
+          const success = await kitRestService.delete(kitToDelete, apiUrl);
+          
+          if (success) {
+            removeKit(kitToDelete);
+            toast.success('Kit excluído com sucesso via API REST');
+          } else {
+            throw new Error('Falha ao excluir kit da API REST');
+          }
+        }
+        // Se estiver usando Supabase
+        else if (storageType === 'supabase') {
           // Excluir do Supabase
           const success = await kitService.delete(kitToDelete);
           
@@ -176,7 +275,7 @@ const KitsThems = () => {
             throw new Error('Falha ao excluir kit do Supabase');
           }
         } else {
-          // Lógica existente para localStorage
+          // Lógica para localStorage
           removeKit(kitToDelete);
           toast.success('Kit excluído com sucesso do armazenamento local');
         }
@@ -196,7 +295,26 @@ const KitsThems = () => {
       setIsLoading(true);
       
       try {
-        if (storageType === 'supabase') {
+        // Se estiver usando API REST
+        if (isRestApi) {
+          if (!apiUrl) {
+            toast.error("URL da API REST não configurada");
+            setIsLoading(false);
+            return;
+          }
+          
+          // Excluir da API REST
+          const success = await themRestService.delete(themToDelete, apiUrl);
+          
+          if (success) {
+            removeThems(themToDelete);
+            toast.success('Tema excluído com sucesso via API REST');
+          } else {
+            throw new Error('Falha ao excluir tema da API REST');
+          }
+        }
+        // Se estiver usando Supabase
+        else if (storageType === 'supabase') {
           // Excluir do Supabase
           const success = await themService.delete(themToDelete);
           
@@ -207,7 +325,7 @@ const KitsThems = () => {
             throw new Error('Falha ao excluir tema do Supabase');
           }
         } else {
-          // Lógica existente para localStorage
+          // Lógica para localStorage
           removeThems(themToDelete);
           toast.success('Tema excluído com sucesso do armazenamento local');
         }
@@ -222,6 +340,7 @@ const KitsThems = () => {
     }
   };
   
+  // O restante do componente permanece o mesmo
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">

@@ -11,6 +11,7 @@ interface ApiContextType {
   apiUrl: string;
   setApiUrl: (url: string) => void;
   isApiInitialized: boolean;
+  isRestApi: boolean;  // Nova propriedade para facilitar verificação
 }
 
 const ApiContext = createContext<ApiContextType | undefined>(undefined);
@@ -49,13 +50,17 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Não mostramos toast aqui pois isso é controlado pela página de configurações
   };
 
+  // Computed property para verificar se estamos usando REST API
+  const isRestApi = apiType === 'rest';
+
   return (
     <ApiContext.Provider value={{
       apiType,
       setApiType,
       apiUrl,
       setApiUrl,
-      isApiInitialized
+      isApiInitialized,
+      isRestApi
     }}>
       {children}
     </ApiContext.Provider>
