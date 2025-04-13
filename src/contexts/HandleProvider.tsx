@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { HandleContext } from './handleContext';
 import { Client, Event, Message, Contract, ContractTemplate, Kit, Them } from '@/types';
 import { useApi } from './apiContext';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 import { kitRestService } from '@/services/api/kitRestService';
 
 export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -93,7 +94,6 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       localStorage.setItem('clients', JSON.stringify(updatedClients));
     } else if (isRestApi && apiUrl) {
       // Implement REST API call
-      // Example: clientRestService.create(newClient, apiUrl);
     }
   };
 
@@ -108,7 +108,6 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       localStorage.setItem('clients', JSON.stringify(updatedClients));
     } else if (isRestApi && apiUrl) {
       // Implement REST API call
-      // Example: clientRestService.update(id, clientData, apiUrl);
     }
   };
 
@@ -120,7 +119,6 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
       localStorage.setItem('clients', JSON.stringify(updatedClients));
     } else if (isRestApi && apiUrl) {
       // Implement REST API call
-      // Example: clientRestService.delete(id, apiUrl);
     }
   };
 

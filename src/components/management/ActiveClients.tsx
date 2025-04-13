@@ -7,7 +7,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useHandleContext } from "@/contexts/handleContext.tsx";
+import { useHandleContext } from "@/contexts/handleContext";
 import { Search, User, Edit, Phone, Mail } from "lucide-react";
 
 const ActiveClients = () => {

@@ -1,7 +1,8 @@
 
+import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import { AppRoutes } from './routes';
-import { Toaster } from 'sonner';
+import { Toaster } from '@/components/ui/use-toast';
 import { ApiProvider } from './contexts/apiContext';
 import { HandleProvider } from './contexts/HandleProvider';
 import { ThemeProvider } from './components/theme-provider';
@@ -13,7 +14,7 @@ function App() {
         <HandleProvider>
           <Router>
             <AppRoutes />
-            <Toaster position="top-right" />
+            <Toaster />
           </Router>
         </HandleProvider>
       </ApiProvider>

@@ -1,29 +1,27 @@
 
-import { ReactNode, useState } from 'react';
-import { cn } from '@/lib/utils';
+import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 
-interface MainLayoutProps {
-  children: ReactNode;
-  className?: string;
+export interface MainLayoutProps {
+  children?: React.ReactNode;
 }
 
-const MainLayout = ({ children, className }: MainLayoutProps) => {
+const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   
-  const handleSidebarToggle = (collapsed: boolean) => {
+  const handleToggleCollapse = (collapsed: boolean) => {
     setSidebarCollapsed(collapsed);
   };
-  
+
   return (
     <div className="flex h-screen bg-background">
-      {/* Using nav element for sidebar navigation */}
-      <Sidebar onToggleCollapse={handleSidebarToggle} />
-      <div className="flex flex-1 flex-col transition-all duration-300">
+      <Sidebar onToggleCollapse={handleToggleCollapse} />
+      <div className={`flex flex-col flex-1 ${sidebarCollapsed ? 'ml-16' : 'ml-64'} transition-all duration-300`}>
         <Header />
-        <main className={cn("flex-1 overflow-y-auto p-6", className)}>
-          {children}
+        <main className="flex-1 p-6 overflow-y-auto">
+          {children || <Outlet />}
         </main>
       </div>
     </div>

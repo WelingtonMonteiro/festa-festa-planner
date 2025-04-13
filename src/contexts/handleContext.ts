@@ -1,3 +1,4 @@
+
 import { createContext, useContext } from 'react';
 import { Client, Event, Message, Contract, ContractTemplate, Kit, Them } from '@/types';
 
@@ -29,8 +30,6 @@ interface HandleContextType {
   addContract: (contract: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateContract: (id: string, contract: Partial<Contract>) => void;
   removeContract: (id: string) => void;
-  
-  // Other methods needed by your components
 }
 
 export const HandleContext = createContext<HandleContextType | undefined>(undefined);
