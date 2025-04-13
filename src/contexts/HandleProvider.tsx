@@ -26,6 +26,9 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     faturamentoMensal: {}
   };
 
+  // Placeholder users array for backward compatibility
+  const users = [];
+
   // Load data on initialization
   useEffect(() => {
     if (isLocalStorage) {
@@ -125,6 +128,173 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     
     if (isLocalStorage) {
       localStorage.setItem('clients', JSON.stringify(updatedClients));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+  };
+
+  // Event methods
+  const addEvent = (event: Omit<Event, 'id'>) => {
+    const newEvent: Event = {
+      ...event,
+      id: Date.now().toString()
+    };
+    
+    const updatedEvents = [...events, newEvent];
+    setEvents(updatedEvents);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('events', JSON.stringify(updatedEvents));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+    
+    return newEvent;
+  };
+
+  const updateEvent = (id: string, eventData: Partial<Event>) => {
+    const updatedEvents = events.map(event => 
+      event.id === id ? { ...event, ...eventData } : event
+    );
+    
+    setEvents(updatedEvents);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('events', JSON.stringify(updatedEvents));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+  };
+
+  const removeEvent = (id: string) => {
+    const updatedEvents = events.filter(event => event.id !== id);
+    setEvents(updatedEvents);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('events', JSON.stringify(updatedEvents));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+  };
+
+  // Message methods
+  const addMessage = (message: Omit<Message, 'id'>) => {
+    const newMessage: Message = {
+      ...message,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      read: false
+    };
+    
+    const updatedMessages = [...messages, newMessage];
+    setMessages(updatedMessages);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('messages', JSON.stringify(updatedMessages));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+    
+    return newMessage;
+  };
+
+  const markMessageAsRead = (id: string) => {
+    const updatedMessages = messages.map(message =>
+      message.id === id ? { ...message, read: true } : message
+    );
+    
+    setMessages(updatedMessages);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('messages', JSON.stringify(updatedMessages));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+  };
+
+  // Kit methods
+  const addKit = (kit: Omit<Kit, 'id'>) => {
+    const newKit: Kit = {
+      ...kit,
+      id: Date.now().toString()
+    };
+    
+    const updatedKits = [...kits, newKit];
+    setKits(updatedKits);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('kits', JSON.stringify(updatedKits));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+    
+    return newKit;
+  };
+
+  const updateKit = (id: string, kitData: Partial<Kit>) => {
+    const updatedKits = kits.map(kit => 
+      kit.id === id ? { ...kit, ...kitData } : kit
+    );
+    
+    setKits(updatedKits);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('kits', JSON.stringify(updatedKits));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+  };
+
+  const removeKit = (id: string) => {
+    const updatedKits = kits.filter(kit => kit.id !== id);
+    setKits(updatedKits);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('kits', JSON.stringify(updatedKits));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+  };
+
+  // Theme methods
+  const addThems = (theme: Omit<Them, 'id'>) => {
+    const newTheme: Them = {
+      ...theme,
+      id: Date.now().toString()
+    };
+    
+    const updatedThemes = [...themes, newTheme];
+    setThemes(updatedThemes);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('themes', JSON.stringify(updatedThemes));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+    
+    return newTheme;
+  };
+
+  const updateThems = (id: string, themeData: Partial<Them>) => {
+    const updatedThemes = themes.map(theme => 
+      theme.id === id ? { ...theme, ...themeData } : theme
+    );
+    
+    setThemes(updatedThemes);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('themes', JSON.stringify(updatedThemes));
+    } else if (isRestApi && apiUrl) {
+      // Implement REST API call
+    }
+  };
+
+  const removeThems = (id: string) => {
+    const updatedThemes = themes.filter(theme => theme.id !== id);
+    setThemes(updatedThemes);
+    
+    if (isLocalStorage) {
+      localStorage.setItem('themes', JSON.stringify(updatedThemes));
     } else if (isRestApi && apiUrl) {
       // Implement REST API call
     }
@@ -271,11 +441,16 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         contractTemplates,
         kits,
         themes,
-        thems: themes, // Add this for backward compatibility
-        statistics, // Add this for backward compatibility
+        thems: themes,
+        statistics,
         addClients,
         updateClients,
         removeClients,
+        addEvent,
+        updateEvent,
+        removeEvent,
+        addMessage,
+        markMessageAsRead,
         signContract,
         sendContractToClient,
         addContractTemplate,
@@ -284,6 +459,13 @@ export const HandleProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         addContract,
         updateContract,
         removeContract,
+        addKit,
+        updateKit,
+        removeKit,
+        addThems,
+        updateThems,
+        removeThems,
+        users
       }}
     >
       {children}

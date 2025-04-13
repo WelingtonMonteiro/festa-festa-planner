@@ -17,6 +17,15 @@ interface HandleContextType {
   updateClients: (id: string, clientData: Partial<Client>) => void;
   removeClients: (id: string) => void;
   
+  // Event methods
+  addEvent?: (event: Omit<Event, 'id'>) => void;
+  updateEvent?: (id: string, eventData: Partial<Event>) => void;
+  removeEvent?: (id: string) => void;
+  
+  // Message methods
+  addMessage?: (message: Omit<Message, 'id'>) => void;
+  markMessageAsRead?: (id: string) => void;
+  
   // Contract methods
   signContract: (contractId: string, signatureUrl: string) => void;
   sendContractToClient: (contractId: string, clientId: string) => void;
@@ -26,12 +35,22 @@ interface HandleContextType {
   updateContractTemplate: (id: string, templateData: Partial<ContractTemplate>) => void;
   removeContractTemplate: (id: string) => void;
   
+  // Kit methods
+  addKit?: (kit: Omit<Kit, 'id'>) => void;
+  updateKit?: (id: string, kitData: Partial<Kit>) => void;
+  removeKit?: (id: string) => void;
+  
+  // Theme methods
+  addThems?: (theme: Omit<Them, 'id'>) => void;
+  updateThems?: (id: string, themeData: Partial<Them>) => void;
+  removeThems?: (id: string) => void;
+  
   // Contract methods
   addContract: (contract: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateContract: (id: string, contract: Partial<Contract>) => void;
   removeContract: (id: string) => void;
   
-  // Additional methods for backward compatibility
+  // Additional properties for backward compatibility
   thems?: Them[];
   statistics?: {
     eventosPorMes: Record<string, number>;
@@ -40,6 +59,7 @@ interface HandleContextType {
     temasPorAno: Record<string, number>;
     faturamentoMensal: Record<string, number>;
   };
+  users?: any[];
 }
 
 export const HandleContext = createContext<HandleContextType | undefined>(undefined);

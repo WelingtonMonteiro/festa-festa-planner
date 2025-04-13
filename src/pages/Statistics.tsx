@@ -1,4 +1,26 @@
+import { useState } from 'react';
 import { useHandleContext } from "@/contexts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts';
 
 const COLORS = ['#8B5CF6', '#EC4899', '#3B82F6', '#10B981', '#F59E0B', '#EF4444'];
 
@@ -8,28 +30,28 @@ const Statistics = () => {
   
   // Preparar dados para gráficos
   const prepararDadosEventos = () => {
-    return Object.entries(statistics.eventosPorMes).map(([mes, quantidade]) => ({
+    return Object.entries(statistics?.eventosPorMes || {}).map(([mes, quantidade]) => ({
       mes,
       quantidade
     }));
   };
   
   const prepararDadosKitsPopulares = () => {
-    return statistics.kitsPopulares.map(({ kit, quantidade }) => ({
+    return statistics?.kitsPopulares?.map(({ kit, quantidade }) => ({
       name: kit,
       value: quantidade
-    }));
+    })) || [];
   };
   
   const prepararDadosTemasPorAno = () => {
-    return Object.entries(statistics.temasPorAno).map(([tema, quantidade]) => ({
+    return Object.entries(statistics?.temasPorAno || {}).map(([tema, quantidade]) => ({
       name: tema,
       value: quantidade
     }));
   };
   
   const prepararDadosFaturamento = () => {
-    return Object.entries(statistics.faturamentoMensal).map(([mes, valor]) => ({
+    return Object.entries(statistics?.faturamentoMensal || {}).map(([mes, valor]) => ({
       mes,
       valor
     }));
@@ -37,7 +59,7 @@ const Statistics = () => {
   
   // Calcular retorno sobre investimento (ROI) dos temas
   const calcularROITemas = () => {
-    return thems.map(tema => {
+    return thems?.map(tema => {
       const receitaTotal = tema.vezes_alugado * (tema.kits.reduce((sum, kit) => sum + kit.preco, 0) / tema.kits.length);
       const roi = tema.valorGasto > 0 ? ((receitaTotal / tema.valorGasto) - 1) * 100 : 0;
       
@@ -48,7 +70,7 @@ const Statistics = () => {
         investimento: tema.valorGasto,
         receita: receitaTotal
       };
-    }).sort((a, b) => b.roi - a.roi);
+    }).sort((a, b) => b.roi - a.roi) || [];
   };
   
   return (

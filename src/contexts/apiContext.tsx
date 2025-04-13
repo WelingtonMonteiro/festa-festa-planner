@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 
 // Tipos de acesso à API suportados
 export type ApiType = 'local' | 'rest' | 'supabase';
@@ -16,7 +16,7 @@ interface ApiContextType {
   isSupabase: boolean;  // Nova propriedade para verificar Supabase
 }
 
-const ApiContext = createContext<ApiContextType | undefined>(undefined);
+export const ApiContext = createContext<ApiContextType | undefined>(undefined);
 
 export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [apiType, setApiTypeState] = useState<ApiType>('local');
@@ -79,27 +79,4 @@ export const useApi = () => {
     throw new Error('useApi must be used within an ApiProvider');
   }
   return context;
-};
-
-// Export the handleContext hook
-export const useHandleContext = () => {
-  // This is a placeholder for the handleContext functionality
-  // It allows components to import it without errors until we implement
-  // the actual handleContext functionality
-  return {
-    clients: [],
-    events: [],
-    messages: [],
-    contracts: [],
-    contractTemplates: [],
-    addClients: () => {},
-    updateClients: () => {},
-    removeClients: () => {},
-    signContract: () => {},
-    sendContractToClient: () => {},
-    addContractTemplate: () => {},
-    updateContractTemplate: () => {},
-    removeContractTemplate: () => {},
-    // Add other methods needed by components
-  };
 };
