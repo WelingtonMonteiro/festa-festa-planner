@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, CalendarDays, ClipboardCheck, Clock, DollarSign, PartyPopper, Tag, Users } from "lucide-react";
-import { useHandleContext } from "@/contexts/handleContext.tsx";
+import { useHandleContext } from "@/contexts/handleContext";
 import { format, isSameDay } from 'date-fns';
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";

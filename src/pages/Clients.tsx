@@ -7,7 +7,7 @@ import {
   Table, TableBody, TableCell, TableHead, 
   TableHeader, TableRow 
 } from "@/components/ui/table";
-import { useHandleContext } from "@/contexts/handleContext.tsx";
+import { useHandleContext } from "@/contexts/handleContext";
 import { useNavigate } from "react-router-dom";
 import { Phone, Mail, PlusCircle, Search, User, Edit, Trash2, Check, X, Filter, BarChart2 } from "lucide-react";
 import NewClientDialog from "@/components/clients/NewClientDialog.tsx";
