@@ -1,5 +1,7 @@
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Loader2 } from 'lucide-react';
+import { useState } from 'react';
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -16,6 +18,17 @@ const DeleteConfirmDialog = ({
   title,
   description
 }: DeleteConfirmDialogProps) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsDeleting(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -26,9 +39,22 @@ const DeleteConfirmDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => onOpenChange(false)}>Cancelar</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
-            Sim, excluir
+          <AlertDialogCancel onClick={() => onOpenChange(false)} disabled={isDeleting}>
+            Cancelar
+          </AlertDialogCancel>
+          <AlertDialogAction 
+            onClick={handleConfirm} 
+            className="bg-destructive hover:bg-destructive/90"
+            disabled={isDeleting}
+          >
+            {isDeleting ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Excluindo...
+              </>
+            ) : (
+              'Sim, excluir'
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

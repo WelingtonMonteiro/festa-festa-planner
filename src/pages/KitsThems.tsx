@@ -1,19 +1,24 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { Package, Tag } from 'lucide-react';
+import { toast } from 'sonner';
 import StorageToggle from '@/components/layout/StorageToggle';
 import KitList from '@/components/kits/KitList';
 import KitForm from '@/components/kits/KitForm';
 import ThemList from '@/components/thems/ThemList';
 import ThemForm from '@/components/thems/ThemForm';
 import DeleteConfirmDialog from '@/components/kits-thems/DeleteConfirmDialog';
-import { Kit } from '@/types';
+import { Kit, Them } from '@/types';
+import { kitService } from '@/services/kitService';
+import { themService } from '@/services/themService';
+import { useStorage } from '@/contexts/storageContext';
 
 const KitsThems = () => {
   const { kits, thems, addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
+  const { storageType } = useStorage();
   
   const [kitDialogOpen, setKitDialogOpen] = useState(false);
   const [themDialogOpen, setThemDialogOpen] = useState(false);
@@ -23,6 +28,7 @@ const KitsThems = () => {
   const [themToDelete, setThemToDelete] = useState<string | null>(null);
   const [editingKit, setEditingKit] = useState<string | null>(null);
   const [editingThem, setEditingThem] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const resetKitForm = () => {
     setEditingKit(null);
@@ -32,26 +38,102 @@ const KitsThems = () => {
     setEditingThem(null);
   };
   
-  const handleKitSubmit = (kitData: Omit<Kit, 'id' | 'vezes_alugado'>) => {
-    if (editingKit) {
-      updateKit(editingKit, kitData);
-    } else {
-      addKit(kitData);
-    }
+  const handleKitSubmit = async (kitData: Omit<Kit, 'id' | 'vezes_alugado'>) => {
+    setIsLoading(true);
     
-    setKitDialogOpen(false);
-    resetKitForm();
+    try {
+      if (storageType === 'supabase') {
+        if (editingKit) {
+          // Atualizar no Supabase
+          const updatedKit = await kitService.update(editingKit, {
+            ...kitData,
+            vezes_alugado: kits.find(k => k.id === editingKit)?.vezes_alugado || 0
+          });
+          
+          if (updatedKit) {
+            updateKit(editingKit, kitData);
+            toast.success('Kit atualizado com sucesso no Supabase');
+          }
+        } else {
+          // Criar no Supabase
+          const newKit = await kitService.create(kitData);
+          
+          if (newKit) {
+            addKit({
+              ...kitData,
+              id: newKit.id,
+              vezes_alugado: 0
+            });
+            toast.success('Kit adicionado com sucesso ao Supabase');
+          }
+        }
+      } else {
+        // Lógica existente para localStorage
+        if (editingKit) {
+          updateKit(editingKit, kitData);
+        } else {
+          addKit(kitData);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao salvar kit:', error);
+      toast.error('Falha ao salvar kit');
+    } finally {
+      setIsLoading(false);
+      setKitDialogOpen(false);
+      resetKitForm();
+    }
   };
   
-  const handleThemSubmit = (themData: any) => {
-    if (editingThem) {
-      updateThems(editingThem, themData);
-    } else {
-      addThems(themData);
-    }
+  const handleThemSubmit = async (themData: any) => {
+    setIsLoading(true);
     
-    setThemDialogOpen(false);
-    resetThemForm();
+    try {
+      if (storageType === 'supabase') {
+        if (editingThem) {
+          // Atualizar no Supabase
+          const updatedThem = await themService.update(
+            editingThem, 
+            {
+              ...themData,
+              vezes_alugado: thems.find(t => t.id === editingThem)?.vezes_alugado || 0
+            },
+            kits
+          );
+          
+          if (updatedThem) {
+            updateThems(editingThem, themData);
+            toast.success('Tema atualizado com sucesso no Supabase');
+          }
+        } else {
+          // Criar no Supabase
+          const newThem = await themService.create(themData, kits);
+          
+          if (newThem) {
+            addThems({
+              ...themData,
+              id: newThem.id,
+              vezes_alugado: 0
+            });
+            toast.success('Tema adicionado com sucesso ao Supabase');
+          }
+        }
+      } else {
+        // Lógica existente para localStorage
+        if (editingThem) {
+          updateThems(editingThem, themData);
+        } else {
+          addThems(themData);
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao salvar tema:', error);
+      toast.error('Falha ao salvar tema');
+    } finally {
+      setIsLoading(false);
+      setThemDialogOpen(false);
+      resetThemForm();
+    }
   };
   
   const handleEditKit = (kit: typeof kits[0]) => {
@@ -74,19 +156,63 @@ const KitsThems = () => {
     setDeleteThemDialogOpen(true);
   };
 
-  const confirmDeleteKit = () => {
+  const confirmDeleteKit = async () => {
     if (kitToDelete) {
-      removeKit(kitToDelete);
-      setDeleteKitDialogOpen(false);
-      setKitToDelete(null);
+      setIsLoading(true);
+      
+      try {
+        if (storageType === 'supabase') {
+          // Excluir do Supabase
+          const success = await kitService.delete(kitToDelete);
+          
+          if (success) {
+            removeKit(kitToDelete);
+            toast.success('Kit excluído com sucesso do Supabase');
+          } else {
+            throw new Error('Falha ao excluir kit do Supabase');
+          }
+        } else {
+          // Lógica existente para localStorage
+          removeKit(kitToDelete);
+        }
+      } catch (error) {
+        console.error('Erro ao excluir kit:', error);
+        toast.error('Falha ao excluir kit');
+      } finally {
+        setIsLoading(false);
+        setDeleteKitDialogOpen(false);
+        setKitToDelete(null);
+      }
     }
   };
 
-  const confirmDeleteThem = () => {
+  const confirmDeleteThem = async () => {
     if (themToDelete) {
-      removeThems(themToDelete);
-      setDeleteThemDialogOpen(false);
-      setThemToDelete(null);
+      setIsLoading(true);
+      
+      try {
+        if (storageType === 'supabase') {
+          // Excluir do Supabase
+          const success = await themService.delete(themToDelete);
+          
+          if (success) {
+            removeThems(themToDelete);
+            toast.success('Tema excluído com sucesso do Supabase');
+          } else {
+            throw new Error('Falha ao excluir tema do Supabase');
+          }
+        } else {
+          // Lógica existente para localStorage
+          removeThems(themToDelete);
+        }
+      } catch (error) {
+        console.error('Erro ao excluir tema:', error);
+        toast.error('Falha ao excluir tema');
+      } finally {
+        setIsLoading(false);
+        setDeleteThemDialogOpen(false);
+        setThemToDelete(null);
+      }
     }
   };
   
@@ -152,6 +278,7 @@ const KitsThems = () => {
             }}
             initialData={editingKit ? kits.find(k => k.id === editingKit) : undefined}
             isEditing={!!editingKit}
+            isLoading={isLoading}
           />
         </DialogContent>
       </Dialog>
@@ -175,6 +302,7 @@ const KitsThems = () => {
             initialData={editingThem ? thems.find(t => t.id === editingThem) : undefined}
             isEditing={!!editingThem}
             kits={kits}
+            isLoading={isLoading}
           />
         </DialogContent>
       </Dialog>

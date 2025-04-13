@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Upload, X } from 'lucide-react';
+import { Upload, X, Loader2 } from 'lucide-react';
 import { Kit } from '@/types';
 
 interface KitFormProps {
@@ -13,9 +12,10 @@ interface KitFormProps {
   onCancel: () => void;
   initialData?: Kit;
   isEditing: boolean;
+  isLoading?: boolean;
 }
 
-const KitForm = ({ onSubmit, onCancel, initialData, isEditing }: KitFormProps) => {
+const KitForm = ({ onSubmit, onCancel, initialData, isEditing, isLoading = false }: KitFormProps) => {
   const [kitForm, setKitForm] = useState({
     nome: initialData?.nome || '',
     descricao: initialData?.descricao || '',
@@ -189,11 +189,27 @@ const KitForm = ({ onSubmit, onCancel, initialData, isEditing }: KitFormProps) =
       </div>
       
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          disabled={isLoading}
+        >
           Cancelar
         </Button>
-        <Button type="submit" className="bg-festa-primary hover:bg-festa-primary/90">
-          {isEditing ? 'Salvar Alterações' : 'Adicionar Kit'}
+        <Button 
+          type="submit" 
+          className="bg-festa-primary hover:bg-festa-primary/90"
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isEditing ? 'Salvando...' : 'Adicionando...'}
+            </>
+          ) : (
+            isEditing ? 'Salvar Alterações' : 'Adicionar Kit'
+          )}
         </Button>
       </DialogFooter>
     </form>

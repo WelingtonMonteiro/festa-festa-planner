@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Check, Upload, X } from 'lucide-react';
+import { Check, Upload, X, Loader2 } from 'lucide-react';
 import { Kit, Them } from '@/types';
 
 interface ThemFormProps {
@@ -14,9 +13,10 @@ interface ThemFormProps {
   initialData?: Them;
   isEditing: boolean;
   kits: Kit[];
+  isLoading?: boolean;
 }
 
-const ThemForm = ({ onSubmit, onCancel, initialData, isEditing, kits }: ThemFormProps) => {
+const ThemForm = ({ onSubmit, onCancel, initialData, isEditing, kits, isLoading = false }: ThemFormProps) => {
   const [themForm, setThemForm] = useState({
     nome: initialData?.nome || '',
     descricao: initialData?.descricao || '',
@@ -179,15 +179,27 @@ const ThemForm = ({ onSubmit, onCancel, initialData, isEditing, kits }: ThemForm
       </div>
       
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          disabled={isLoading}
+        >
           Cancelar
         </Button>
         <Button 
           type="submit" 
           className="bg-festa-primary hover:bg-festa-primary/90"
-          disabled={kits.length === 0 || themForm.kitsIds.length === 0}
+          disabled={isLoading || kits.length === 0 || themForm.kitsIds.length === 0}
         >
-          {isEditing ? 'Salvar Alterações' : 'Adicionar Tema'}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {isEditing ? 'Salvando...' : 'Adicionando...'}
+            </>
+          ) : (
+            isEditing ? 'Salvar Alterações' : 'Adicionar Tema'
+          )}
         </Button>
       </DialogFooter>
     </form>
