@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useHandleContext } from "@/contexts/handleContext";
 import { Link, useNavigate } from "react-router-dom";
-import { Link2, Phone, Instagram, Facebook, MessageSquare, Settings } from "lucide-react";
+import { Link2, Settings, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { toast } from "sonner";
@@ -144,22 +144,27 @@ const Messages = () => {
     navigate('/configurations');
   };
 
-  // Se não há integrações habilitadas, mostramos um alerta
-  if (enabledIntegrations.length === 0) {
-    return (
-      <div className="container py-6">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold mb-2">Mensagens</h1>
-          <p className="text-muted-foreground">
-            Gerencie suas conversas com clientes em diferentes plataformas
-          </p>
-        </div>
-        
+  // Verificar se há integrações configuradas mas nenhuma habilitada
+  const hasConfiguredIntegrations = integrations.length > 0;
+  const hasNoEnabledIntegrations = enabledIntegrations.length === 0;
+  const showConfigurationAlert = hasNoEnabledIntegrations;
+
+  return (
+    <div className="container py-6">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold mb-2">Mensagens</h1>
+        <p className="text-muted-foreground">
+          Gerencie suas conversas com clientes em diferentes plataformas
+        </p>
+      </div>
+      
+      {showConfigurationAlert && (
         <Alert className="mb-6">
           <AlertDescription className="flex flex-col gap-4">
             <div>
-              Nenhuma integração está habilitada no momento. Para utilizar o sistema de mensagens, 
-              você precisa habilitar pelo menos uma integração.
+              {hasConfiguredIntegrations 
+                ? "Você tem integrações configuradas, mas nenhuma está habilitada. Para utilizar o sistema de mensagens, habilite pelo menos uma integração."
+                : "Nenhuma integração está configurada. Para utilizar o sistema de mensagens, você precisa configurar pelo menos uma integração."}
             </div>
             <Button 
               variant="outline" 
@@ -171,142 +176,134 @@ const Messages = () => {
             </Button>
           </AlertDescription>
         </Alert>
-      </div>
-    );
-  }
+      )}
 
-  return (
-    <div className="container py-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold mb-2">Mensagens</h1>
-        <p className="text-muted-foreground">
-          Gerencie suas conversas com clientes em diferentes plataformas
-        </p>
-      </div>
-      
-      <div className="flex justify-between items-center mb-4">
-        <MessageTypeFilter 
-          selectedTypes={selectedTypes}
-          onSelectType={toggleMessageType}
-        />
-        
-        <div className="flex gap-2">
-          {enabledIntegrations.find(i => i.name === 'whatsapp') && apiUrl && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setIsQRCodeModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <MessageSquare className="h-4 w-4" />
-              {isWhatsAppConnected ? 'WhatsApp Conectado' : 'Conectar WhatsApp'}
-            </Button>
-          )}
-          
-          {selectedClient && (
+      {!showConfigurationAlert && (
+        <>
+          <div className="flex justify-between items-center mb-4">
+            <MessageTypeFilter 
+              selectedTypes={selectedTypes}
+              onSelectType={toggleMessageType}
+            />
+            
             <div className="flex gap-2">
-              <ContractMessageSender clientId={selectedClient} />
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/contracts">
-                  <Link2 className="h-4 w-4 mr-1" />
-                  Contratos
-                </Link>
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-240px)]">
-        {/* Lista de conversas */}
-        <div className="col-span-4 bg-secondary/10 rounded-lg overflow-y-auto h-full">
-          <div className="p-3 border-b">
-            <h3 className="font-medium">Conversas</h3>
-          </div>
-          
-          {clientsWithMessages.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground">
-              Nenhuma conversa encontrada
-            </div>
-          ) : (
-            <div className="divide-y">
-              {clientsWithMessages.map(client => {
-                const lastMessage = [...messages]
-                  .filter(m => {
-                    const matchesClient = m.clienteId === client.id;
-                    const matchesType = selectedTypes.length === 0 || 
-                      selectedTypes.some(type => getPlatformFromMessage(m) === type);
-                    return matchesClient && matchesType;
-                  })
-                  .sort((a, b) => 
-                    new Date(b.datahora).getTime() - new Date(a.datahora).getTime()
-                  )[0];
-                
-                const unreadMessages = messages.filter(m => {
-                  const matchesClient = m.clienteId === client.id;
-                  const matchesType = selectedTypes.length === 0 || 
-                    selectedTypes.some(type => getPlatformFromMessage(m) === type);
-                  return matchesClient && !m.lida && m.remetente === 'cliente' && matchesType;
-                }).length;
-                
-                if (!lastMessage) return null;
-                
-                return (
-                  <ClientConversationItem
-                    key={client.id}
-                    client={client}
-                    lastMessage={lastMessage}
-                    platform={getPlatformFromMessage(lastMessage)}
-                    unreadCount={unreadMessages}
-                    isSelected={selectedClient === client.id}
-                    onClick={() => setSelectedClient(client.id)}
-                  />
-                );
-              })}
-            </div>
-          )}
-        </div>
-        
-        {/* Área de conversa */}
-        <div className="col-span-8 bg-card border rounded-lg flex flex-col h-full">
-          {!selectedClient ? (
-            <div className="flex items-center justify-center h-full text-muted-foreground">
-              Selecione um cliente para iniciar uma conversa
-            </div>
-          ) : (
-            <>
-              {filteredMessages.length > 0 && (
-                <ConversationHeader 
-                  clientName={getClientName(selectedClient)} 
-                  platform={getPlatformFromMessage(filteredMessages[0])} 
-                />
+              {enabledIntegrations.find(i => i.name === 'whatsapp') && apiUrl && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setIsQRCodeModalOpen(true)}
+                  className="flex items-center gap-2"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  {isWhatsAppConnected ? 'WhatsApp Conectado' : 'Conectar WhatsApp'}
+                </Button>
               )}
               
-              <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                {filteredMessages.map(message => (
-                  <MessageBubble 
-                    key={message.id} 
-                    message={{...message, platform: getPlatformFromMessage(message)}} 
-                  />
-                ))}
+              {selectedClient && (
+                <div className="flex gap-2">
+                  <ContractMessageSender clientId={selectedClient} />
+                  <Button variant="outline" size="sm" asChild>
+                    <Link to="/contracts">
+                      <Link2 className="h-4 w-4 mr-1" />
+                      Contratos
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-12 gap-4 h-[calc(100vh-240px)]">
+            {/* Lista de conversas */}
+            <div className="col-span-4 bg-secondary/10 rounded-lg overflow-y-auto h-full">
+              <div className="p-3 border-b">
+                <h3 className="font-medium">Conversas</h3>
               </div>
               
-              <MessageComposer 
-                onSend={sendMessage}
-                disabled={
-                  (enabledIntegrations.find(i => i.name === 'whatsapp') && !isWhatsAppConnected) ||
-                  enabledIntegrations.length === 0
-                }
-                disabledMessage={
-                  enabledIntegrations.find(i => i.name === 'whatsapp') && !isWhatsAppConnected ? 
-                  "É necessário conectar o WhatsApp para enviar mensagens." : 
-                  "Nenhuma integração habilitada."
-                }
-              />
-            </>
-          )}
-        </div>
-      </div>
+              {clientsWithMessages.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  Nenhuma conversa encontrada
+                </div>
+              ) : (
+                <div className="divide-y">
+                  {clientsWithMessages.map(client => {
+                    const lastMessage = [...messages]
+                      .filter(m => {
+                        const matchesClient = m.clienteId === client.id;
+                        const matchesType = selectedTypes.length === 0 || 
+                          selectedTypes.some(type => getPlatformFromMessage(m) === type);
+                        return matchesClient && matchesType;
+                      })
+                      .sort((a, b) => 
+                        new Date(b.datahora).getTime() - new Date(a.datahora).getTime()
+                      )[0];
+                    
+                    const unreadMessages = messages.filter(m => {
+                      const matchesClient = m.clienteId === client.id;
+                      const matchesType = selectedTypes.length === 0 || 
+                        selectedTypes.some(type => getPlatformFromMessage(m) === type);
+                      return matchesClient && !m.lida && m.remetente === 'cliente' && matchesType;
+                    }).length;
+                    
+                    if (!lastMessage) return null;
+                    
+                    return (
+                      <ClientConversationItem
+                        key={client.id}
+                        client={client}
+                        lastMessage={lastMessage}
+                        platform={getPlatformFromMessage(lastMessage)}
+                        unreadCount={unreadMessages}
+                        isSelected={selectedClient === client.id}
+                        onClick={() => setSelectedClient(client.id)}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            
+            {/* Área de conversa */}
+            <div className="col-span-8 bg-card border rounded-lg flex flex-col h-full">
+              {!selectedClient ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  Selecione um cliente para iniciar uma conversa
+                </div>
+              ) : (
+                <>
+                  {filteredMessages.length > 0 && (
+                    <ConversationHeader 
+                      clientName={getClientName(selectedClient)} 
+                      platform={getPlatformFromMessage(filteredMessages[0])} 
+                    />
+                  )}
+                  
+                  <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    {filteredMessages.map(message => (
+                      <MessageBubble 
+                        key={message.id} 
+                        message={{...message, platform: getPlatformFromMessage(message)}} 
+                      />
+                    ))}
+                  </div>
+                  
+                  <MessageComposer 
+                    onSend={sendMessage}
+                    disabled={
+                      (enabledIntegrations.find(i => i.name === 'whatsapp') && !isWhatsAppConnected) || false
+                    }
+                    disabledMessage={
+                      enabledIntegrations.find(i => i.name === 'whatsapp') && !isWhatsAppConnected ? 
+                      "É necessário conectar o WhatsApp para enviar mensagens." : 
+                      ""
+                    }
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        </>
+      )}
       
       <WhatsAppQRCode 
         isOpen={isQRCodeModalOpen} 
