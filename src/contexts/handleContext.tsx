@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Message } from '../types';
 import { ClientsProvider, useClientsContext } from './clients/clientsContext';
@@ -64,6 +65,7 @@ export const useHandleContext = () => {
     contracts: contracts.contracts,
     contractTemplates: contracts.contractTemplates,
     apiUrl: settings.apiUrl,
+    integrations: settings.integrations,
 
     addClients: clients.addClients,
     updateClients: clients.updateClients,
@@ -94,6 +96,11 @@ export const useHandleContext = () => {
     updateContract: contracts.updateContract,
     removeContract: contracts.removeContract,
     sendContractToClient: contracts.sendContractToClient,
-    signContract: contracts.signContract
+    signContract: contracts.signContract,
+    
+    setApiUrl: settings.setApiUrl,
+    updateIntegration: settings.updateIntegration,
+    addIntegration: settings.addIntegration,
+    getEnabledIntegrations: settings.getEnabledIntegrations
   };
 };

@@ -1,23 +1,23 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Phone, Instagram, Facebook, MessageCircle } from "lucide-react";
+import { MessageSquare, Instagram, Facebook } from "lucide-react";
 
 interface ConversationHeaderProps {
   clientName: string;
-  platform: 'whatsapp' | 'instagram' | 'facebook';
+  platform: string;
 }
 
 const ConversationHeader = ({ clientName, platform }: ConversationHeaderProps) => {
-  const getPlatformIcon = (platform: 'whatsapp' | 'instagram' | 'facebook') => {
+  const getPlatformIcon = (platform: string) => {
     switch(platform) {
       case 'whatsapp':
-        return <Phone className="h-4 w-4" />;
+        return <MessageSquare className="h-4 w-4" />;
       case 'instagram':
         return <Instagram className="h-4 w-4" />;
       case 'facebook':
         return <Facebook className="h-4 w-4" />;
       default:
-        return <MessageCircle className="h-4 w-4" />;
+        return <MessageSquare className="h-4 w-4" />;
     }
   };
 
@@ -33,7 +33,7 @@ const ConversationHeader = ({ clientName, platform }: ConversationHeaderProps) =
         <div>
           <h3 className="font-medium">{clientName}</h3>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
-            {getPlatformIcon(platform)} <span>{platform}</span>
+            {getPlatformIcon(platform)} <span className="capitalize">{platform}</span>
           </div>
         </div>
       </div>

@@ -52,6 +52,7 @@ export interface Message {
   conteudo: string;
   datahora: string; // ISO date string
   lida: boolean;
+  platform?: 'whatsapp' | 'facebook' | 'instagram';
 }
 
 export interface Statistic {
