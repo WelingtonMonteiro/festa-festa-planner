@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Client, Kit, Them, Event, Message, Statistic, User, Contract, ContractTemplate } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
@@ -149,7 +150,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setModelosContrato(loadedModelosContrato ? JSON.parse(loadedModelosContrato) : []);
         } catch (error) {
           console.error('Failed to load data from Supabase:', error);
-          toast({ title: "Erro ao carregar dados", description: "Falha ao carregar dados do Supabase", variant: "destructive" });
+          toast.error("Erro ao carregar dados: Falha ao carregar dados do Supabase");
           
           const loadedKits = localStorage.getItem('kits');
           const loadedTemas = localStorage.getItem('temas');
@@ -213,34 +214,27 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       ativo: cliente.ativo !== false
     };
     setClientes([...clientes, novoCliente]);
-    toast({ title: "Cliente adicionado", description: `${cliente.nome} foi adicionado com sucesso.` });
+    toast.success(`${cliente.nome} foi adicionado com sucesso.`);
   };
   
   const atualizarCliente = (id: string, clienteAtualizado: Partial<Client>) => {
     setClientes(clientes.map(c => 
       c.id === id ? { ...c, ...clienteAtualizado } : c
     ));
-    toast({ title: "Cliente atualizado", description: "As informações do cliente foram atualizadas." });
+    toast.success("As informações do cliente foram atualizadas.");
   };
   
   const excluirCliente = (id: string) => {
     const clienteComEventos = eventos.some(e => e.cliente.id === id);
     if (clienteComEventos) {
-      toast({ 
-        title: "Operação não permitida", 
-        description: "Este cliente possui events registrados e não pode ser excluído.",
-        variant: "destructive" 
-      });
+      toast.error("Este cliente possui events registrados e não pode ser excluído.");
       return;
     }
     
     const cliente = clientes.find(c => c.id === id);
     if (cliente) {
       atualizarCliente(id, { ativo: false });
-      toast({ 
-        title: "Cliente desativado", 
-        description: `${cliente.nome} foi marcado como inativo com sucesso.` 
-      });
+      toast.success(`${cliente.nome} foi marcado como inativo com sucesso.`);
     }
   };
   
@@ -252,20 +246,20 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         vezes_alugado: 0
       };
       setKits([...kits, novoKit]);
-      toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso.` });
+      toast.success(`Kit ${kit.nome} foi adicionado com sucesso.`);
       return novoKit;
     } else {
       try {
         const novoKit = await kitService.create(kit);
         if (novoKit) {
           setKits([...kits, novoKit]);
-          toast({ title: "Kit adicionado", description: `Kit ${kit.nome} foi adicionado com sucesso.` });
+          toast.success(`Kit ${kit.nome} foi adicionado com sucesso.`);
           return novoKit;
         }
         return null;
       } catch (error) {
         console.error('Failed to add kit to Supabase:', error);
-        toast({ title: "Erro", description: "Falha ao adicionar kit no Supabase.", variant: "destructive" });
+        toast.error("Falha ao adicionar kit no Supabase.");
         return null;
       }
     }
@@ -276,20 +270,20 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setKits(kits.map(k => 
         k.id === id ? { ...k, ...kitAtualizado } : k
       ));
-      toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas." });
+      toast.success("As informações do kit foram atualizadas.");
       return kits.find(k => k.id === id);
     } else {
       try {
         const updatedKit = await kitService.update(id, kitAtualizado);
         if (updatedKit) {
           setKits(kits.map(k => k.id === id ? updatedKit : k));
-          toast({ title: "Kit atualizado", description: "As informações do kit foram atualizadas." });
+          toast.success("As informações do kit foram atualizadas.");
           return updatedKit;
         }
         return null;
       } catch (error) {
         console.error('Failed to update kit in Supabase:', error);
-        toast({ title: "Erro", description: "Falha ao atualizar kit no Supabase.", variant: "destructive" });
+        toast.error("Falha ao atualizar kit no Supabase.");
         return null;
       }
     }
@@ -298,11 +292,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const excluirKit = async (id: string) => {
     const kitEmUso = eventos.some(e => e.kit.id === id);
     if (kitEmUso) {
-      toast({ 
-        title: "Operação não permitida", 
-        description: "Este kit está associado a events e não pode ser excluído.",
-        variant: "destructive" 
-      });
+      toast.error("Este kit está associado a events e não pode ser excluído.");
       return false;
     }
     
@@ -317,7 +307,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setKits(kits.filter(k => k.id !== id));
       
       if (kitRemovido) {
-        toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso.` });
+        toast.success(`Kit ${kitRemovido.nome} foi removido com sucesso.`);
       }
       return true;
     } else {
@@ -327,14 +317,14 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setKits(kits.filter(k => k.id !== id));
           
           if (kitRemovido) {
-            toast({ title: "Kit removido", description: `Kit ${kitRemovido.nome} foi removido com sucesso.` });
+            toast.success(`Kit ${kitRemovido.nome} foi removido com sucesso.`);
           }
           return true;
         }
         return false;
       } catch (error) {
         console.error('Failed to delete kit from Supabase:', error);
-        toast({ title: "Erro", description: "Falha ao remover kit do Supabase.", variant: "destructive" });
+        toast.error("Falha ao remover kit do Supabase.");
         return false;
       }
     }
@@ -348,20 +338,20 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         vezes_alugado: 0
       };
       setTemas([...temas, novoTema]);
-      toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
+      toast.success(`Tema ${tema.nome} foi adicionado com sucesso.`);
       return novoTema;
     } else {
       try {
         const novoTema = await themService.create(tema, kits);
         if (novoTema) {
           setTemas([...temas, novoTema]);
-          toast({ title: "Tema adicionado", description: `Tema ${tema.nome} foi adicionado com sucesso.` });
+          toast.success(`Tema ${tema.nome} foi adicionado com sucesso.`);
           return novoTema;
         }
         return null;
       } catch (error) {
         console.error('Failed to add them to Supabase:', error);
-        toast({ title: "Erro", description: "Falha ao adicionar tema no Supabase.", variant: "destructive" });
+        toast.error("Falha ao adicionar tema no Supabase.");
         return null;
       }
     }
@@ -372,20 +362,20 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setTemas(temas.map(t => 
         t.id === id ? { ...t, ...temaAtualizado } : t
       ));
-      toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas." });
+      toast.success("As informações do tema foram atualizadas.");
       return temas.find(t => t.id === id);
     } else {
       try {
         const updatedThem = await themService.update(id, temaAtualizado, kits);
         if (updatedThem) {
           setTemas(temas.map(t => t.id === id ? updatedThem : t));
-          toast({ title: "Tema atualizado", description: "As informações do tema foram atualizadas." });
+          toast.success("As informações do tema foram atualizadas.");
           return updatedThem;
         }
         return null;
       } catch (error) {
         console.error('Failed to update them in Supabase:', error);
-        toast({ title: "Erro", description: "Falha ao atualizar tema no Supabase.", variant: "destructive" });
+        toast.error("Falha ao atualizar tema no Supabase.");
         return null;
       }
     }
@@ -394,11 +384,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const excluirTema = async (id: string) => {
     const temaEmUso = eventos.some(e => e.tema?.id === id);
     if (temaEmUso) {
-      toast({ 
-        title: "Operação não permitida", 
-        description: "Este tema está associado a events e não pode ser excluído.",
-        variant: "destructive" 
-      });
+      toast.error("Este tema está associado a events e não pode ser excluído.");
       return false;
     }
     
@@ -408,7 +394,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setTemas(temas.filter(t => t.id !== id));
       
       if (temaRemovido) {
-        toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso.` });
+        toast.success(`Tema ${temaRemovido.nome} foi removido com sucesso.`);
       }
       return true;
     } else {
@@ -418,14 +404,14 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setTemas(temas.filter(t => t.id !== id));
           
           if (temaRemovido) {
-            toast({ title: "Tema removido", description: `Tema ${temaRemovido.nome} foi removido com sucesso.` });
+            toast.success(`Tema ${temaRemovido.nome} foi removido com sucesso.`);
           }
           return true;
         }
         return false;
       } catch (error) {
         console.error('Failed to delete them from Supabase:', error);
-        toast({ title: "Erro", description: "Falha ao remover tema do Supabase.", variant: "destructive" });
+        toast.error("Falha ao remover tema do Supabase.");
         return false;
       }
     }
@@ -495,7 +481,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
     }
     
-    toast({ title: "Evento atualizado", description: "As informações do evento foram atualizadas." });
+    toast.success("As informações do evento foram atualizadas.");
   };
   
   const excluirEvento = (id: string) => {
@@ -509,7 +495,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }
       
       setEventos(eventos.filter(e => e.id !== id));
-      toast({ title: "Evento removido", description: "O evento foi removido com sucesso." });
+      toast.success("O evento foi removido com sucesso.");
     }
   };
   
@@ -541,7 +527,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updatedAt: new Date().toISOString()
     };
     setModelosContrato([...modelosContrato, novoModelo]);
-    toast({ title: "Modelo de contrato adicionado", description: `${modelo.name} foi adicionado com sucesso.` });
+    toast.success(`${modelo.name} foi adicionado com sucesso.`);
     return novoModelo;
   };
   
@@ -549,17 +535,13 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setModelosContrato(modelosContrato.map(m => 
       m.id === id ? { ...m, ...modeloAtualizado, updatedAt: new Date().toISOString() } : m
     ));
-    toast({ title: "Modelo atualizado", description: "O modelo de contrato foi atualizado com sucesso." });
+    toast.success("O modelo de contrato foi atualizado com sucesso.");
   };
   
   const excluirModeloContrato = (id: string) => {
     const modeloEmUso = contratos.some(c => c.templateId === id);
     if (modeloEmUso) {
-      toast({ 
-        title: "Operação não permitida", 
-        description: "Este modelo está associado a contratos e não pode ser excluído.",
-        variant: "destructive" 
-      });
+      toast.error("Este modelo está associado a contratos e não pode ser excluído.");
       return;
     }
     
@@ -567,7 +549,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setModelosContrato(modelosContrato.filter(m => m.id !== id));
     
     if (modeloRemovido) {
-      toast({ title: "Modelo removido", description: `${modeloRemovido.name} foi removido com sucesso.` });
+      toast.success(`${modeloRemovido.name} foi removido com sucesso.`);
     }
   };
   
@@ -579,7 +561,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       updatedAt: new Date().toISOString()
     };
     setContratos([...contratos, novoContrato]);
-    toast({ title: "Contrato adicionado", description: `${contrato.title} foi adicionado com sucesso.` });
+    toast.success(`${contrato.title} foi adicionado com sucesso.`);
     return novoContrato;
   };
   
@@ -587,7 +569,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setContratos(contratos.map(c => 
       c.id === id ? { ...c, ...contratoAtualizado, updatedAt: new Date().toISOString() } : c
     ));
-    toast({ title: "Contrato atualizado", description: "O contrato foi atualizado com sucesso." });
+    toast.success("O contrato foi atualizado com sucesso.");
   };
   
   const excluirContrato = (id: string) => {
@@ -595,7 +577,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setContratos(contratos.filter(c => c.id !== id));
     
     if (contratoRemovido) {
-      toast({ title: "Contrato removido", description: `${contratoRemovido.title} foi removido com sucesso.` });
+      toast.success(`${contratoRemovido.title} foi removido com sucesso.`);
     }
   };
   
@@ -603,11 +585,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const contrato = contratos.find(c => c.id === contractId);
     
     if (!contrato) {
-      toast({ 
-        title: "Erro", 
-        description: "Contrato não encontrado.",
-        variant: "destructive" 
-      });
+      toast.error("Contrato não encontrado.");
       return;
     }
     
@@ -620,18 +598,14 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     
     atualizarContrato(contractId, { status: 'sent' });
     
-    toast({ title: "Contrato enviado", description: "O contrato foi enviado para o cliente com sucesso." });
+    toast.success("O contrato foi enviado para o cliente com sucesso.");
   };
   
   const assinarContrato = (contractId: string, signatureUrl: string) => {
     const contrato = contratos.find(c => c.id === contractId);
     
     if (!contrato) {
-      toast({ 
-        title: "Erro", 
-        description: "Contrato não encontrado.",
-        variant: "destructive" 
-      });
+      toast.error("Contrato não encontrado.");
       return;
     }
     
@@ -641,7 +615,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       signedAt: new Date().toISOString()
     });
     
-    toast({ title: "Contrato assinado", description: "O contrato foi assinado com sucesso." });
+    toast.success("O contrato foi assinado com sucesso.");
   };
   
   return (
