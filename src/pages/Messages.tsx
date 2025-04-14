@@ -1,25 +1,32 @@
 
 import { useState, useEffect } from 'react';
-import { useHandleContext } from "@/contexts/handleContext.tsx";
+import { useHandleContext } from "@/contexts/handleContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Send, MessageCircle, Facebook, Instagram, Phone, FileText, Link2, QrCode } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
-import ContractMessageSender from "@/components/contracts/ContractMessageSender";
-import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import { Link2, Phone, Instagram, Facebook, QrCode } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import WhatsAppQRCode from "@/components/messages/WhatsAppQRCode";
 import { whatsappApiService } from '@/services/apiServices/whatsappApiService';
+import ContractMessageSender from "@/components/contracts/ContractMessageSender";
+
+// Componentes refatorados
+import ClientConversationItem from '@/components/messages/ClientConversationItem';
+import MessageBubble from '@/components/messages/MessageBubble';
+import ConversationHeader from '@/components/messages/ConversationHeader';
+import MessageComposer from '@/components/messages/MessageComposer';
 
 const Messages = () => {
-  const { messages: messages, clients: clients, addMessage: addMessage, markMessageAsRead: markMessageAsRead, apiUrl } = useHandleContext();
+  const { 
+    messages, 
+    clients, 
+    addMessage, 
+    markMessageAsRead, 
+    apiUrl 
+  } = useHandleContext();
+  
   const [platform, setPlatform] = useState<'whatsapp' | 'instagram' | 'facebook'>('whatsapp');
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
-  const [newMessage, setNewMessage] = useState('');
   const [isQRCodeModalOpen, setIsQRCodeModalOpen] = useState(false);
   const [isWhatsAppConnected, setIsWhatsAppConnected] = useState(false);
   
@@ -32,20 +39,13 @@ const Messages = () => {
     return client ? client.nome : 'Client';
   };
   
-  const formatDate = (date: string) => {
-    return format(new Date(date), "dd 'de' MMMM 'às' HH:mm", { locale: ptBR });
-  };
-
-  const formatMessageTime = (date: string) => {
-    return format(new Date(date), "HH:mm", { locale: ptBR });
-  };
-  
   const filteredMessages = selectedClient 
     ? messages
         .filter(m => m.clienteId === selectedClient)
         .sort((a, b) => new Date(a.datahora).getTime() - new Date(b.datahora).getTime())
     : [];
     
+  // Marcar mensagens como lidas quando selecionar um cliente
   useEffect(() => {
     if (selectedClient) {
       filteredMessages
@@ -54,6 +54,7 @@ const Messages = () => {
     }
   }, [selectedClient, filteredMessages, markMessageAsRead]);
   
+  // Verificar conexão do WhatsApp
   useEffect(() => {
     checkWhatsAppConnection();
   }, [platform, apiUrl]);
@@ -65,23 +66,23 @@ const Messages = () => {
     }
   };
   
-  const sendMessage = async () => {
-    if (!newMessage.trim() || !selectedClient) return;
+  // Enviar mensagem
+  const sendMessage = async (messageContent: string) => {
+    if (!selectedClient) return;
     
     if (platform === 'whatsapp' && apiUrl) {
       const client = clients.find(c => c.id === selectedClient);
       if (client && client.telefone) {
         const phoneNumber = client.telefone.replace(/\D/g, ''); // Remove todos os caracteres que não são números
-        const sent = await whatsappApiService.sendMessage(apiUrl, phoneNumber, newMessage);
+        const sent = await whatsappApiService.sendMessage(apiUrl, phoneNumber, messageContent);
         
         if (sent) {
           addMessage({
             remetente: 'empresa',
             clienteId: selectedClient,
-            conteudo: newMessage,
+            conteudo: messageContent,
             lida: true
           });
-          setNewMessage('');
         }
       } else {
         toast.error("Cliente não possui número de telefone cadastrado");
@@ -90,27 +91,13 @@ const Messages = () => {
       addMessage({
         remetente: 'empresa',
         clienteId: selectedClient,
-        conteudo: newMessage,
+        conteudo: messageContent,
         lida: true
       });
-      setNewMessage('');
       toast.success("Mensagem enviada com sucesso!");
     }
   };
-  
-  const getPlatformIcon = (platform: 'whatsapp' | 'instagram' | 'facebook') => {
-    switch(platform) {
-      case 'whatsapp':
-        return <Phone className="h-4 w-4" />;
-      case 'instagram':
-        return <Instagram className="h-4 w-4" />;
-      case 'facebook':
-        return <Facebook className="h-4 w-4" />;
-      default:
-        return <MessageCircle className="h-4 w-4" />;
-    }
-  };
-  
+
   return (
     <div className="container py-6">
       <div className="mb-6">
@@ -162,14 +149,15 @@ const Messages = () => {
         </div>
         
         <div className="grid grid-cols-12 gap-4 h-[calc(100vh-240px)]">
+          {/* Lista de conversas */}
           <div className="col-span-4 bg-secondary/10 rounded-lg overflow-y-auto h-full">
             <div className="p-3 border-b">
-              <h3 className="font-medium">Conversations</h3>
+              <h3 className="font-medium">Conversas</h3>
             </div>
             
             {clientsWithMessages.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
-                No conversations found
+                Nenhuma conversa encontrada
               </div>
             ) : (
               <div className="divide-y">
@@ -185,131 +173,46 @@ const Messages = () => {
                   ).length;
                   
                   return (
-                    <div 
+                    <ClientConversationItem
                       key={client.id}
-                      className={`p-3 hover:bg-accent/20 cursor-pointer ${
-                        selectedClient === client.id ? 'bg-accent/30' : ''
-                      }`}
+                      client={client}
+                      lastMessage={lastMessage}
+                      unreadCount={unreadMessages}
+                      isSelected={selectedClient === client.id}
                       onClick={() => setSelectedClient(client.id)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Avatar>
-                          <AvatarFallback>
-                            {client.nome.substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        <div className="flex-1 min-w-0">
-                          <div className="flex justify-between items-center mb-1">
-                            <h4 className="font-medium truncate">{client.nome}</h4>
-                            {lastMessage && (
-                              <span className="text-xs text-muted-foreground">
-                                {format(new Date(lastMessage.datahora), "dd/MM")}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <div className="flex justify-between">
-                            {lastMessage && (
-                              <p className="text-sm text-muted-foreground truncate">
-                                {lastMessage.remetente === 'empresa' ? 'You: ' : ''}
-                                {lastMessage.conteudo}
-                              </p>
-                            )}
-                            
-                            {unreadMessages > 0 && (
-                              <span className="bg-primary text-primary-foreground rounded-full h-5 w-5 flex items-center justify-center text-xs">
-                                {unreadMessages}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
+                    />
                   );
                 })}
               </div>
             )}
           </div>
           
+          {/* Área de conversa */}
           <div className="col-span-8 bg-card border rounded-lg flex flex-col h-full">
             {!selectedClient ? (
               <div className="flex items-center justify-center h-full text-muted-foreground">
-                Select a client to start a conversation
+                Selecione um cliente para iniciar uma conversa
               </div>
             ) : (
               <>
-                <div className="p-3 border-b flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Avatar>
-                      <AvatarFallback>
-                        {getClientName(selectedClient).substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div>
-                      <h3 className="font-medium">{getClientName(selectedClient)}</h3>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                        {getPlatformIcon(platform)} <span>{platform}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <ConversationHeader 
+                  clientName={getClientName(selectedClient)} 
+                  platform={platform} 
+                />
                 
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
                   {filteredMessages.map(message => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.remetente === 'empresa' ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div 
-                        className={`max-w-[80%] rounded-lg p-3 ${
-                          message.remetente === 'empresa' 
-                            ? 'bg-primary text-primary-foreground' 
-                            : 'bg-secondary/50'
-                        }`}
-                      >
-                        <p>{message.conteudo}</p>
-                        <p className={`text-xs mt-1 text-right ${
-                          message.remetente === 'empresa' 
-                            ? 'text-primary-foreground/80' 
-                            : 'text-muted-foreground'
-                        }`}>
-                          {formatMessageTime(message.datahora)}
-                        </p>
-                      </div>
-                    </div>
+                    <MessageBubble key={message.id} message={message} />
                   ))}
                 </div>
                 
-                <div className="p-3 border-t">
-                  <form 
-                    className="flex gap-2" 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      sendMessage();
-                    }}
-                  >
-                    <Textarea
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      placeholder="Type your message..."
-                      className="resize-none min-h-[50px] flex-1"
-                      rows={1}
-                    />
-                    <Button 
-                      type="submit" 
-                      disabled={!newMessage.trim() || (platform === 'whatsapp' && !isWhatsAppConnected)}
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
-                  </form>
-                  {platform === 'whatsapp' && !isWhatsAppConnected && apiUrl && (
-                    <p className="text-xs text-red-500 mt-1">
-                      É necessário conectar o WhatsApp para enviar mensagens.
-                    </p>
-                  )}
-                </div>
+                <MessageComposer 
+                  onSend={sendMessage}
+                  disabled={platform === 'whatsapp' && !isWhatsAppConnected}
+                  disabledMessage={platform === 'whatsapp' && !isWhatsAppConnected ? 
+                    "É necessário conectar o WhatsApp para enviar mensagens." : 
+                    undefined}
+                />
               </>
             )}
           </div>
