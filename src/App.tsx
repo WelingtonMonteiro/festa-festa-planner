@@ -1,6 +1,6 @@
+
 import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "sonner";
 import { FestaProvider } from "./contexts/handleContext";
 import { StorageProvider } from "./contexts/storageContext";
@@ -8,19 +8,14 @@ import { StorageProvider } from "./contexts/storageContext";
 // Pages
 import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
-import Events from "./pages/Events";
-import Kits from "./pages/Kits";
-import Themes from "./pages/Themes";
 import Messages from "./pages/Messages";
 import Contracts from "./pages/Contracts";
-import ContractDetails from "./pages/ContractDetails";
-import ContractTemplates from "./pages/ContractTemplates";
-import ContractTemplateEditor from "./pages/ContractTemplateEditor";
 import Configurations from "./pages/Configurations";
 
 // Components
-import Sidebar from "./components/Sidebar";
-import Header from "./components/Header";
+import Sidebar from "./components/layout/Sidebar";
+import Header from "./components/layout/Header";
+import { ThemeProvider } from "./components/theme-provider";
 import { useTheme } from "./hooks/use-theme";
 
 function App() {
@@ -49,14 +44,8 @@ function App() {
                     <Routes>
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/clients" element={<Clients />} />
-                      <Route path="/events" element={<Events />} />
-                      <Route path="/kits" element={<Kits />} />
-                      <Route path="/themes" element={<Themes />} />
                       <Route path="/messages" element={<Messages />} />
                       <Route path="/contracts" element={<Contracts />} />
-                      <Route path="/contracts/:id" element={<ContractDetails />} />
-                      <Route path="/contract-templates" element={<ContractTemplates />} />
-                      <Route path="/contract-templates/:id" element={<ContractTemplateEditor />} />
                       <Route path="/configurations" element={<Configurations />} />
                     </Routes>
                   </main>
