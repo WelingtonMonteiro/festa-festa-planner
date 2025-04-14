@@ -16,39 +16,28 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <SettingsProvider>
       <EventsProvider>
-        {(eventsContext) => (
-          <KitsProvider 
-            events={eventsContext.events} 
+        <KitsProvider 
+          events={[]}  // Precisamos passar um array vazio inicialmente
+          storageType={storageType}
+        >
+          <ThemesProvider 
+            events={[]}  // Precisamos passar um array vazio inicialmente
+            kits={[]}    // Precisamos passar um array vazio inicialmente
             storageType={storageType}
           >
-            {(kitsContext) => (
-              <ThemesProvider 
-                events={eventsContext.events} 
-                kits={kitsContext.kits}
-                storageType={storageType}
-              >
-                <ClientsProvider 
-                  events={eventsContext.events}
-                  onUpdateClientHistory={(clientId, events) => {
-                    // Callback para atualizar histórico de clientes
-                  }}
-                >
-                  <MessagesProvider>
-                    {(messagesContext) => (
-                      <ContractsProvider 
-                        onAddMessage={messagesContext.addMessage}
-                      >
-                        <StatisticsProvider events={eventsContext.events}>
-                          {children}
-                        </StatisticsProvider>
-                      </ContractsProvider>
-                    )}
-                  </MessagesProvider>
-                </ClientsProvider>
-              </ThemesProvider>
-            )}
-          </KitsProvider>
-        )}
+            <ClientsProvider 
+              events={[]}  // Precisamos passar um array vazio inicialmente
+            >
+              <MessagesProvider>
+                <ContractsProvider>
+                  <StatisticsProvider events={[]}>
+                    {children}
+                  </StatisticsProvider>
+                </ContractsProvider>
+              </MessagesProvider>
+            </ClientsProvider>
+          </ThemesProvider>
+        </KitsProvider>
       </EventsProvider>
     </SettingsProvider>
   );

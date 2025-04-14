@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Contract, ContractTemplate } from '../../types';
+import { Contract, ContractTemplate, Message } from '../../types';
 import { toast } from 'sonner';
 
 interface ContractsContextType {
