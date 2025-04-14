@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -5,18 +6,22 @@ import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Send, MessageCircle, Facebook, Instagram, Phone, FileText, Link2 } from "lucide-react";
+import { Send, MessageCircle, Facebook, Instagram, Phone, FileText, Link2, QrCode } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import ContractMessageSender from "@/components/contracts/ContractMessageSender";
 import { toast } from "sonner";
 import { Link } from "react-router-dom";
+import WhatsAppQRCode from "@/components/messages/WhatsAppQRCode";
+import { whatsappApiService } from '@/services/apiServices/whatsappApiService';
 
 const Messages = () => {
-  const { messages: messages, clients: clients, addMessage: addMessage, markMessageAsRead: markMessageAsRead } = useHandleContext();
+  const { messages: messages, clients: clients, addMessage: addMessage, markMessageAsRead: markMessageAsRead, apiUrl } = useHandleContext();
   const [platform, setPlatform] = useState<'whatsapp' | 'instagram' | 'facebook'>('whatsapp');
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
   const [newMessage, setNewMessage] = useState('');
+  const [isQRCodeModalOpen, setIsQRCodeModalOpen] = useState(false);
+  const [isWhatsAppConnected, setIsWhatsAppConnected] = useState(false);
   
   const clientsWithMessages = clients.filter(client => 
     messages.some(m => m.clienteId === client.id)
@@ -49,18 +54,48 @@ const Messages = () => {
     }
   }, [selectedClient, filteredMessages, markMessageAsRead]);
   
-  const sendMessage = () => {
+  useEffect(() => {
+    checkWhatsAppConnection();
+  }, [platform, apiUrl]);
+  
+  const checkWhatsAppConnection = async () => {
+    if (platform === 'whatsapp' && apiUrl) {
+      const connected = await whatsappApiService.checkConnection(apiUrl);
+      setIsWhatsAppConnected(connected);
+    }
+  };
+  
+  const sendMessage = async () => {
     if (!newMessage.trim() || !selectedClient) return;
     
-    addMessage({
-      remetente: 'empresa',
-      clienteId: selectedClient,
-      conteudo: newMessage,
-      lida: true
-    });
-    
-    toast.success("Message sent successfully!");
-    setNewMessage('');
+    if (platform === 'whatsapp' && apiUrl) {
+      const client = clients.find(c => c.id === selectedClient);
+      if (client && client.telefone) {
+        const phoneNumber = client.telefone.replace(/\D/g, ''); // Remove todos os caracteres que não são números
+        const sent = await whatsappApiService.sendMessage(apiUrl, phoneNumber, newMessage);
+        
+        if (sent) {
+          addMessage({
+            remetente: 'empresa',
+            clienteId: selectedClient,
+            conteudo: newMessage,
+            lida: true
+          });
+          setNewMessage('');
+        }
+      } else {
+        toast.error("Cliente não possui número de telefone cadastrado");
+      }
+    } else {
+      addMessage({
+        remetente: 'empresa',
+        clienteId: selectedClient,
+        conteudo: newMessage,
+        lida: true
+      });
+      setNewMessage('');
+      toast.success("Mensagem enviada com sucesso!");
+    }
   };
   
   const getPlatformIcon = (platform: 'whatsapp' | 'instagram' | 'facebook') => {
@@ -99,17 +134,31 @@ const Messages = () => {
             </TabsTrigger>
           </TabsList>
           
-          {selectedClient && (
-            <div className="flex gap-2">
-              <ContractMessageSender clientId={selectedClient} />
-              <Button variant="outline" size="sm" asChild>
-                <Link to="/contracts">
-                  <Link2 className="h-4 w-4 mr-1" />
-                  Contratos
-                </Link>
+          <div className="flex gap-2">
+            {platform === 'whatsapp' && apiUrl && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setIsQRCodeModalOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <QrCode className="h-4 w-4" />
+                {isWhatsAppConnected ? 'WhatsApp Conectado' : 'Conectar WhatsApp'}
               </Button>
-            </div>
-          )}
+            )}
+            
+            {selectedClient && (
+              <div className="flex gap-2">
+                <ContractMessageSender clientId={selectedClient} />
+                <Button variant="outline" size="sm" asChild>
+                  <Link to="/contracts">
+                    <Link2 className="h-4 w-4 mr-1" />
+                    Contratos
+                  </Link>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         
         <div className="grid grid-cols-12 gap-4 h-[calc(100vh-240px)]">
@@ -248,16 +297,32 @@ const Messages = () => {
                       className="resize-none min-h-[50px] flex-1"
                       rows={1}
                     />
-                    <Button type="submit" disabled={!newMessage.trim()}>
+                    <Button 
+                      type="submit" 
+                      disabled={!newMessage.trim() || (platform === 'whatsapp' && !isWhatsAppConnected)}
+                    >
                       <Send className="h-4 w-4" />
                     </Button>
                   </form>
+                  {platform === 'whatsapp' && !isWhatsAppConnected && apiUrl && (
+                    <p className="text-xs text-red-500 mt-1">
+                      É necessário conectar o WhatsApp para enviar mensagens.
+                    </p>
+                  )}
                 </div>
               </>
             )}
           </div>
         </div>
       </Tabs>
+      
+      <WhatsAppQRCode 
+        isOpen={isQRCodeModalOpen} 
+        onClose={() => {
+          setIsQRCodeModalOpen(false);
+          checkWhatsAppConnection();
+        }} 
+      />
     </div>
   );
 };

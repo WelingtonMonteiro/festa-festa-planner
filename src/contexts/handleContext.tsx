@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Client, Kit, Them, Event, Message, Statistic, User, Contract, ContractTemplate } from '../types';
 import { clientesMock, kitsMock, temasMock, eventosMock, mensagensMock, gerarEstatisticas } from '../data/mockData';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { kitService } from '@/services/kitService';
 import { themService } from '@/services/themService';
 import { useStorage } from './storageContext';
@@ -16,6 +16,7 @@ interface HandleContextType {
   users: User;
   contracts: Contract[];
   contractTemplates: ContractTemplate[];
+  apiUrl: string;
   
   addClients: (cliente: Omit<Client, 'id' | 'historico'>) => void;
   updateClients: (id: string, cliente: Partial<Client>) => void;
@@ -80,6 +81,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [mensagens, setMensagens] = useState<Message[]>([]);
   const [contratos, setContratos] = useState<Contract[]>([]);
   const [modelosContrato, setModelosContrato] = useState<ContractTemplate[]>([]);
+  const [apiUrl, setApiUrl] = useState<string>('');
   const [estatisticas, setEstatisticas] = useState<Statistic>({
     eventosPorMes: {},
     kitsPopulares: [],
@@ -161,6 +163,11 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setUsuario(JSON.parse(loadedUsuario));
       }
       
+      const loadedApiUrl = localStorage.getItem('apiUrl');
+      if (loadedApiUrl) {
+        setApiUrl(loadedApiUrl);
+      }
+      
       setIsLoading(false);
     };
     
@@ -191,7 +198,8 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
     
     localStorage.setItem('usuario', JSON.stringify(usuario));
-  }, [clientes, kits, temas, eventos, mensagens, usuario, contratos, modelosContrato, storageType, isLoading, isInitialized]);
+    localStorage.setItem('apiUrl', apiUrl);
+  }, [clientes, kits, temas, eventos, mensagens, usuario, contratos, modelosContrato, apiUrl, storageType, isLoading, isInitialized]);
   
   useEffect(() => {
     atualizarEstatisticas();
@@ -647,6 +655,7 @@ export const FestaProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       users: usuario,
       contracts: contratos,
       contractTemplates: modelosContrato,
+      apiUrl,
       addClients: adicionarCliente,
       updateClients: atualizarCliente,
       removeClients: excluirCliente,
