@@ -20,6 +20,23 @@ export const kitApiService = {
     }
   },
   
+  async getById(apiUrl: string, id: string): Promise<Kit | null> {
+    try {
+      const response = await fetch(`${apiUrl}/kits/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar kit: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data as Kit;
+    } catch (error) {
+      console.error('Falha ao buscar kit da API:', error);
+      toast.error('Falha ao buscar kit da API');
+      return null;
+    }
+  },
+  
   async create(apiUrl: string, kit: Omit<Kit, 'id' | 'vezes_alugado'>): Promise<Kit | null> {
     try {
       const response = await fetch(`${apiUrl}/kits`, {

@@ -1,5 +1,5 @@
 
-import { Kit, Them } from "@/types";
+import { Them } from "@/types";
 import { toast } from "sonner";
 
 export const themApiService = {
@@ -17,6 +17,23 @@ export const themApiService = {
       console.error('Falha ao buscar temas da API:', error);
       toast.error('Falha ao buscar temas da API');
       return [];
+    }
+  },
+  
+  async getById(apiUrl: string, id: string): Promise<Them | null> {
+    try {
+      const response = await fetch(`${apiUrl}/thems/${id}`);
+      
+      if (!response.ok) {
+        throw new Error(`Erro ao buscar tema: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data as Them;
+    } catch (error) {
+      console.error('Falha ao buscar tema da API:', error);
+      toast.error('Falha ao buscar tema da API');
+      return null;
     }
   },
   
