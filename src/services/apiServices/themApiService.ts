@@ -22,6 +22,7 @@ export const themApiService = {
   
   async getById(apiUrl: string, id: string): Promise<Them | null> {
     try {
+      console.log('Fetching theme with ID:', id);
       const response = await fetch(`${apiUrl}/thems/${id}`);
       
       if (!response.ok) {
@@ -65,6 +66,7 @@ export const themApiService = {
   
   async update(apiUrl: string, id: string, them: Partial<Them>): Promise<Them | null> {
     try {
+      console.log('Updating theme with ID:', id);
       const response = await fetch(`${apiUrl}/thems/${id}`, {
         method: 'PUT',
         headers: {
@@ -88,6 +90,7 @@ export const themApiService = {
   
   async delete(apiUrl: string, id: string): Promise<boolean> {
     try {
+      console.log('Deleting theme with ID:', id);
       const response = await fetch(`${apiUrl}/thems/${id}`, {
         method: 'DELETE',
       });

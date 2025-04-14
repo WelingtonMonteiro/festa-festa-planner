@@ -35,6 +35,7 @@ export const unifiedThemService = {
 
   async getById(id: string, dataSource: DataSource, kits: Kit[], apiUrl?: string): Promise<Them | null> {
     try {
+      console.log('Getting theme by ID:', id, 'from', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await themService.getById(id, kits);
@@ -109,6 +110,7 @@ export const unifiedThemService = {
     apiUrl?: string
   ): Promise<Them | null> {
     try {
+      console.log('Updating theme:', id, 'in', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await themService.update(id, themUpdate, kits);
@@ -147,6 +149,7 @@ export const unifiedThemService = {
     apiUrl?: string
   ): Promise<boolean> {
     try {
+      console.log('Deleting theme:', id, 'from', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await themService.delete(id);

@@ -37,6 +37,7 @@ export const unifiedKitService = {
 
   async getById(id: string, dataSource: DataSource, apiUrl?: string): Promise<Kit | null> {
     try {
+      console.log('Getting kit by ID:', id, 'from', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await kitService.getById(id);
@@ -109,6 +110,7 @@ export const unifiedKitService = {
     apiUrl?: string
   ): Promise<Kit | null> {
     try {
+      console.log('Updating kit:', id, 'in', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await kitService.update(id, kitUpdate);
@@ -147,6 +149,7 @@ export const unifiedKitService = {
     apiUrl?: string
   ): Promise<boolean> {
     try {
+      console.log('Deleting kit:', id, 'from', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await kitService.delete(id);

@@ -28,8 +28,8 @@ const KitsThems = () => {
   const [deleteThemDialogOpen, setDeleteThemDialogOpen] = useState(false);
   const [kitToDelete, setKitToDelete] = useState<string | null>(null);
   const [themToDelete, setThemToDelete] = useState<string | null>(null);
-  const [editingKit, setEditingKit] = useState<string | null>(null);
-  const [editingThem, setEditingThem] = useState<string | null>(null);
+  const [editingKit, setEditingKit] = useState<Kit | null>(null);
+  const [editingThem, setEditingThem] = useState<Them | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [localKits, setLocalKits] = useState<Kit[]>([]);
   const [localThems, setLocalThems] = useState<Them[]>([]);
@@ -85,10 +85,10 @@ const KitsThems = () => {
       if (editingKit) {
         // Atualizar kit
         const updatedKit = await unifiedKitService.update(
-          editingKit,
+          editingKit.id,
           {
             ...kitData,
-            vezes_alugado: localKits.find(k => k.id === editingKit)?.vezes_alugado || 0
+            vezes_alugado: editingKit.vezes_alugado || 0
           },
           dataSource,
           apiUrl
@@ -96,8 +96,8 @@ const KitsThems = () => {
         
         if (updatedKit) {
           // Atualizar estado local
-          setLocalKits(localKits.map(k => k.id === editingKit ? updatedKit : k));
-          updateKit(editingKit, kitData);
+          setLocalKits(localKits.map(k => k.id === editingKit.id ? updatedKit : k));
+          updateKit(editingKit.id, kitData);
           toast.success(`Kit atualizado com sucesso via ${dataSource}`);
         } else {
           throw new Error(`Falha ao atualizar kit via ${dataSource}`);
@@ -132,10 +132,10 @@ const KitsThems = () => {
       if (editingThem) {
         // Atualizar tema
         const updatedThem = await unifiedThemService.update(
-          editingThem,
+          editingThem.id,
           {
             ...themData,
-            vezes_alugado: localThems.find(t => t.id === editingThem)?.vezes_alugado || 0
+            vezes_alugado: editingThem.vezes_alugado || 0
           },
           dataSource,
           localKits,
@@ -144,8 +144,8 @@ const KitsThems = () => {
         
         if (updatedThem) {
           // Atualizar estado local
-          setLocalThems(localThems.map(t => t.id === editingThem ? updatedThem : t));
-          updateThems(editingThem, themData);
+          setLocalThems(localThems.map(t => t.id === editingThem.id ? updatedThem : t));
+          updateThems(editingThem.id, themData);
           toast.success(`Tema atualizado com sucesso via ${dataSource}`);
         } else {
           throw new Error(`Falha ao atualizar tema via ${dataSource}`);
@@ -173,22 +173,26 @@ const KitsThems = () => {
     }
   };
   
-  const handleEditKit = (kit: typeof localKits[0]) => {
-    setEditingKit(kit.id);
+  const handleEditKit = (kit: Kit) => {
+    console.log('Editing kit:', kit);
+    setEditingKit(kit);
     setKitDialogOpen(true);
   };
   
-  const handleEditTema = (tema: typeof localThems[0]) => {
-    setEditingThem(tema.id);
+  const handleEditTema = (tema: Them) => {
+    console.log('Editing theme:', tema);
+    setEditingThem(tema);
     setThemDialogOpen(true);
   };
 
   const handleDeleteKitClick = (id: string) => {
+    console.log('Setting kit to delete:', id);
     setKitToDelete(id);
     setDeleteKitDialogOpen(true);
   };
 
   const handleDeleteThemClick = (id: string) => {
+    console.log('Setting theme to delete:', id);
     setThemToDelete(id);
     setDeleteThemDialogOpen(true);
   };
@@ -198,6 +202,7 @@ const KitsThems = () => {
       setIsLoading(true);
       
       try {
+        console.log('Confirming delete kit with ID:', kitToDelete);
         // Excluir kit usando o serviço unificado
         const success = await unifiedKitService.delete(kitToDelete, dataSource, apiUrl);
         
@@ -225,6 +230,7 @@ const KitsThems = () => {
       setIsLoading(true);
       
       try {
+        console.log('Confirming delete theme with ID:', themToDelete);
         // Excluir tema usando o serviço unificado
         const success = await unifiedThemService.delete(themToDelete, dataSource, apiUrl);
         
@@ -326,7 +332,7 @@ const KitsThems = () => {
               setKitDialogOpen(false);
               resetKitForm();
             }}
-            initialData={editingKit ? localKits.find(k => k.id === editingKit) : undefined}
+            initialData={editingKit}
             isEditing={!!editingKit}
             isLoading={isLoading}
           />
@@ -349,7 +355,7 @@ const KitsThems = () => {
               setThemDialogOpen(false);
               resetThemForm();
             }}
-            initialData={editingThem ? localThems.find(t => t.id === editingThem) : undefined}
+            initialData={editingThem}
             isEditing={!!editingThem}
             kits={localKits}
             isLoading={isLoading}

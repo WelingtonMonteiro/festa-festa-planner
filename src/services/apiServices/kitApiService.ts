@@ -65,6 +65,7 @@ export const kitApiService = {
   
   async update(apiUrl: string, id: string, kit: Partial<Kit>): Promise<Kit | null> {
     try {
+      console.log('Updating kit with ID:', id);
       const response = await fetch(`${apiUrl}/kits/${id}`, {
         method: 'PUT',
         headers: {
@@ -88,6 +89,7 @@ export const kitApiService = {
   
   async delete(apiUrl: string, id: string): Promise<boolean> {
     try {
+      console.log('Deleting kit with ID:', id);
       const response = await fetch(`${apiUrl}/kits/${id}`, {
         method: 'DELETE',
       });
