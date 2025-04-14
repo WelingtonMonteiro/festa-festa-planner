@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
 import { FestaProvider } from "./contexts/handleContext";
 import { StorageProvider } from "./contexts/storageContext";
@@ -35,23 +35,21 @@ function App() {
       <ThemeProvider defaultTheme={theme} storageKey="vite-ui-theme">
         <StorageProvider>
           <FestaProvider>
-            <Router>
-              <div className="flex h-screen overflow-hidden">
-                <Sidebar />
-                <div className="flex flex-col flex-1 overflow-hidden">
-                  <Header />
-                  <main className="flex-1 overflow-y-auto">
-                    <Routes>
-                      <Route path="/" element={<Dashboard />} />
-                      <Route path="/clients" element={<Clients />} />
-                      <Route path="/messages" element={<Messages />} />
-                      <Route path="/contracts" element={<Contracts />} />
-                      <Route path="/configurations" element={<Configurations />} />
-                    </Routes>
-                  </main>
-                </div>
+            <div className="flex h-screen overflow-hidden">
+              <Sidebar />
+              <div className="flex flex-col flex-1 overflow-hidden">
+                <Header />
+                <main className="flex-1 overflow-y-auto">
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/clients" element={<Clients />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/contracts" element={<Contracts />} />
+                    <Route path="/configurations" element={<Configurations />} />
+                  </Routes>
+                </main>
               </div>
-            </Router>
+            </div>
             <Toaster position="top-right" richColors />
           </FestaProvider>
         </StorageProvider>
