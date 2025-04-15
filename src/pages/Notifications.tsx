@@ -20,7 +20,7 @@ type Notification = {
 };
 
 const Notifications = () => {
-  const { events: events, messages: messages } = useHandleContext();
+  const { events, messages } = useHandleContext();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filter, setFilter] = useState<'all' | 'read' | 'unread'>('all');
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
@@ -35,16 +35,22 @@ const Notifications = () => {
     const threeDaysLater = new Date();
     threeDaysLater.setDate(today.getDate() + 3);
     
-    const upcomingEvents = events.filter(event => {
+    // Verificar se events existe e filtrar eventos válidos
+    const upcomingEvents = events?.filter(event => {
+      if (!event || !event.data) return false;
+      
       const eventDate = new Date(event.data);
       return eventDate >= today && eventDate <= threeDaysLater && event.status !== 'cancelado';
-    });
+    }) || [];
     
     upcomingEvents.forEach(event => {
+      // Verificar se o cliente existe antes de acessar a propriedade nome
+      const clientName = event.cliente && event.cliente.nome ? event.cliente.nome : 'Cliente não definido';
+      
       newNotifications.push({
         id: `event-${event.id}`,
         title: 'Upcoming Event',
-        message: `${event.cliente.nome} - ${format(new Date(event.data), 'dd/MM/yyyy')}`,
+        message: `${clientName} - ${format(new Date(event.data), 'dd/MM/yyyy')}`,
         date: new Date().toISOString(),
         read: false,
         type: 'event',
@@ -52,8 +58,8 @@ const Notifications = () => {
       });
     });
     
-    // Add unread messages
-    const unreadMessages = messages.filter(m => !m.lida && m.remetente === 'cliente');
+    // Verificar se messages existe e filtrar mensagens não lidas
+    const unreadMessages = messages?.filter(m => !m.lida && m.remetente === 'cliente') || [];
     unreadMessages.forEach(message => {
       newNotifications.push({
         id: `message-${message.id}`,
