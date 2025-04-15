@@ -12,7 +12,7 @@ interface ThemCardProps {
 
 const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
   const calcROI = (them: Them) => {
-    const receitaTotal = them.vezes_alugado * (them.kits.reduce((sum, kit) => sum + kit.preco, 0) / them.kits.length);
+    const receitaTotal = them.vezes_alugado * (them.kits.reduce((sum, kit) => sum + kit.preco, 0) / (them.kits.length || 1));
     const roi = them.valorGasto > 0 ? ((receitaTotal / them.valorGasto) - 1) * 100 : 0;
     return roi.toFixed(2);
   };
@@ -24,7 +24,7 @@ const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
           <div className="absolute inset-0 rounded-t-lg overflow-hidden">
             <img 
               src={theme.imagens[0]} 
-              alt={theme.nome}
+              alt={theme.nome || 'Tema sem nome'}
               className="w-full h-24 object-cover opacity-20"
             />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-background" />
@@ -56,11 +56,14 @@ const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
         <div className="mb-3">
           <h4 className="text-sm font-medium mb-2">Kits disponíveis:</h4>
           <div className="flex flex-wrap gap-2">
-            {theme.kits.map(kit => (
+            {theme.kits && theme.kits.map(kit => (
               <div key={kit.id} className="bg-muted rounded-full px-3 py-1 text-xs">
-                {kit.nome}
+                {kit.nome || 'Kit sem nome'}
               </div>
             ))}
+            {(!theme.kits || theme.kits.length === 0) && (
+              <div className="text-xs text-muted-foreground">Nenhum kit disponível</div>
+            )}
           </div>
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">

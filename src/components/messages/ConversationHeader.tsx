@@ -7,9 +7,9 @@ interface ConversationHeaderProps {
   platform: string;
 }
 
-const ConversationHeader = ({ clientName, platform }: ConversationHeaderProps) => {
-  const getPlatformIcon = (platform: string) => {
-    switch(platform) {
+const ConversationHeader = ({ clientName = 'Cliente', platform = 'whatsapp' }: ConversationHeaderProps) => {
+  const getPlatformIcon = (platformName: string) => {
+    switch(platformName) {
       case 'whatsapp':
         return <MessageSquare className="h-4 w-4" />;
       case 'instagram':
@@ -26,12 +26,12 @@ const ConversationHeader = ({ clientName, platform }: ConversationHeaderProps) =
       <div className="flex items-center gap-3">
         <Avatar>
           <AvatarFallback>
-            {clientName.substring(0, 2).toUpperCase()}
+            {clientName ? clientName.substring(0, 2).toUpperCase() : 'CL'}
           </AvatarFallback>
         </Avatar>
         
         <div>
-          <h3 className="font-medium">{clientName}</h3>
+          <h3 className="font-medium">{clientName || 'Cliente'}</h3>
           <div className="flex items-center gap-1 text-xs text-muted-foreground">
             {getPlatformIcon(platform)} <span className="capitalize">{platform}</span>
           </div>

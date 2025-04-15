@@ -19,17 +19,17 @@ import MessageComposer from '@/components/messages/MessageComposer';
 
 const Messages = () => {
   const { 
-    messages, 
-    clients, 
+    messages = [], 
+    clients = [], 
     addMessage, 
     markMessageAsRead, 
     apiUrl,
-    integrations,
+    integrations = [],
     getEnabledIntegrations
   } = useHandleContext();
   
   const navigate = useNavigate();
-  const enabledIntegrations = getEnabledIntegrations();
+  const enabledIntegrations = getEnabledIntegrations ? getEnabledIntegrations() : [];
   
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedClient, setSelectedClient] = useState<string | null>(null);
@@ -47,7 +47,7 @@ const Messages = () => {
   // Filtrar clientes com base nas integrações selecionadas
   const clientsWithMessages = clients.filter(client => 
     messages.some(m => {
-      const matchesClient = m.clienteId === client.id;
+      const matchesClient = m.clienteId === client?.id;
       const matchesType = selectedTypes.length === 0 || 
         selectedTypes.some(type => m.platform === type);
       return matchesClient && matchesType;
@@ -56,12 +56,12 @@ const Messages = () => {
   
   const getClientName = (clientId: string) => {
     const client = clients.find(c => c.id === clientId);
-    return client ? client.nome : 'Cliente';
+    return client && client.nome ? client.nome : 'Cliente';
   };
   
   const getPlatformFromMessage = (message: any) => {
     // Se a mensagem já tem plataforma definida, use-a
-    if (message.platform) return message.platform;
+    if (message && message.platform) return message.platform;
     
     // Caso contrário, assumimos que é WhatsApp por padrão
     return 'whatsapp';
@@ -80,7 +80,7 @@ const Messages = () => {
     
   // Marcar mensagens como lidas quando selecionar um cliente
   useEffect(() => {
-    if (selectedClient) {
+    if (selectedClient && markMessageAsRead) {
       filteredMessages
         .filter(m => !m.lida && m.remetente === 'cliente')
         .forEach(m => markMessageAsRead(m.id));
@@ -89,38 +89,49 @@ const Messages = () => {
   
   // Verificar conexão do WhatsApp
   useEffect(() => {
-    if (enabledIntegrations.find(i => i.name === 'whatsapp') && apiUrl) {
+    const hasWhatsappIntegration = enabledIntegrations.some(i => i.name === 'whatsapp');
+    if (hasWhatsappIntegration && apiUrl) {
       checkWhatsAppConnection();
     }
   }, [enabledIntegrations, apiUrl]);
   
   const checkWhatsAppConnection = async () => {
     if (apiUrl) {
-      const connected = await whatsappApiService.checkConnection(apiUrl);
-      setIsWhatsAppConnected(connected);
+      try {
+        const connected = await whatsappApiService.checkConnection(apiUrl);
+        setIsWhatsAppConnected(connected);
+      } catch (error) {
+        console.error('Failed to check WhatsApp connection:', error);
+        setIsWhatsAppConnected(false);
+      }
     }
   };
   
   // Enviar mensagem
   const sendMessage = async (messageContent: string) => {
-    if (!selectedClient) return;
+    if (!selectedClient || !addMessage) return;
     
     const whatsappEnabled = enabledIntegrations.find(i => i.name === 'whatsapp');
     
     if (whatsappEnabled && apiUrl) {
       const client = clients.find(c => c.id === selectedClient);
       if (client && client.telefone) {
-        const phoneNumber = client.telefone.replace(/\D/g, ''); // Remove todos os caracteres que não são números
-        const sent = await whatsappApiService.sendMessage(apiUrl, phoneNumber, messageContent);
-        
-        if (sent) {
-          addMessage({
-            remetente: 'empresa',
-            clienteId: selectedClient,
-            conteudo: messageContent,
-            lida: true,
-            platform: 'whatsapp'
-          });
+        try {
+          const phoneNumber = client.telefone.replace(/\D/g, ''); // Remove todos os caracteres que não são números
+          const sent = await whatsappApiService.sendMessage(apiUrl, phoneNumber, messageContent);
+          
+          if (sent) {
+            addMessage({
+              remetente: 'empresa',
+              clienteId: selectedClient,
+              conteudo: messageContent,
+              lida: true,
+              platform: 'whatsapp'
+            });
+          }
+        } catch (error) {
+          toast.error("Erro ao enviar mensagem");
+          console.error("Error sending message:", error);
         }
       } else {
         toast.error("Cliente não possui número de telefone cadastrado");
@@ -145,7 +156,7 @@ const Messages = () => {
   };
 
   // Se não há integrações habilitadas, mostramos um alerta
-  if (enabledIntegrations.length === 0) {
+  if (!enabledIntegrations || enabledIntegrations.length === 0) {
     return (
       <div className="container py-6">
         <div className="mb-6">
@@ -231,6 +242,8 @@ const Messages = () => {
           ) : (
             <div className="divide-y">
               {clientsWithMessages.map(client => {
+                if (!client) return null;
+                
                 const lastMessage = [...messages]
                   .filter(m => {
                     const matchesClient = m.clienteId === client.id;

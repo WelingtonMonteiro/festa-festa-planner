@@ -146,11 +146,11 @@ const Dashboard = () => {
                 )}
               </div>
             ) : (
-              <div className="flex h-24 flex-col items-center justify-center rounded-lg border border-dashed">
+              <div className="flex h-48 flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
                 <p className="text-sm text-muted-foreground">
                   Nenhum evento agendado
                 </p>
-                <Button variant="link" onClick={() => navigate('/calendari')}>
+                <Button variant="link" onClick={() => navigate('/calendar')}>
                   Agendar um evento
                 </Button>
               </div>

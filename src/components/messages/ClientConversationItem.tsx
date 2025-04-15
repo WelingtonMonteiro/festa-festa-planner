@@ -22,8 +22,8 @@ const ClientConversationItem = ({
   isSelected,
   onClick
 }: ClientConversationItemProps) => {
-  const getPlatformIcon = (platform: string) => {
-    switch(platform) {
+  const getPlatformIcon = (platformName: string) => {
+    switch(platformName) {
       case 'whatsapp':
         return <MessageSquare className="h-4 w-4" />;
       case 'instagram':
@@ -35,6 +35,9 @@ const ClientConversationItem = ({
     }
   };
 
+  // Make sure client name is available
+  const clientName = client && client.nome ? client.nome : 'Cliente';
+
   return (
     <div 
       className={`p-3 hover:bg-accent/20 cursor-pointer ${
@@ -45,14 +48,14 @@ const ClientConversationItem = ({
       <div className="flex items-start gap-3">
         <Avatar>
           <AvatarFallback>
-            {client.nome.substring(0, 2).toUpperCase()}
+            {clientName.substring(0, 2).toUpperCase()}
           </AvatarFallback>
         </Avatar>
         
         <div className="flex-1 min-w-0">
           <div className="flex justify-between items-center mb-1">
             <div className="flex items-center gap-1">
-              <h4 className="font-medium truncate">{client.nome}</h4>
+              <h4 className="font-medium truncate">{clientName}</h4>
               {getPlatformIcon(platform)}
             </div>
             {lastMessage && (
