@@ -32,21 +32,27 @@ const Header = () => {
     const threeDaysLater = new Date();
     threeDaysLater.setDate(today.getDate() + 3);
     
-    const nextEvents = events.filter(evento => {
+    // Filtrar eventos válidos - verificando se o evento e o cliente existem antes de acessar propriedades
+    const nextEvents = events?.filter(evento => {
+      if (!evento || !evento.data) return false;
+      
       const eventDate = new Date(evento.data);
       return eventDate >= today && eventDate <= threeDaysLater && evento.status !== 'cancelado';
-    });
+    }) || [];
     
     nextEvents.forEach(evento => {
+      // Verificar se o cliente existe antes de acessar a propriedade nome
+      const clientName = evento.cliente && evento.cliente.nome ? evento.cliente.nome : 'Cliente não definido';
+      
       newNotifications.push({
         id: `evento-${evento.id}`,
         title: 'Evento Próximo',
-        message: `${evento.cliente.nome} - ${format(new Date(evento.data), 'dd/MM/yyyy')}`
+        message: `${clientName} - ${format(new Date(evento.data), 'dd/MM/yyyy')}`
       });
     });
     
     // Adicionar mensagens não lidas
-    const unreadMessages = messages.filter(m => !m.lida && m.remetente === 'cliente');
+    const unreadMessages = messages?.filter(m => !m.lida && m.remetente === 'cliente') || [];
     if (unreadMessages.length > 0) {
       newNotifications.push({
         id: 'mensagens',
