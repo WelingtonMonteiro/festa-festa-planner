@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext } from 'react';
 import { Client, Event } from '@/types';
 import { toast } from 'sonner';
 import { useClientService } from '@/services/entityServices/clientService';
@@ -33,19 +33,18 @@ export const ClientsProvider: React.FC<{
     }
   });
 
-  useEffect(() => {
-    crud.refresh();
-  }, []);
+  const clientService = useClientService();
 
   const adicionarCliente = async (cliente: Omit<Client, 'id' | 'historico'>) => {
     try {
-      const novoCliente = await crud.create({
+      const novoCliente = await clientService.create({
         ...cliente,
         historico: [],
         ativo: cliente.ativo !== false
       });
       
       if (novoCliente) {
+        crud.refresh();
         toast.success(`${cliente.nome} foi adicionado com sucesso.`);
       }
     } catch (error) {
@@ -56,8 +55,9 @@ export const ClientsProvider: React.FC<{
   
   const atualizarCliente = async (id: string, clienteAtualizado: Partial<Client>) => {
     try {
-      const updated = await crud.update(id, clienteAtualizado);
+      const updated = await clientService.update(id, clienteAtualizado);
       if (updated) {
+        crud.refresh();
         toast.success("As informações do cliente foram atualizadas.");
       }
     } catch (error) {
@@ -76,7 +76,8 @@ export const ClientsProvider: React.FC<{
     try {
       const cliente = crud.data.find(c => c.id === id);
       if (cliente) {
-        await crud.update(id, { ativo: false });
+        await clientService.toggleClientStatus(id, false);
+        crud.refresh();
         toast.success(`${cliente.nome} foi marcado como inativo com sucesso.`);
       }
     } catch (error) {

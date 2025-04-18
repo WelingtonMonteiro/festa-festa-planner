@@ -1,10 +1,11 @@
 
 import { Client } from "@/types";
-import { CrudOperations, StorageAdapterConfig } from "@/types/crud";
+import { CrudOperations } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 import { useApi } from "@/contexts/apiContext";
 
+// Serviço específico para Clientes que estende o CRUD genérico
 export const useClientService = (): CrudOperations<Client> & {
   getActiveClients: () => Promise<Client[]>;
   toggleClientStatus: (id: string, isActive: boolean) => Promise<Client | null>;
