@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Plan } from '@/types/plans';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { PlanList } from '@/components/admin/plans/PlanList';
 import { PlanForm } from '@/components/admin/plans/PlanForm';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlanService } from '@/services/entityServices/planService';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { PricingSection } from '@/components/landing/PricingSection';
 import { Switch } from '@/components/ui/switch';
 
 const PlansManagement = () => {
@@ -161,6 +160,17 @@ const PlansManagement = () => {
     setPreviewPlan(plan);
   };
 
+  const formatCurrency = (value: number): string => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  const handlePlanSelection = (planName: string) => {
+    toast.info(`Plano ${planName} selecionado para demonstração`);
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -310,7 +320,7 @@ const PlansManagement = () => {
                               : previewPlan.features
                             ).map((feature, index) => (
                               <div key={index} className="flex items-start">
-                                <span className="mr-2">•</span>
+                                <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
                                 <span>{feature.trim()}</span>
                               </div>
                             ))}

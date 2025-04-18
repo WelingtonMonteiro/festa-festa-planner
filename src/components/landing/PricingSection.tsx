@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,52 +79,56 @@ export const PricingSection = () => {
           </div>
         ) : plans.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans.map((plan) => (
-              <Card 
-                key={plan.id || plan._id} 
-                className={`w-full ${plan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
-              >
-                {plan.is_popular && (
-                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
-                    Popular
-                  </div>
-                )}
-                <CardHeader>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription>{plan.description}</CardDescription>
-                  <div className="mt-4">
-                    <span className="text-4xl font-bold">
-                      R$ {isYearly ? (plan.price_yearly / 12).toFixed(2) : plan.price_monthly.toFixed(2)}
-                    </span>
-                    <span className="text-muted-foreground ml-2">/mês</span>
-                    {isYearly && (
-                      <div className="text-sm text-muted-foreground mt-1">
-                        Faturado como R$ {plan.price_yearly.toFixed(2)} anualmente
-                      </div>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    {(typeof plan.features === 'string' ? plan.features.split(',') : plan.features)
-                      .map((feature, index) => (
+            {plans.map((plan) => {
+              // Verifica se o ID é o id real ou o _id do MongoDB
+              const planId = plan.id || plan._id;
+              
+              return (
+                <Card 
+                  key={planId} 
+                  className={`w-full ${plan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
+                >
+                  {plan.is_popular && (
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
+                      Popular
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle>{plan.name}</CardTitle>
+                    <CardDescription>{plan.description}</CardDescription>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold">
+                        R$ {isYearly ? (plan.price_yearly / 12).toFixed(2) : plan.price_monthly.toFixed(2)}
+                      </span>
+                      <span className="text-muted-foreground ml-2">/mês</span>
+                      {isYearly && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Faturado como R$ {plan.price_yearly.toFixed(2)} anualmente
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      {formatFeatures(plan.features).map((feature, index) => (
                         <div key={index} className="flex items-start">
                           <CheckIcon className="h-5 w-5 text-green-500 mr-2 shrink-0" />
-                          <span>{feature.trim()}</span>
+                          <span>{feature}</span>
                         </div>
                       ))}
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    className="w-full" 
-                    onClick={() => document.dispatchEvent(new CustomEvent('openLoginModal'))}
-                  >
-                    {plan.is_popular ? 'Comece Agora' : 'Assinar'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full" 
+                      onClick={() => document.dispatchEvent(new CustomEvent('openLoginModal'))}
+                    >
+                      {plan.is_popular ? 'Comece Agora' : 'Assinar'}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center p-8 border rounded-lg">
