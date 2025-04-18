@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Plan } from '@/types/plans';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,12 +7,17 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlanService } from '@/services/entityServices/planService';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { PricingSection } from '@/components/landing/PricingSection';
 
 const PlansManagement = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [showArchived, setShowArchived] = useState(false);
+  const [previewPlan, setPreviewPlan] = useState<Plan | null>(null);
   
   const planService = usePlanService();
   
@@ -38,7 +42,6 @@ const PlansManagement = () => {
   
   const handleCreatePlan = async (planData: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
     try {
-      // Adicionamos os campos obrigatórios que não vêm do formulário
       const plan: Omit<Plan, 'id'> = {
         ...planData,
         created_at: new Date().toISOString(),
@@ -152,6 +155,10 @@ const PlansManagement = () => {
     setEditingPlan(null);
   };
   
+  const handlePreviewPlan = (plan: Plan) => {
+    setPreviewPlan(plan);
+  };
+
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -180,6 +187,11 @@ const PlansManagement = () => {
                 onEdit={handleEditPlan}
                 onToggleStatus={handleTogglePlanStatus}
                 onArchive={handleArchivePlan}
+                onPreview={handlePreviewPlan}
+                statusFilter={statusFilter}
+                onStatusFilterChange={setStatusFilter}
+                showArchived={showArchived}
+                onShowArchivedChange={setShowArchived}
               />
             </CardContent>
           </Card>
@@ -221,6 +233,56 @@ const PlansManagement = () => {
           </Card>
         )}
       </div>
+
+      <Dialog open={!!previewPlan} onOpenChange={() => setPreviewPlan(null)}>
+        <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
+          <CardHeader>
+            <CardTitle>Preview do Plano</CardTitle>
+            <CardDescription>
+              Visualização do plano como será exibido na página inicial
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {previewPlan && (
+              <div className="bg-background">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <Card 
+                    className={`w-full ${previewPlan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
+                  >
+                    {previewPlan.is_popular && (
+                      <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
+                        Popular
+                      </div>
+                    )}
+                    <CardHeader>
+                      <CardTitle>{previewPlan.name}</CardTitle>
+                      <CardDescription>{previewPlan.description}</CardDescription>
+                      <div className="mt-4">
+                        <span className="text-4xl font-bold">
+                          R$ {previewPlan.price_monthly.toFixed(2)}
+                        </span>
+                        <span className="text-muted-foreground ml-2">/mês</span>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {(typeof previewPlan.features === 'string' 
+                          ? previewPlan.features.split(',') 
+                          : previewPlan.features
+                        ).map((feature, index) => (
+                          <div key={index} className="flex items-start">
+                            <span>• {feature.trim()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

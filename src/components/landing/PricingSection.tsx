@@ -1,10 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { CheckIcon } from "lucide-react";
 import { Plan } from "@/types/plans";
-import { planService } from "@/services/planService";
+import { usePlanService } from "@/services/planService";
 
 export const PricingSection = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -14,7 +13,7 @@ export const PricingSection = () => {
   useEffect(() => {
     const loadPlans = async () => {
       try {
-        // Usando o método CRUD genérico
+        const planService = usePlanService();
         const activePlans = await planService.getActivePlans();
         console.log("Planos ativos carregados na landing page:", activePlans);
         setPlans(activePlans);
