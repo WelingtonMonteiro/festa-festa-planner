@@ -13,7 +13,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
   async getAll(): Promise<T[]> {
     try {
       const { data, error } = await supabase
-        .from(this.tableName)
+        .from(this.tableName as any)
         .select('*')
         .order('created_at', { ascending: false });
         
@@ -29,7 +29,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
   async getById(id: string): Promise<T | null> {
     try {
       const { data, error } = await supabase
-        .from(this.tableName)
+        .from(this.tableName as any)
         .select('*')
         .eq('id', id)
         .single();
@@ -46,8 +46,8 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
   async create(item: Omit<T, 'id'>): Promise<T | null> {
     try {
       const { data, error } = await supabase
-        .from(this.tableName)
-        .insert([item])
+        .from(this.tableName as any)
+        .insert([item as any])
         .select()
         .single();
           
@@ -63,8 +63,8 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
   async update(id: string, item: Partial<T>): Promise<T | null> {
     try {
       const { data, error } = await supabase
-        .from(this.tableName)
-        .update(item)
+        .from(this.tableName as any)
+        .update(item as any)
         .eq('id', id)
         .select()
         .single();
@@ -81,7 +81,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
   async delete(id: string): Promise<boolean> {
     try {
       const { error } = await supabase
-        .from(this.tableName)
+        .from(this.tableName as any)
         .delete()
         .eq('id', id);
           

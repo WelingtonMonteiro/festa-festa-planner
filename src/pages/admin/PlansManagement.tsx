@@ -1,204 +1,192 @@
 
-import { useState } from 'react';
-import { toast } from 'sonner';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { usePlanService } from '@/services/entityServices/planService';
+import React, { useEffect, useState } from 'react';
 import { Plan } from '@/types/plans';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import PlanList from '@/components/admin/plans/PlanList';
+import PlanForm from '@/components/admin/plans/PlanForm';
 import { Button } from '@/components/ui/button';
-import { PlanList } from '@/components/admin/plans/PlanList';
-import { PlanForm } from '@/components/admin/plans/PlanForm';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { Plus } from 'lucide-react';
+import { toast } from 'sonner';
+import { usePlanService } from '@/services/entityServices/planService';
 
 const PlansManagement = () => {
-  const queryClient = useQueryClient();
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  
   const planService = usePlanService();
-
-  // Query para carregar planos
-  const { data: plans, isLoading } = useQuery({
-    queryKey: ['plans'],
-    queryFn: () => planService.getAll()
-  });
-
-  // Mutation para criar planos
-  const createPlanMutation = useMutation({
-    mutationFn: (plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
-      return planService.create(plan);
-    },
-    onSuccess: () => {
-      toast.success('Plano criado com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['plans'] });
-      setIsCreating(false);
-    },
-    onError: (error) => {
-      toast.error(`Erro ao criar plano: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
+  
+  useEffect(() => {
+    loadPlans();
+  }, []);
+  
+  const loadPlans = async () => {
+    setIsLoading(true);
+    try {
+      const plans = await planService.getAll();
+      setPlans(plans);
+    } catch (error) {
+      console.error('Error loading plans:', error);
+      toast.error('Falha ao carregar planos');
+    } finally {
+      setIsLoading(false);
     }
-  });
-
-  // Mutation para atualizar planos
-  const updatePlanMutation = useMutation({
-    mutationFn: ({ id, plan }: { id: string; plan: Partial<Plan> }) => {
-      return planService.update(id, plan);
-    },
-    onSuccess: () => {
-      toast.success('Plano atualizado com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['plans'] });
-      setEditingPlan(null);
-    },
-    onError: (error) => {
-      toast.error(`Erro ao atualizar plano: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-    }
-  });
-
-  // Mutation para ativar/desativar planos
-  const togglePlanStatusMutation = useMutation({
-    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => {
-      return planService.togglePlanStatus(id, isActive);
-    },
-    onSuccess: (data) => {
-      const statusText = data?.is_active ? 'ativado' : 'desativado';
-      toast.success(`Plano ${statusText} com sucesso!`);
-      queryClient.invalidateQueries({ queryKey: ['plans'] });
-    },
-    onError: (error) => {
-      toast.error(`Erro ao alterar status do plano: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-    }
-  });
-
-  // Mutation para arquivar planos
-  const archivePlanMutation = useMutation({
-    mutationFn: (id: string) => {
-      return planService.archivePlan(id);
-    },
-    onSuccess: () => {
-      toast.success('Plano arquivado com sucesso!');
-      queryClient.invalidateQueries({ queryKey: ['plans'] });
-    },
-    onError: (error) => {
-      toast.error(`Erro ao arquivar plano: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
-    }
-  });
-
-  const handleCreatePlan = async (plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
-    await createPlanMutation.mutateAsync(plan);
   };
-
-  const handleUpdatePlan = async (plan: Plan) => {
-    const { id, ...planData } = plan;
-    await updatePlanMutation.mutateAsync({ id, plan: planData });
+  
+  const handleCreatePlan = async (plan: Omit<Plan, 'id'>) => {
+    try {
+      const newPlan = await planService.create(plan);
+      if (newPlan) {
+        toast.success('Plano criado com sucesso');
+        setIsCreating(false);
+        loadPlans();
+      }
+    } catch (error) {
+      console.error('Error creating plan:', error);
+      toast.error('Falha ao criar plano');
+    }
   };
-
-  const handleToggleStatus = async (id: string, isActive: boolean) => {
-    await togglePlanStatusMutation.mutateAsync({ id, isActive });
+  
+  const handleUpdatePlan = async (plan: Omit<Plan, 'id'>) => {
+    if (!editingPlan) return;
+    
+    try {
+      const updatedPlan = await planService.update(editingPlan.id, plan);
+      if (updatedPlan) {
+        toast.success('Plano atualizado com sucesso');
+        setEditingPlan(null);
+        loadPlans();
+      }
+    } catch (error) {
+      console.error('Error updating plan:', error);
+      toast.error('Falha ao atualizar plano');
+    }
   };
-
+  
+  const handleTogglePlanStatus = async (id: string, isActive: boolean) => {
+    try {
+      const result = await planService.togglePlanStatus(id, isActive);
+      if (result) {
+        toast.success(`Plano ${isActive ? 'ativado' : 'desativado'} com sucesso`);
+        loadPlans();
+      }
+    } catch (error) {
+      console.error('Error toggling plan status:', error);
+      toast.error(`Falha ao ${isActive ? 'ativar' : 'desativar'} plano`);
+    }
+  };
+  
   const handleArchivePlan = async (id: string) => {
-    await archivePlanMutation.mutateAsync(id);
+    try {
+      const result = await planService.archivePlan(id);
+      if (result) {
+        toast.success('Plano arquivado com sucesso');
+        loadPlans();
+      }
+    } catch (error) {
+      console.error('Error archiving plan:', error);
+      toast.error('Falha ao arquivar plano');
+    }
   };
-
-  const handleEdit = (plan: Plan) => {
+  
+  const handleEditPlan = (plan: Plan) => {
     setEditingPlan(plan);
     setIsCreating(false);
   };
-
+  
+  const handleCancelEdit = () => {
+    setEditingPlan(null);
+    setIsCreating(false);
+  };
+  
+  const handleStartCreating = () => {
+    setIsCreating(true);
+    setEditingPlan(null);
+  };
+  
+  // Plano padrão para novo
+  const defaultPlan: Omit<Plan, 'id'> = {
+    name: '',
+    description: '',
+    price_monthly: 0,
+    price_yearly: 0,
+    features: [],
+    is_active: true,
+    is_archived: false,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
+  };
+  
   return (
-    <div className="p-4 space-y-6">
-      <h1 className="text-3xl font-bold">Gerenciamento de Planos</h1>
+    <div className="container mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">Gerenciamento de Planos</h1>
+        {!isCreating && !editingPlan && (
+          <Button onClick={handleStartCreating}>
+            <Plus className="mr-2 h-4 w-4" />
+            Novo Plano
+          </Button>
+        )}
+      </div>
       
-      <Tabs defaultValue="list">
-        <TabsList>
-          <TabsTrigger value="list">Lista de Planos</TabsTrigger>
-          <TabsTrigger value="create" onClick={() => {
-            setIsCreating(true);
-            setEditingPlan(null);
-          }}>
-            Criar Plano
-          </TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="list" className="space-y-4">
+      <div className="grid grid-cols-1 gap-6">
+        {!isCreating && !editingPlan && (
           <Card>
             <CardHeader>
-              <CardTitle>Planos</CardTitle>
+              <CardTitle>Planos Disponíveis</CardTitle>
               <CardDescription>
-                Gerencie os planos de assinatura disponíveis para seus clientes.
+                Gerencie os planos de assinatura disponíveis para os clientes
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isCreating || editingPlan ? (
-                <div className="mb-4">
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setIsCreating(false);
-                      setEditingPlan(null);
-                    }}
-                  >
-                    Voltar para Lista
-                  </Button>
-                </div>
-              ) : (
-                <div className="mb-4">
-                  <Button 
-                    onClick={() => {
-                      setIsCreating(true);
-                      setEditingPlan(null);
-                    }}
-                  >
-                    Novo Plano
-                  </Button>
-                </div>
-              )}
-              
-              {!isCreating && !editingPlan && (
-                <PlanList 
-                  plans={plans || []} 
-                  isLoading={isLoading}
-                  onEdit={handleEdit}
-                  onToggleStatus={handleToggleStatus}
-                  onArchive={handleArchivePlan}
-                />
-              )}
-              
-              {(isCreating || editingPlan) && (
-                <PlanForm 
-                  plan={editingPlan}
-                  onSubmit={editingPlan ? handleUpdatePlan : handleCreatePlan}
-                  onCancel={() => {
-                    setIsCreating(false);
-                    setEditingPlan(null);
-                  }}
-                />
-              )}
+              <PlanList 
+                plans={plans} 
+                isLoading={isLoading}
+                onEdit={handleEditPlan}
+                onToggleStatus={handleTogglePlanStatus}
+                onArchive={handleArchivePlan}
+              />
             </CardContent>
           </Card>
-        </TabsContent>
+        )}
         
-        <TabsContent value="create">
+        {isCreating && (
           <Card>
             <CardHeader>
-              <CardTitle>{editingPlan ? 'Editar Plano' : 'Criar Novo Plano'}</CardTitle>
+              <CardTitle>Criar Novo Plano</CardTitle>
               <CardDescription>
-                {editingPlan 
-                  ? 'Atualize os detalhes do plano existente' 
-                  : 'Preencha os detalhes do novo plano de assinatura'}
+                Preencha os detalhes para criar um novo plano
               </CardDescription>
             </CardHeader>
             <CardContent>
               <PlanForm 
-                plan={editingPlan}
-                onSubmit={editingPlan ? handleUpdatePlan : handleCreatePlan}
-                onCancel={() => {
-                  setIsCreating(false);
-                  setEditingPlan(null);
-                }}
+                defaultValues={defaultPlan}
+                onSubmit={handleCreatePlan}
+                onCancel={handleCancelEdit}
               />
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        )}
+        
+        {editingPlan && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Editar Plano</CardTitle>
+              <CardDescription>
+                Atualize as informações do plano selecionado
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <PlanForm 
+                defaultValues={editingPlan}
+                onSubmit={handleUpdatePlan}
+                onCancel={handleCancelEdit}
+              />
+            </CardContent>
+          </Card>
+        )}
+      </div>
     </div>
   );
 };

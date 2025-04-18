@@ -13,6 +13,7 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
   constructor(storageType: 'localStorage' | 'supabase' | 'apiRest', apiUrl?: string) {
     this.storageType = storageType;
     this.apiUrl = apiUrl;
+    console.log("StorageAdapterFactory created with storage type:", storageType, "and API URL:", apiUrl);
   }
 
   getCurrentStorageType(): 'localStorage' | 'supabase' | 'apiRest' {
@@ -20,6 +21,9 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
   }
 
   createAdapter<T>(config: StorageAdapterConfig): StorageAdapter<T> {
+    // Log which adapter is being created
+    console.log(`Creating adapter for type: ${this.storageType}, config:`, config);
+
     // Sobrescrever o tipo de configuração passado pelo tipo de armazenamento atual
     switch (this.storageType) {
       case 'localStorage': 
@@ -77,8 +81,11 @@ export const useStorageAdapterFactory = (): StorageAdapterFactory => {
   const { storageType } = useStorage();
   const { apiType, apiUrl } = useApi();
   
+  // Determina o tipo de armazenamento com base nas configurações
   const currentStorageType: 'localStorage' | 'supabase' | 'apiRest' = 
     apiType === 'rest' ? 'apiRest' : storageType;
+  
+  console.log("useStorageAdapterFactory: currentStorageType =", currentStorageType, "apiType =", apiType, "apiUrl =", apiUrl);
   
   return new StorageAdapterFactoryImpl(currentStorageType, apiUrl);
 };

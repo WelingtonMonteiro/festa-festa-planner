@@ -26,6 +26,8 @@ const AdminSettings = () => {
   
   // Atualizar estados quando os valores dos contextos mudarem
   useEffect(() => {
+    console.log("AdminSettings: apiType =", apiType, "storageType =", storageType);
+    
     if (apiType === 'rest') {
       setSelectedDataSource('rest');
     } else {
@@ -38,11 +40,14 @@ const AdminSettings = () => {
   const handleDataSourceChange = (value: 'localStorage' | 'supabase' | 'rest') => {
     setSelectedDataSource(value);
     
+    console.log("Changing data source to:", value);
+    
     if (value === 'rest') {
       // Se selecionar REST API, configura API REST
       setApiType('rest');
       // Mantém o tipo de armazenamento atual para possíveis operações locais
       localStorage.setItem('adminApiPreference', 'rest');
+      localStorage.removeItem('adminStoragePreference');
     } else {
       // Se selecionar localStorage ou supabase, configura para acesso local
       setApiType('local');
@@ -56,15 +61,13 @@ const AdminSettings = () => {
       value === 'supabase' ? 'Supabase' : 'API REST'
     }`);
     
-    if (value !== 'rest') {
-      toast.info(`As alterações terão efeito após recarregar a página`, {
-        duration: 5000,
-        action: {
-          label: "Recarregar agora",
-          onClick: () => window.location.reload(),
-        },
-      });
-    }
+    toast.info(`As alterações terão efeito após recarregar a página`, {
+      duration: 5000,
+      action: {
+        label: "Recarregar agora",
+        onClick: () => window.location.reload(),
+      },
+    });
   };
   
   const handleApiUrlSave = () => {
@@ -77,6 +80,8 @@ const AdminSettings = () => {
       // Validação básica de URL
       new URL(apiUrlInput);
       setApiUrl(apiUrlInput);
+      localStorage.setItem('adminApiUrl', apiUrlInput);
+      
       toast.success("URL da API atualizada com sucesso");
       
       if (apiType === 'rest') {

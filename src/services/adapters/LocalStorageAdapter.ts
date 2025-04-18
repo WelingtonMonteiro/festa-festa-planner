@@ -42,7 +42,7 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
         ...item,
         id: `id_${Date.now().toString()}`, // Gera ID simples
         created_at: new Date().toISOString()
-      } as T;
+      } as unknown as T;
 
       const updatedItems = [...items, newItem];
       localStorage.setItem(this.storageKey, JSON.stringify(updatedItems));
@@ -64,7 +64,7 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
             ...existingItem, 
             ...item, 
             updated_at: new Date().toISOString() 
-          };
+          } as T;
           return updated;
         }
         return existingItem;
