@@ -21,56 +21,40 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
   }
 
   createAdapter<T>(config: StorageAdapterConfig): StorageAdapter<T> {
-    // Log which adapter is being created
+    // Log qual adaptador está sendo criado
     console.log(`Creating adapter for type: ${this.storageType}, config:`, config);
 
-    // Sobrescrever o tipo de configuração passado pelo tipo de armazenamento atual
+    // Determinar o endpoint/storageKey/tableName com base no tipo de configuração
+    let resourceIdentifier: string;
+
+    if (config.type === 'supabase') {
+      resourceIdentifier = config.config.tableName;
+    } else if (config.type === 'localStorage') {
+      resourceIdentifier = config.config.storageKey;
+    } else { // apiRest
+      resourceIdentifier = config.config.endpoint;
+    }
+
+    // Criar o adaptador com base no tipo de armazenamento atual
     switch (this.storageType) {
       case 'localStorage': 
-        if (config.type !== 'localStorage') {
-          console.warn('Usando localStorage em vez do tipo de armazenamento configurado');
-        }
-        return new LocalStorageAdapter<T>(
-          config.type === 'localStorage' ? config.config : {
-            storageKey: config.type === 'supabase' 
-              ? config.config.tableName 
-              : config.config.endpoint
-          }
-        );
+        console.log(`Criando LocalStorageAdapter com chave: ${resourceIdentifier}`);
+        return new LocalStorageAdapter<T>({ storageKey: resourceIdentifier });
         
       case 'supabase':
-        if (config.type !== 'supabase') {
-          console.warn('Usando Supabase em vez do tipo de armazenamento configurado');
-        }
-        return new SupabaseAdapter<T>(
-          config.type === 'supabase' ? config.config : {
-            tableName: config.type === 'localStorage' 
-              ? config.config.storageKey 
-              : config.config.endpoint
-          }
-        );
+        console.log(`Criando SupabaseAdapter com tabela: ${resourceIdentifier}`);
+        return new SupabaseAdapter<T>({ tableName: resourceIdentifier });
         
       case 'apiRest':
         if (!this.apiUrl) {
-          console.warn('URL da API não configurada, usando localStorage');
-          return new LocalStorageAdapter<T>(
-            config.type === 'localStorage' ? config.config : {
-              storageKey: config.type === 'supabase' 
-                ? config.config.tableName 
-                : config.config.endpoint
-            }
-          );
+          console.warn('URL da API não configurada, usando localStorage como fallback');
+          return new LocalStorageAdapter<T>({ storageKey: resourceIdentifier });
         }
         
-        if (config.type !== 'apiRest') {
-          console.warn('Usando API REST em vez do tipo de armazenamento configurado');
-        }
-        
+        console.log(`Criando ApiRestAdapter com URL: ${this.apiUrl} e endpoint: ${resourceIdentifier}`);
         return new ApiRestAdapter<T>({
           apiUrl: this.apiUrl,
-          endpoint: config.type === 'apiRest' ? config.config.endpoint : 
-                    config.type === 'supabase' ? config.config.tableName : 
-                    config.config.storageKey
+          endpoint: resourceIdentifier
         });
     }
   }

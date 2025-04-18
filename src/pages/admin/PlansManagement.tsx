@@ -24,6 +24,7 @@ const PlansManagement = () => {
   const loadPlans = async () => {
     setIsLoading(true);
     try {
+      console.log("Carregando planos com serviço:", planService);
       const plans = await planService.getAll();
       setPlans(plans);
     } catch (error) {
@@ -34,8 +35,15 @@ const PlansManagement = () => {
     }
   };
   
-  const handleCreatePlan = async (plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
+  const handleCreatePlan = async (planData: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
     try {
+      // Adicionamos os campos obrigatórios que não vêm do formulário
+      const plan: Omit<Plan, 'id'> = {
+        ...planData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      
       const newPlan = await planService.create(plan);
       if (newPlan) {
         toast.success('Plano criado com sucesso');
@@ -48,10 +56,15 @@ const PlansManagement = () => {
     }
   };
   
-  const handleUpdatePlan = async (plan: Omit<Plan, 'id'>) => {
+  const handleUpdatePlan = async (planData: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
     if (!editingPlan) return;
     
     try {
+      const plan: Partial<Plan> = {
+        ...planData,
+        updated_at: new Date().toISOString(),
+      };
+      
       const updatedPlan = await planService.update(editingPlan.id, plan);
       if (updatedPlan) {
         toast.success('Plano atualizado com sucesso');

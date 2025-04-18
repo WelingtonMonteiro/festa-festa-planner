@@ -11,10 +11,12 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
     this.apiUrl = config.apiUrl;
     this.endpoint = config.endpoint;
     this.baseUrl = `${this.apiUrl}/${this.endpoint}`;
+    console.log(`ApiRestAdapter inicializado com baseUrl: ${this.baseUrl}`);
   }
 
   async getAll(): Promise<T[]> {
     try {
+      console.log(`Fazendo requisição GET para ${this.baseUrl}`);
       const response = await fetch(this.baseUrl);
       
       if (!response.ok) {
@@ -22,6 +24,7 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
       }
       
       const data = await response.json();
+      console.log(`Dados recebidos da API:`, data);
       return data as T[];
     } catch (error) {
       console.error(`Falha ao buscar dados da API (${this.endpoint}):`, error);
@@ -32,6 +35,7 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
 
   async getById(id: string): Promise<T | null> {
     try {
+      console.log(`Fazendo requisição GET para ${this.baseUrl}/${id}`);
       const response = await fetch(`${this.baseUrl}/${id}`);
       
       if (!response.ok) {
@@ -52,6 +56,7 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
 
   async create(item: Omit<T, 'id'>): Promise<T | null> {
     try {
+      console.log(`Fazendo requisição POST para ${this.baseUrl}`, item);
       const response = await fetch(this.baseUrl, {
         method: 'POST',
         headers: {
@@ -75,6 +80,7 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
 
   async update(id: string, item: Partial<T>): Promise<T | null> {
     try {
+      console.log(`Fazendo requisição PUT para ${this.baseUrl}/${id}`, item);
       const response = await fetch(`${this.baseUrl}/${id}`, {
         method: 'PUT',
         headers: {
@@ -98,6 +104,7 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
 
   async delete(id: string): Promise<boolean> {
     try {
+      console.log(`Fazendo requisição DELETE para ${this.baseUrl}/${id}`);
       const response = await fetch(`${this.baseUrl}/${id}`, {
         method: 'DELETE',
       });

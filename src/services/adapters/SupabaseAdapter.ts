@@ -18,7 +18,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      return (data || []) as T[];
+      return (data || []) as unknown as T[];
     } catch (error) {
       console.error(`Falha ao buscar dados do Supabase (${this.tableName}):`, error);
       toast.error(`Falha ao carregar dados de ${this.tableName}`);
