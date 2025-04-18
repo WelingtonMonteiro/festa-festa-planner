@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Plan } from "@/types/plans";
 import { Input } from "@/components/ui/input";
@@ -6,8 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Plus, X } from "lucide-react";
 
-interface PlanFormProps {
-  plan?: Partial<Plan> | null;
+export interface PlanFormProps {
+  plan?: Plan | null;
   onSubmit: (data: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
   onCancel: () => void;
 }

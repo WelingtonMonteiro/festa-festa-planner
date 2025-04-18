@@ -1,30 +1,31 @@
 
 import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { planService } from '@/services/planService';
+import { usePlanService } from '@/services/entityServices/planService';
 import { Plan } from '@/types/plans';
 import { Button } from '@/components/ui/button';
 import { PlanList } from '@/components/admin/plans/PlanList';
 import { PlanForm } from '@/components/admin/plans/PlanForm';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const PlansManagement = () => {
   const queryClient = useQueryClient();
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const planService = usePlanService();
 
   // Query para carregar planos
   const { data: plans, isLoading } = useQuery({
     queryKey: ['plans'],
-    queryFn: planService.getPlans
+    queryFn: () => planService.getAll()
   });
 
   // Mutation para criar planos
   const createPlanMutation = useMutation({
     mutationFn: (plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
-      return planService.createPlan(plan);
+      return planService.create(plan);
     },
     onSuccess: () => {
       toast.success('Plano criado com sucesso!');
@@ -39,7 +40,7 @@ const PlansManagement = () => {
   // Mutation para atualizar planos
   const updatePlanMutation = useMutation({
     mutationFn: ({ id, plan }: { id: string; plan: Partial<Plan> }) => {
-      return planService.updatePlan(id, plan);
+      return planService.update(id, plan);
     },
     onSuccess: () => {
       toast.success('Plano atualizado com sucesso!');
@@ -57,7 +58,7 @@ const PlansManagement = () => {
       return planService.togglePlanStatus(id, isActive);
     },
     onSuccess: (data) => {
-      const statusText = data.is_active ? 'ativado' : 'desativado';
+      const statusText = data?.is_active ? 'ativado' : 'desativado';
       toast.success(`Plano ${statusText} com sucesso!`);
       queryClient.invalidateQueries({ queryKey: ['plans'] });
     },
