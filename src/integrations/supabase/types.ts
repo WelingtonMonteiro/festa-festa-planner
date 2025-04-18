@@ -9,6 +9,112 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      contacts: {
+        Row: {
+          company: string | null
+          company_id: string
+          created_at: string
+          email: string
+          id: string
+          name: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          company?: string | null
+          company_id: string
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company?: string | null
+          company_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      folder_documents: {
+        Row: {
+          created_at: string
+          file_url: string | null
+          folder_id: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          file_url?: string | null
+          folder_id?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          file_url?: string | null
+          folder_id?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folder_documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      folders: {
+        Row: {
+          access_control: string | null
+          company_id: string
+          created_at: string
+          id: string
+          name: string
+          parent_folder_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_control?: string | null
+          company_id: string
+          created_at?: string
+          id?: string
+          name: string
+          parent_folder_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_control?: string | null
+          company_id?: string
+          created_at?: string
+          id?: string
+          name?: string
+          parent_folder_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "folders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kits: {
         Row: {
           created_at: string | null
@@ -39,6 +145,75 @@ export type Database = {
           nome?: string
           preco?: number
           vezes_alugado?: number
+        }
+        Relationships: []
+      }
+      plans: {
+        Row: {
+          created_at: string
+          description: string
+          features: string[]
+          id: string
+          is_active: boolean
+          is_archived: boolean
+          name: string
+          price_monthly: number
+          price_yearly: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          is_archived?: boolean
+          name: string
+          price_monthly: number
+          price_yearly: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          features?: string[]
+          id?: string
+          is_active?: boolean
+          is_archived?: boolean
+          name?: string
+          price_monthly?: number
+          price_yearly?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      templates: {
+        Row: {
+          company_id: string
+          content: string | null
+          created_at: string
+          id: string
+          name: string
+          updated_at: string
+          variables: Json | null
+        }
+        Insert: {
+          company_id: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          updated_at?: string
+          variables?: Json | null
+        }
+        Update: {
+          company_id?: string
+          content?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          variables?: Json | null
         }
         Relationships: []
       }

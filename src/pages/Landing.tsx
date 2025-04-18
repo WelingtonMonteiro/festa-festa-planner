@@ -9,6 +9,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { Textarea } from "@/components/ui/textarea";
 import LoginHeader from '@/components/landing/LoginHeader';
 import { Separator } from '@/components/ui/separator';
+import { useQuery } from '@tanstack/react-query';
+import { planService } from '@/services/planService';
+import { formatCurrency } from '@/utils/format';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -166,6 +169,59 @@ const Landing = () => {
       ]
     }
   ];
+
+  // Update the pricingPlans section to use data from the service
+  const { data: plans = [] } = useQuery({
+    queryKey: ['active-plans'],
+    queryFn: planService.getActivePlans
+  });
+
+  // Replace the static pricingPlans with dynamic data from the service
+  const pricingSection = (
+    <section id="pricing" className="py-20">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">Planos Simples e Transparentes</h2>
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Escolha o plano que melhor se adapta ao tamanho do seu negócio e necessidades
+          </p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+          {plans.map((plan, index) => (
+            <Card key={plan.id} className={`border ${index === 1 ? 'border-primary shadow-lg' : 'shadow-md'}`}>
+              <CardHeader className={`pb-8 ${index === 1 ? 'bg-primary/10' : ''}`}>
+                <CardTitle>{plan.name}</CardTitle>
+                <CardDescription className="mt-2">
+                  <span className="text-3xl font-bold">{formatCurrency(plan.price_monthly)}</span>
+                  <span className="text-muted-foreground">/mês</span>
+                  <p className="mt-2">{plan.description}</p>
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <ul className="space-y-3">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center">
+                      <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+              <CardFooter>
+                <Button 
+                  className={`w-full ${index === 1 ? '' : 'bg-muted-foreground hover:bg-muted-foreground/80'}`}
+                  onClick={() => handlePlanSelection(plan.name)}
+                >
+                  {index === 1 ? 'Começar Agora' : 'Escolher Plano'}
+                </Button>
+              </CardFooter>
+            </Card>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -374,49 +430,7 @@ const Landing = () => {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Planos Simples e Transparentes</h2>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Escolha o plano que melhor se adapta ao tamanho do seu negócio e necessidades
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-            {pricingPlans.map((plan, index) => (
-              <Card key={index} className={`border ${plan.highlighted ? 'border-primary shadow-lg' : 'shadow-md'}`}>
-                <CardHeader className={`pb-8 ${plan.highlighted ? 'bg-primary/10' : ''}`}>
-                  <CardTitle>{plan.name}</CardTitle>
-                  <CardDescription className="mt-2">
-                    <span className="text-3xl font-bold">{plan.price}</span>
-                    <span className="text-muted-foreground">{plan.period}</span>
-                    <p className="mt-2">{plan.description}</p>
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <ul className="space-y-3">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center">
-                        <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-                <CardFooter>
-                  <Button 
-                    className={`w-full ${plan.highlighted ? '' : 'bg-muted-foreground hover:bg-muted-foreground/80'}`}
-                    onClick={() => handlePlanSelection(plan.name)}
-                  >
-                    {plan.highlighted ? 'Começar Agora' : 'Escolher Plano'}
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      {pricingSection}
 
       {/* About Us Section */}
       <section id="about" className="py-20 bg-muted/30">
@@ -713,107 +727,4 @@ const Landing = () => {
                 <h4 className="font-medium mb-3">Empresa</h4>
                 <ul className="space-y-2">
                   <li><a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">Sobre</a></li>
-                  <li><a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">Contato</a></li>
-                  <li><a href="#" className="text-muted-foreground hover:text-foreground transition-colors">Privacidade</a></li>
-                </ul>
-              </div>
-            </div>
-          </div>
-          <Separator />
-          <div className="mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
-            <p className="text-sm text-muted-foreground">© 2025 Festana. Todos os direitos reservados.</p>
-            <div className="flex space-x-4 mt-4 md:mt-0">
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                  <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                </svg>
-                <span className="sr-only">Facebook</span>
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                </svg>
-                <span className="sr-only">Instagram</span>
-              </Button>
-              <Button variant="ghost" size="icon" className="rounded-full">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                  <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"></path>
-                </svg>
-                <span className="sr-only">Twitter</span>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </footer>
-
-      {/* Modal de Login */}
-      <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-2xl">
-              {selectedPlan ? `Entrar para assinar o plano ${selectedPlan}` : 'Entrar na sua conta'}
-            </DialogTitle>
-            <DialogDescription>
-              {selectedPlan 
-                ? `Digite suas credenciais para assinar o plano ${selectedPlan} e acessar o sistema`
-                : 'Digite suas credenciais para acessar o sistema de planejamento de eventos'
-              }
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleLogin} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium">
-                Email
-              </label>
-              <Input 
-                id="email"
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                placeholder="nome@exemplo.com"
-                required
-                className="w-full"
-              />
-            </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <label htmlFor="password" className="text-sm font-medium">
-                  Senha
-                </label>
-                <Button type="button" variant="link" className="p-0 h-auto text-xs">
-                  Esqueceu a senha?
-                </Button>
-              </div>
-              <Input 
-                id="password"
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="w-full"
-              />
-            </div>
-            <Button type="submit" className="w-full">
-              {selectedPlan ? `Assinar plano ${selectedPlan}` : 'Entrar'}
-            </Button>
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">
-                Não tem uma conta?{" "}
-                <Button type="button" variant="link" className="p-0 h-auto" onClick={() => {
-                  setLoginModalOpen(false);
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                }}>
-                  Entre em contato
-                </Button>
-              </p>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-};
-
-export default Landing;
+                  <li><a href="#contact" className="text-muted-foreground hover
