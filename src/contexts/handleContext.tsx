@@ -67,9 +67,17 @@ export const useHandleContext = () => {
     apiUrl: settings.apiUrl,
     integrations: settings.integrations,
 
+    // Client context properties
     addClients: clients.addClients,
     updateClients: clients.updateClients,
     removeClients: clients.removeClients,
+    total: clients.total,
+    page: clients.page, 
+    limit: clients.limit,
+    loading: clients.loading,
+    setPage: clients.setPage,
+    setLimit: clients.setLimit,
+    refresh: clients.refresh,
 
     addKit: kits.addKit,
     updateKit: kits.updateKit,

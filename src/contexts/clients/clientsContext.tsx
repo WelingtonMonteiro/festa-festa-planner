@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Client } from '@/types';
+import { Client, Event } from '@/types';
 import { toast } from 'sonner';
 import { useClientService } from '@/services/entityServices/clientService';
 import { useCrud } from '@/hooks/useCrud';
@@ -28,7 +28,7 @@ export const ClientsProvider: React.FC<{
   const crud = useCrud<Client>({
     type: 'apiRest',
     config: {
-      apiUrl: process.env.REACT_APP_API_URL || '',
+      apiUrl: import.meta.env.VITE_APP_API_URL || '',
       endpoint: 'clients'
     }
   });
