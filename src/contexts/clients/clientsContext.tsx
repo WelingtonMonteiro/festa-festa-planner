@@ -3,12 +3,20 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Client } from '@/types';
 import { toast } from 'sonner';
 import { useClientService } from '@/services/entityServices/clientService';
+import { useCrud } from '@/hooks/useCrud';
 
 interface ClientsContextType {
   clients: Client[];
-  addClients: (cliente: Omit<Client, 'id' | 'historico'>) => void;
-  updateClients: (id: string, cliente: Partial<Client>) => void;
+  addClients: (client: Omit<Client, 'id' | 'historico'>) => void;
+  updateClients: (id: string, client: Partial<Client>) => void;
   removeClients: (id: string) => void;
+  total: number;
+  page: number;
+  limit: number;
+  loading: boolean;
+  setPage: (page: number) => void;
+  setLimit: (limit: number) => void;
+  refresh: () => void;
 }
 
 const ClientsContext = createContext<ClientsContextType | undefined>(undefined);
@@ -17,33 +25,27 @@ export const ClientsProvider: React.FC<{
   children: React.ReactNode,
   events: Event[]
 }> = ({ children, events }) => {
-  const [clientes, setClientes] = useState<Client[]>([]);
-  const clientService = useClientService();
-  
+  const crud = useCrud<Client>({
+    type: 'apiRest',
+    config: {
+      apiUrl: process.env.REACT_APP_API_URL || '',
+      endpoint: 'clients'
+    }
+  });
+
   useEffect(() => {
-    const loadClients = async () => {
-      try {
-        const response = await clientService.getAll();
-        setClientes(response.data);
-      } catch (error) {
-        console.error('Erro ao carregar clientes:', error);
-        toast.error('Erro ao carregar clientes');
-      }
-    };
-    
-    loadClients();
+    crud.refresh();
   }, []);
-  
+
   const adicionarCliente = async (cliente: Omit<Client, 'id' | 'historico'>) => {
     try {
-      const novoCliente = await clientService.create({
+      const novoCliente = await crud.create({
         ...cliente,
         historico: [],
         ativo: cliente.ativo !== false
       });
       
       if (novoCliente) {
-        setClientes(prev => [...prev, novoCliente]);
         toast.success(`${cliente.nome} foi adicionado com sucesso.`);
       }
     } catch (error) {
@@ -54,9 +56,8 @@ export const ClientsProvider: React.FC<{
   
   const atualizarCliente = async (id: string, clienteAtualizado: Partial<Client>) => {
     try {
-      const updated = await clientService.update(id, clienteAtualizado);
+      const updated = await crud.update(id, clienteAtualizado);
       if (updated) {
-        setClientes(prev => prev.map(c => c.id === id ? updated : c));
         toast.success("As informações do cliente foram atualizadas.");
       }
     } catch (error) {
@@ -66,17 +67,16 @@ export const ClientsProvider: React.FC<{
   };
   
   const excluirCliente = async (id: string) => {
-    const clienteComEventos = events.some(e => e.cliente.id === id);
+    const clienteComEventos = events.some(e => e.cliente?.id === id);
     if (clienteComEventos) {
       toast.error("Este cliente possui eventos registrados e não pode ser excluído.");
       return;
     }
     
     try {
-      const cliente = clientes.find(c => c.id === id);
+      const cliente = crud.data.find(c => c.id === id);
       if (cliente) {
-        await clientService.update(id, { ativo: false });
-        setClientes(prev => prev.map(c => c.id === id ? { ...c, ativo: false } : c));
+        await crud.update(id, { ativo: false });
         toast.success(`${cliente.nome} foi marcado como inativo com sucesso.`);
       }
     } catch (error) {
@@ -87,10 +87,17 @@ export const ClientsProvider: React.FC<{
   
   return (
     <ClientsContext.Provider value={{
-      clients: clientes,
+      clients: crud.data,
       addClients: adicionarCliente,
       updateClients: atualizarCliente,
-      removeClients: excluirCliente
+      removeClients: excluirCliente,
+      total: crud.total,
+      page: crud.page,
+      limit: crud.limit,
+      loading: crud.loading,
+      setPage: (page) => crud.refresh(page, crud.limit),
+      setLimit: (limit) => crud.refresh(1, limit),
+      refresh: () => crud.refresh()
     }}>
       {children}
     </ClientsContext.Provider>

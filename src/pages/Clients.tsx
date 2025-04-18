@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,13 +31,18 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Client } from "@/types";
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
 
 const Clients = () => {
-  const { clients, updateClients } = useHandleContext();
+  const { 
+    clients, updateClients, removeClients,
+    total, page, limit, loading,
+    setPage, setLimit, refresh 
+  } = useHandleContext();
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
-  const [filtroStatus, setFiltroStatus] = useState("todos"); // "todos", "ativos", "inativos"
+  const [filtroStatus, setFiltroStatus] = useState("todos");
   const [clienteParaEditar, setClienteParaEditar] = useState<{
     id: string;
     nome: string;
@@ -47,7 +51,7 @@ const Clients = () => {
     endereco?: string;
     ativo?: boolean;
   } | null>(null);
-  
+
   const clientesFiltrados = clients.filter(
     cliente =>
       (cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
@@ -57,6 +61,9 @@ const Clients = () => {
        (filtroStatus === "ativos" && cliente.ativo !== false) ||
        (filtroStatus === "inativos" && cliente.ativo === false))
   );
+
+  const totalPages = Math.ceil(total / limit);
+  const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const abrirEdicao = (cliente: Client) => {
     console.log("Cliente para editar:", cliente);
@@ -70,7 +77,7 @@ const Clients = () => {
     });
     setDialogAberto(true);
   };
-  
+
   const marcarClienteComoInativo = (clienteId: string) => {
     try {
       const cliente = clients.find(c => c.id === clienteId);
@@ -89,7 +96,7 @@ const Clients = () => {
       });
     }
   };
-  
+
   const reativarCliente = (clienteId: string) => {
     try {
       const cliente = clients.find(c => c.id === clienteId);
@@ -108,14 +115,14 @@ const Clients = () => {
       });
     }
   };
-  
+
   const handleDialogOpenChange = (open: boolean) => {
     setDialogAberto(open);
     if (!open) {
       setClienteParaEditar(null);
     }
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -177,122 +184,159 @@ const Clients = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {clientesFiltrados.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Contato</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Eventos</TableHead>
-                  <TableHead>Valor Total</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {clientesFiltrados.map((cliente) => {
-                  const historico = cliente.historico || [];
-                  const totalEventos = historico.length;
-                  const valorTotal = historico.reduce(
-                    (total, evento) => total + (evento?.valorTotal || 0), 
-                    0
-                  );
-                  
-                  return (
-                    <TableRow key={cliente.id} className={cliente.ativo === false ? "opacity-60" : ""}>
-                      <TableCell className="font-medium">{cliente.nome}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col gap-1">
-                          <div className="flex items-center text-sm">
-                            <Phone className="mr-2 h-3 w-3" />
-                            {cliente.telefone}
-                          </div>
-                          {cliente.email && (
+          {loading ? (
+            <div className="flex justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
+            </div>
+          ) : clientesFiltrados.length > 0 ? (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nome</TableHead>
+                    <TableHead>Contato</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Eventos</TableHead>
+                    <TableHead>Valor Total</TableHead>
+                    <TableHead className="text-right">Ações</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {clientesFiltrados.map((cliente) => {
+                    const historico = cliente.historico || [];
+                    const totalEventos = historico.length;
+                    const valorTotal = historico.reduce(
+                      (total, evento) => total + (evento?.valorTotal || 0), 
+                      0
+                    );
+                    
+                    return (
+                      <TableRow key={cliente.id} className={cliente.ativo === false ? "opacity-60" : ""}>
+                        <TableCell className="font-medium">{cliente.nome}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1">
                             <div className="flex items-center text-sm">
-                              <Mail className="mr-2 h-3 w-3" />
-                              {cliente.email}
+                              <Phone className="mr-2 h-3 w-3" />
+                              {cliente.telefone}
+                            </div>
+                            {cliente.email && (
+                              <div className="flex items-center text-sm">
+                                <Mail className="mr-2 h-3 w-3" />
+                                {cliente.email}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {cliente.ativo === false ? (
+                            <div className="flex items-center text-destructive">
+                              <X className="mr-1 h-4 w-4" />
+                              Inativo
+                            </div>
+                          ) : (
+                            <div className="flex items-center text-green-600">
+                              <Check className="mr-1 h-4 w-4" />
+                              Ativo
                             </div>
                           )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        {cliente.ativo === false ? (
-                          <div className="flex items-center text-destructive">
-                            <X className="mr-1 h-4 w-4" />
-                            Inativo
-                          </div>
-                        ) : (
-                          <div className="flex items-center text-green-600">
-                            <Check className="mr-1 h-4 w-4" />
-                            Ativo
-                          </div>
-                        )}
-                      </TableCell>
-                      <TableCell>{totalEventos}</TableCell>
-                      <TableCell>R$ {valorTotal.toLocaleString('pt-BR')}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => navigate(`/client/${cliente.id}`)}
-                          >
-                            Detalhes
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => abrirEdicao(cliente)}
-                          >
-                            <Edit className="h-3 w-3" />
-                          </Button>
-                          {cliente.ativo !== false ? (
-                            <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-destructive hover:bg-destructive/10"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle>Desativar cliente</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    Isso irá marcar o cliente {cliente.nome} como inativo. 
-                                    Você poderá reativar o cliente posteriormente se necessário.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                  <Button 
-                                    variant="destructive" 
-                                    onClick={() => marcarClienteComoInativo(cliente.id)}
-                                  >
-                                    Desativar
-                                  </Button>
-                                </AlertDialogFooter>
-                              </AlertDialogContent>
-                            </AlertDialog>
-                          ) : (
+                        </TableCell>
+                        <TableCell>{totalEventos}</TableCell>
+                        <TableCell>R$ {valorTotal.toLocaleString('pt-BR')}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-2">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => navigate(`/client/${cliente.id}`)}
+                            >
+                              Detalhes
+                            </Button>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="text-green-600 hover:bg-green-50"
-                              onClick={() => reativarCliente(cliente.id)}
+                              onClick={() => abrirEdicao(cliente)}
                             >
-                              <Check className="h-3 w-3" />
+                              <Edit className="h-3 w-3" />
                             </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                            {cliente.ativo !== false ? (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="text-destructive hover:bg-destructive/10"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Desativar cliente</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Isso irá marcar o cliente {cliente.nome} como inativo. 
+                                      Você poderá reativar o cliente posteriormente se necessário.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <Button 
+                                      variant="destructive" 
+                                      onClick={() => marcarClienteComoInativo(cliente.id)}
+                                    >
+                                      Desativar
+                                    </Button>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="text-green-600 hover:bg-green-50"
+                                onClick={() => reativarCliente(cliente.id)}
+                              >
+                                <Check className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+              
+              <div className="mt-4">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => setPage(page - 1)}
+                        className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                    
+                    {pageNumbers.map((pageNum) => (
+                      <PaginationItem key={pageNum}>
+                        <PaginationLink
+                          onClick={() => setPage(pageNum)}
+                          isActive={page === pageNum}
+                        >
+                          {pageNum}
+                        </PaginationLink>
+                      </PaginationItem>
+                    ))}
+                    
+                    <PaginationItem>
+                      <PaginationNext
+                        onClick={() => setPage(page + 1)}
+                        className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-8">
               <p className="text-muted-foreground">

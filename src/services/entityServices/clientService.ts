@@ -1,6 +1,6 @@
 
 import { Client } from "@/types";
-import { CrudOperations } from "@/types/crud";
+import { CrudOperations, StorageAdapterConfig } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 import { useApi } from "@/contexts/apiContext";
@@ -35,11 +35,7 @@ export const useClientService = (): CrudOperations<Client> & {
   };
 
   return {
-    getAll: crudService.getAll,
-    getById: crudService.getById,
-    create: crudService.create,
-    update: crudService.update,
-    delete: crudService.delete,
+    ...crudService,
     getActiveClients,
     toggleClientStatus
   };
