@@ -46,6 +46,18 @@ const Landing = () => {
     setLoginModalOpen(true);
   };
 
+  const renderFeatures = (features: string | string[]) => {
+    if (typeof features === 'string') {
+      return <li className="flex items-center mb-2">{features}</li>;
+    }
+    
+    return features.map((feature, index) => (
+      <li key={index} className="flex items-center mb-2">
+        {feature}
+      </li>
+    ));
+  };
+
   const features = [
     {
       icon: <Calendar className="h-10 w-10 text-primary" />,
@@ -221,12 +233,7 @@ const Landing = () => {
               </CardHeader>
               <CardContent className="pt-6">
                 <ul className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
+                  {renderFeatures(plan.features)}
                 </ul>
               </CardContent>
               <CardFooter>

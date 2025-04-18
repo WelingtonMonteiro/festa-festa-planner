@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -34,7 +33,6 @@ const KitsThems = () => {
   const [localKits, setLocalKits] = useState<Kit[]>([]);
   const [localThems, setLocalThems] = useState<Them[]>([]);
 
-  // Determinar a fonte de dados atual
   const getCurrentDataSource = (): DataSource => {
     if (apiType === 'rest' && apiUrl) {
       return 'apiRest';
@@ -47,16 +45,13 @@ const KitsThems = () => {
 
   const dataSource = getCurrentDataSource();
   
-  // Carregar dados na inicialização
   useEffect(() => {
     const loadData = async () => {
       setIsLoading(true);
       try {
-        // Carregar kits
         const loadedKits = await unifiedKitService.getAll(dataSource, apiUrl);
         setLocalKits(loadedKits);
         
-        // Carregar temas
         const loadedThems = await unifiedThemService.getAll(dataSource, loadedKits, apiUrl);
         setLocalThems(loadedThems);
       } catch (error) {
@@ -83,7 +78,6 @@ const KitsThems = () => {
     
     try {
       if (editingKit) {
-        // Atualizar kit
         const updatedKit = await unifiedKitService.update(
           editingKit.id,
           {
@@ -95,7 +89,6 @@ const KitsThems = () => {
         );
         
         if (updatedKit) {
-          // Atualizar estado local
           setLocalKits(localKits.map(k => k.id === editingKit.id ? updatedKit : k));
           updateKit(editingKit.id, kitData);
           toast.success(`Kit atualizado com sucesso via ${dataSource}`);
@@ -103,11 +96,9 @@ const KitsThems = () => {
           throw new Error(`Falha ao atualizar kit via ${dataSource}`);
         }
       } else {
-        // Criar novo kit
         const newKit = await unifiedKitService.create(kitData, dataSource, apiUrl);
         
         if (newKit) {
-          // Atualizar estado local
           setLocalKits([...localKits, newKit]);
           addKit(newKit);
           toast.success(`Kit adicionado com sucesso via ${dataSource}`);
@@ -130,7 +121,6 @@ const KitsThems = () => {
     
     try {
       if (editingThem) {
-        // Atualizar tema
         const updatedThem = await unifiedThemService.update(
           editingThem.id,
           {
@@ -143,7 +133,6 @@ const KitsThems = () => {
         );
         
         if (updatedThem) {
-          // Atualizar estado local
           setLocalThems(localThems.map(t => t.id === editingThem.id ? updatedThem : t));
           updateThems(editingThem.id, themData);
           toast.success(`Tema atualizado com sucesso via ${dataSource}`);
@@ -151,11 +140,9 @@ const KitsThems = () => {
           throw new Error(`Falha ao atualizar tema via ${dataSource}`);
         }
       } else {
-        // Criar novo tema
         const newThem = await unifiedThemService.create(themData, dataSource, localKits, apiUrl);
         
         if (newThem) {
-          // Atualizar estado local
           setLocalThems([...localThems, newThem]);
           addThems(newThem);
           toast.success(`Tema adicionado com sucesso via ${dataSource}`);
@@ -203,11 +190,9 @@ const KitsThems = () => {
       
       try {
         console.log('Confirming delete kit with ID:', kitToDelete);
-        // Excluir kit usando o serviço unificado
         const success = await unifiedKitService.delete(kitToDelete, dataSource, apiUrl);
         
         if (success) {
-          // Atualizar estado local
           setLocalKits(localKits.filter(k => k.id !== kitToDelete));
           removeKit(kitToDelete);
           toast.success(`Kit excluído com sucesso via ${dataSource}`);
@@ -231,11 +216,9 @@ const KitsThems = () => {
       
       try {
         console.log('Confirming delete theme with ID:', themToDelete);
-        // Excluir tema usando o serviço unificado
         const success = await unifiedThemService.delete(themToDelete, dataSource, apiUrl);
         
         if (success) {
-          // Atualizar estado local
           setLocalThems(localThems.filter(t => t.id !== themToDelete));
           removeThems(themToDelete);
           toast.success(`Tema excluído com sucesso via ${dataSource}`);
@@ -253,7 +236,6 @@ const KitsThems = () => {
     }
   };
   
-  // Componente para mostrar o modo atual
   const StorageModeIndicator = () => {
     let label = 'Local Storage';
     let description = apiUrl || '';
@@ -305,7 +287,7 @@ const KitsThems = () => {
         
         <TabsContent value="temas">
           <ThemList 
-            themes={localThems} 
+            themes={Array.isArray(localThems) ? localThems : []} 
             onAddThem={() => {
               resetThemForm();
               setThemDialogOpen(true);
@@ -316,7 +298,6 @@ const KitsThems = () => {
         </TabsContent>
       </Tabs>
       
-      {/* Kit Form Dialog */}
       <Dialog open={kitDialogOpen} onOpenChange={setKitDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -339,7 +320,6 @@ const KitsThems = () => {
         </DialogContent>
       </Dialog>
       
-      {/* Theme Form Dialog */}
       <Dialog open={themDialogOpen} onOpenChange={setThemDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -363,7 +343,6 @@ const KitsThems = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialogs */}
       <DeleteConfirmDialog 
         open={deleteKitDialogOpen}
         onOpenChange={setDeleteKitDialogOpen}

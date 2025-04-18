@@ -13,6 +13,9 @@ interface ThemListProps {
 }
 
 const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem }: ThemListProps) => {
+  // Ensure themes is an array and not null or undefined
+  const safeThemes = Array.isArray(themes) ? themes : [];
+  
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
@@ -26,7 +29,7 @@ const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem }: ThemListProps
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {themes.map(theme => (
+        {safeThemes.map(theme => (
           <ThemCard 
             key={theme.id} 
             theme={theme} 
@@ -35,7 +38,7 @@ const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem }: ThemListProps
           />
         ))}
         
-        {themes.length === 0 && (
+        {safeThemes.length === 0 && (
           <div className="col-span-full">
             <Card>
               <CardContent className="flex flex-col items-center justify-center p-8">
