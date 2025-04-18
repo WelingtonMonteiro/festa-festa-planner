@@ -3,6 +3,7 @@ import { Plan } from "@/types/plans";
 import { CrudOperations } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
+import { useApi } from "@/contexts/apiContext";
 
 // Serviço específico para Planos que estende o CRUD genérico
 export const usePlanService = (): CrudOperations<Plan> & {
@@ -11,11 +12,15 @@ export const usePlanService = (): CrudOperations<Plan> & {
   archivePlan: (id: string) => Promise<Plan | null>;
 } => {
   const factory = useStorageAdapterFactory();
+  const { apiUrl } = useApi();
   
-  // Criar serviço CRUD base
+  // Criar serviço CRUD base com configuração correta para API REST
   const crudService = createCrudService<Plan>(factory, {
     type: 'apiRest',
-    config: { endpoint: 'plans' }
+    config: { 
+      apiUrl: apiUrl || '',
+      endpoint: 'plans' 
+    }
   });
 
   // Métodos específicos para planos
@@ -30,10 +35,20 @@ export const usePlanService = (): CrudOperations<Plan> & {
   };
 
   const togglePlanStatus = async (id: string, isActive: boolean): Promise<Plan | null> => {
+    console.log(`togglePlanStatus chamado com ID: ${id}, isActive: ${isActive}`);
+    if (!id) {
+      console.error('ID não fornecido para togglePlanStatus');
+      return null;
+    }
     return crudService.update(id, { is_active: isActive });
   };
 
   const archivePlan = async (id: string): Promise<Plan | null> => {
+    console.log(`archivePlan chamado com ID: ${id}`);
+    if (!id) {
+      console.error('ID não fornecido para archivePlan');
+      return null;
+    }
     return crudService.update(id, { is_archived: true });
   };
 

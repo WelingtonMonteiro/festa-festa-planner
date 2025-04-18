@@ -1,110 +1,95 @@
 
-import { Them, Kit } from "@/types";
+import { Them, ThemWithIds } from "@/types/index";
 import { CrudOperations } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
-
-// Interface estendida para incluir os campos adicionais necessários
-interface ThemWithIds extends Omit<Them, 'kits'> {
-  kits_ids?: string[];
-}
+import { useApi } from "@/contexts/apiContext";
 
 // Serviço específico para Temas que estende o CRUD genérico
-export const useThemService = (allKits: Kit[]): CrudOperations<Them> & {
-  getTrendingThems: () => Promise<Them[]>;
+export const useThemService = (): CrudOperations<ThemWithIds> & {
+  getActiveThems: () => Promise<ThemWithIds[]>;
+  toggleThemStatus: (id: string, isActive: boolean) => Promise<ThemWithIds | null>;
+  archiveThems: (id: string) => Promise<ThemWithIds | null>;
+  importThems: (thems: Them[]) => Promise<ThemWithIds[]>;
 } => {
   const factory = useStorageAdapterFactory();
+  const { apiUrl } = useApi();
+  
+  // Criar serviço CRUD base
   const crudService = createCrudService<ThemWithIds>(factory, {
-    type: 'supabase',
-    config: { tableName: 'thems' }
+    type: 'apiRest',
+    config: { 
+      apiUrl: apiUrl || '',
+      endpoint: 'thems' 
+    }
   });
 
-  // Função para converter Them para ThemWithIds (para salvar no banco)
-  const themToRecord = (them: Omit<Them, 'id'>): Omit<ThemWithIds, 'id'> => {
-    const kitIds = them.kits.map(kit => kit.id);
-    
-    return {
-      nome: them.nome,
-      descricao: them.descricao,
-      imagens: them.imagens,
-      valorGasto: them.valorGasto,
-      vezes_alugado: them.vezes_alugado || 0,
-      kits_ids: kitIds
-    };
-  };
-
-  // Função para converter ThemWithIds para Them (ao ler do banco)
-  const recordToThem = (record: ThemWithIds): Them => {
-    const kits = (record.kits_ids || [])
-      .map(id => allKits.find(k => k.id === id))
-      .filter((kit): kit is Kit => kit !== undefined);
-      
-    return {
-      id: record.id,
-      nome: record.nome,
-      descricao: record.descricao,
-      imagens: record.imagens,
-      valorGasto: record.valorGasto,
-      vezes_alugado: record.vezes_alugado || 0,
-      kits: kits
-    };
-  };
-
-  // Sobrescrever métodos do CRUD para tratar a conversão
-  const getAll = async (): Promise<Them[]> => {
-    const records = await crudService.getAll();
-    return records.map(record => recordToThem(record));
-  };
-
-  const getById = async (id: string): Promise<Them | null> => {
-    const record = await crudService.getById(id);
-    return record ? recordToThem(record) : null;
-  };
-
-  const create = async (them: Omit<Them, 'id'>): Promise<Them | null> => {
-    const record = await crudService.create(themToRecord(them));
-    return record ? recordToThem(record) : null;
-  };
-
-  const update = async (id: string, them: Partial<Them>): Promise<Them | null> => {
-    // Converter apenas os campos fornecidos
-    const updateData: Partial<ThemWithIds> = { ...them };
-    
-    // Se kits for fornecido, converter para kits_ids
-    if (them.kits) {
-      updateData.kits_ids = them.kits.map(kit => kit.id);
-      delete updateData.kits;
-    }
-    
-    const record = await crudService.update(id, updateData);
-    return record ? recordToThem(record) : null;
-  };
-
-  const remove = async (id: string): Promise<boolean> => {
-    return crudService.delete(id);
-  };
-
   // Métodos específicos para temas
-  const getTrendingThems = async (): Promise<Them[]> => {
+  const getActiveThems = async (): Promise<ThemWithIds[]> => {
     try {
-      const allThems = await getAll();
-      return allThems
-        .filter(them => them.vezes_alugado > 0)
-        .sort((a, b) => b.vezes_alugado - a.vezes_alugado)
-        .slice(0, 5);
+      const allThems = await crudService.getAll();
+      return allThems.filter(them => them.is_active === true && them.is_archived === false);
     } catch (error) {
-      console.error('Erro ao buscar temas em tendência:', error);
+      console.error('Erro ao buscar temas ativos:', error);
+      return [];
+    }
+  };
+
+  const toggleThemStatus = async (id: string, isActive: boolean): Promise<ThemWithIds | null> => {
+    console.log(`toggleThemStatus chamado com ID: ${id}, isActive: ${isActive}`);
+    if (!id) {
+      console.error('ID não fornecido para toggleThemStatus');
+      return null;
+    }
+    return crudService.update(id, { is_active: isActive });
+  };
+
+  const archiveThems = async (id: string): Promise<ThemWithIds | null> => {
+    console.log(`archiveThems chamado com ID: ${id}`);
+    if (!id) {
+      console.error('ID não fornecido para archiveThems');
+      return null;
+    }
+    return crudService.update(id, { is_archived: true });
+  };
+
+  const importThems = async (thems: Them[]): Promise<ThemWithIds[]> => {
+    try {
+      console.log('Importando temas:', thems);
+      const importedThems: ThemWithIds[] = [];
+      
+      for (const them of thems) {
+        const themToImport = {
+          ...them,
+          is_active: true,
+          is_archived: false,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        
+        const importedThem = await crudService.create(themToImport);
+        if (importedThem) {
+          importedThems.push(importedThem);
+        }
+      }
+      
+      return importedThems;
+    } catch (error) {
+      console.error('Erro ao importar temas:', error);
       return [];
     }
   };
 
   // Retorna a combinação do CRUD genérico com métodos específicos
   return {
-    getAll,
-    getById,
-    create,
-    update,
-    delete: remove,
-    getTrendingThems
+    getAll: crudService.getAll,
+    getById: crudService.getById,
+    create: crudService.create,
+    update: crudService.update,
+    delete: crudService.delete,
+    getActiveThems,
+    toggleThemStatus,
+    archiveThems,
+    importThems
   };
 };

@@ -1,83 +1,151 @@
-
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { CheckIcon } from "lucide-react";
+import { Plan } from "@/types/plans";
 import { planService } from "@/services/planService";
-import { formatCurrency } from "@/utils/format";
-import { CheckCircle } from "lucide-react";
 
-export const PricingSection = ({ onPlanSelect }: { onPlanSelect: (planName: string) => void }) => {
-  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
-
-  const { data: plans = [] } = useQuery({
-    queryKey: ['active-plans'],
-    queryFn: planService.getActivePlans
-  });
+export const PricingSection = () => {
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isYearly, setIsYearly] = useState(false);
+  
+  useEffect(() => {
+    const loadPlans = async () => {
+      try {
+        // Usando o método CRUD genérico
+        const activePlans = await planService.getActivePlans();
+        console.log("Planos ativos carregados na landing page:", activePlans);
+        setPlans(activePlans);
+      } catch (error) {
+        console.error("Erro ao carregar planos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadPlans();
+  }, []);
+  
+  // Função para formatar os recursos do plano
+  const formatFeatures = (features: string): string[] => {
+    return features.split(',').map(feature => feature.trim());
+  };
 
   return (
-    <section id="pricing" className="py-20">
-      <div className="container mx-auto px-4">
+    <section id="pricing" className="py-20 bg-background">
+      <div className="container px-4 mx-auto">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Planos Simples e Transparentes</h2>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Escolha o plano que melhor se adapta ao tamanho do seu negócio e necessidades
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            Escolha o plano ideal para seu negócio
+          </h2>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Preços transparentes, sem taxas ocultas. Cancele a qualquer momento.
           </p>
           
-          <div className="flex items-center justify-center gap-4 mt-8">
-            <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+          <div className="flex items-center justify-center mt-8">
+            <span className={`mr-4 ${!isYearly ? 'font-bold' : 'text-muted-foreground'}`}>
               Mensal
             </span>
-            <Switch
-              checked={billingInterval === 'yearly'}
-              onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
-              className="data-[state=checked]:bg-primary"
-            />
-            <span className="inline-flex items-center gap-1">
-              <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                Anual
-              </span>
-              <span className="text-xs font-medium text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">
-                17% OFF
-              </span>
+            <button 
+              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isYearly ? 'bg-primary' : 'bg-input'}`}
+              onClick={() => setIsYearly(!isYearly)}
+              type="button"
+              role="switch"
+              aria-checked={isYearly}
+            >
+              <span 
+                className={`pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${isYearly ? 'translate-x-5' : 'translate-x-0'}`} 
+              />
+            </button>
+            <span className={`ml-4 ${isYearly ? 'font-bold' : 'text-muted-foreground'}`}>
+              Anual <span className="text-green-500 text-sm">(Economize 16%)</span>
             </span>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
-          {plans.map((plan, index) => (
-            <Card key={plan.id} className={`border ${index === 1 ? 'border-primary shadow-lg' : 'shadow-md'}`}>
-              <CardHeader className={`pb-8 ${index === 1 ? 'bg-primary/10' : ''}`}>
-                <CardTitle>{plan.name}</CardTitle>
-                <CardDescription className="mt-2">
-                  <span className="text-3xl font-bold">
-                    {formatCurrency(billingInterval === 'yearly' ? plan.price_yearly : plan.price_monthly)}
-                  </span>
-                  <span className="text-muted-foreground">/{billingInterval === 'yearly' ? 'ano' : 'mês'}</span>
-                  <p className="mt-2">{plan.description}</p>
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-6">
-                <ul className="space-y-3">
-                  {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button 
-                  className={`w-full ${index === 1 ? '' : 'bg-muted-foreground hover:bg-muted-foreground/80'}`}
-                  onClick={() => onPlanSelect(plan.name)}
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="w-full animate-pulse">
+                <CardHeader className="h-48 bg-muted/50" />
+                <CardContent className="space-y-4 p-6">
+                  <div className="h-4 bg-muted rounded w-3/4" />
+                  <div className="h-8 bg-muted rounded w-1/2" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                  <div className="h-4 bg-muted rounded w-full" />
+                </CardContent>
+                <CardFooter className="p-6">
+                  <div className="h-10 bg-muted rounded w-full" />
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        ) : plans.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {plans
+              .sort((a, b) => a.price_monthly - b.price_monthly)
+              .map((plan) => (
+                <Card 
+                  key={plan.id} 
+                  className={`w-full ${plan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
                 >
-                  {index === 1 ? 'Começar Agora' : 'Escolher Plano'}
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
+                  {plan.is_popular && (
+                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
+                      Popular
+                    </div>
+                  )}
+                  <CardHeader>
+                    <CardTitle>{plan.name}</CardTitle>
+                    <CardDescription>{plan.description}</CardDescription>
+                    <div className="mt-4">
+                      <span className="text-4xl font-bold">
+                        R$ {isYearly ? (plan.price_yearly / 12).toFixed(2) : plan.price_monthly.toFixed(2)}
+                      </span>
+                      <span className="text-muted-foreground ml-2">/mês</span>
+                      {isYearly && (
+                        <div className="text-sm text-muted-foreground mt-1">
+                          Faturado como R$ {plan.price_yearly.toFixed(2)} anualmente
+                        </div>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      {formatFeatures(plan.features).map((feature, index) => (
+                        <div key={index} className="flex items-start">
+                          <CheckIcon className="h-5 w-5 text-green-500 mr-2 shrink-0" />
+                          <span>{feature}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                  <CardFooter>
+                    <Button 
+                      className="w-full" 
+                      size="lg"
+                      onClick={() => document.dispatchEvent(new CustomEvent('openLoginModal'))}
+                    >
+                      {plan.is_popular ? 'Comece Agora' : 'Assinar'}
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+          </div>
+        ) : (
+          <div className="text-center p-8 border rounded-lg">
+            <p className="text-muted-foreground">Nenhum plano disponível no momento.</p>
+          </div>
+        )}
+        
+        <div className="mt-16 text-center">
+          <h3 className="text-xl font-bold mb-4">Empresas com necessidades especiais?</h3>
+          <p className="text-muted-foreground mb-6">
+            Oferecemos planos personalizados para empresas de maior porte com necessidades específicas.
+          </p>
+          <Button variant="outline" size="lg" onClick={() => document.querySelector('#contact')?.scrollIntoView({ behavior: 'smooth' })}>
+            Fale Conosco
+          </Button>
         </div>
       </div>
     </section>

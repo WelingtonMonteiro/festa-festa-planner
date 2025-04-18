@@ -61,7 +61,11 @@ const PlansManagement = () => {
   };
   
   const handleUpdatePlan = async (planData: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!editingPlan) return;
+    if (!editingPlan || !editingPlan.id) {
+      console.error('ID do plano não disponível para atualização');
+      toast.error('Falha ao identificar o plano para atualização');
+      return;
+    }
     
     try {
       const plan: Partial<Plan> = {
@@ -85,6 +89,12 @@ const PlansManagement = () => {
   };
   
   const handleTogglePlanStatus = async (id: string, isActive: boolean) => {
+    if (!id) {
+      console.error('ID do plano não fornecido para alteração de status');
+      toast.error('Falha ao identificar o plano');
+      return;
+    }
+    
     try {
       console.log("Alterando status do plano:", id, isActive);
       const result = await planService.togglePlanStatus(id, isActive);
@@ -101,6 +111,12 @@ const PlansManagement = () => {
   };
   
   const handleArchivePlan = async (id: string) => {
+    if (!id) {
+      console.error('ID do plano não fornecido para arquivamento');
+      toast.error('Falha ao identificar o plano');
+      return;
+    }
+    
     try {
       console.log("Arquivando plano:", id);
       const result = await planService.archivePlan(id);
@@ -117,6 +133,11 @@ const PlansManagement = () => {
   };
   
   const handleEditPlan = (plan: Plan) => {
+    if (!plan || !plan.id) {
+      console.error('Plano inválido para edição');
+      toast.error('Falha ao preparar plano para edição');
+      return;
+    }
     setEditingPlan(plan);
     setIsCreating(false);
   };
