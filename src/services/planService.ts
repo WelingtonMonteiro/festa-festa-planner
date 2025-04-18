@@ -1,4 +1,5 @@
-import { Plan } from "@/types";
+
+import { Plan } from "@/types/plans";
 import { toast } from "sonner";
 
 export const planService = {

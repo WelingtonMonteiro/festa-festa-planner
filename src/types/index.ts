@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   nome: string;
@@ -89,3 +88,5 @@ export interface ContractTemplate {
   createdAt: string;
   updatedAt: string;
 }
+
+export { Plan } from "./plans";
