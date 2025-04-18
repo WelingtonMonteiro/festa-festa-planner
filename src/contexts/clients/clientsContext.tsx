@@ -1,12 +1,11 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Client, Event } from '../../types';
-import { clientesMock } from '../../data/mockData';
+import { Client } from '@/types';
 import { toast } from 'sonner';
+import { useClientService } from '@/services/entityServices/clientService';
 
 interface ClientsContextType {
   clients: Client[];
-  
   addClients: (cliente: Omit<Client, 'id' | 'historico'>) => void;
   updateClients: (id: string, cliente: Partial<Client>) => void;
   removeClients: (id: string) => void;
@@ -16,88 +15,73 @@ const ClientsContext = createContext<ClientsContextType | undefined>(undefined);
 
 export const ClientsProvider: React.FC<{ 
   children: React.ReactNode,
-  events: Event[],
-  onEventsChange?: (eventosAtualizados: Event[]) => void 
-}> = ({ children, events, onEventsChange }) => {
+  events: Event[]
+}> = ({ children, events }) => {
   const [clientes, setClientes] = useState<Client[]>([]);
-  const [isInitialized, setIsInitialized] = useState(false);
+  const clientService = useClientService();
   
-  // Inicialização
   useEffect(() => {
-    const loadData = () => {
-      const loadedClientes = localStorage.getItem('clients');
-      
-      const clientesWithActiveStatus = loadedClientes 
-        ? JSON.parse(loadedClientes) 
-        : clientesMock.map(c => ({ ...c, ativo: true }));
-      
-      setClientes(clientesWithActiveStatus);
-      setIsInitialized(true);
+    const loadClients = async () => {
+      try {
+        const response = await clientService.getAll();
+        setClientes(response.data);
+      } catch (error) {
+        console.error('Erro ao carregar clientes:', error);
+        toast.error('Erro ao carregar clientes');
+      }
     };
     
-    loadData();
+    loadClients();
   }, []);
   
-  // Persistência
-  useEffect(() => {
-    if (!isInitialized) return;
-    
-    if (clientes.length) {
-      const prepareForStorage = (data: any) => {
-        if (Array.isArray(data)) {
-          return data.map(item => prepareForStorage(item));
-        } else if (data && typeof data === 'object') {
-          const result = { ...data };
-          
-          if (result.cliente && result.cliente.historico) {
-            result.clienteId = result.cliente.id;
-            delete result.cliente;
-          }
-          
-          if (result.historico && Array.isArray(result.historico)) {
-            result.historicoIds = result.historico.map((e: Event) => e.id);
-            delete result.historico;
-          }
-          
-          return result;
-        }
-        return data;
-      };
-
-      const clientesForStorage = prepareForStorage(clientes);
-      localStorage.setItem('clients', JSON.stringify(clientesForStorage));
+  const adicionarCliente = async (cliente: Omit<Client, 'id' | 'historico'>) => {
+    try {
+      const novoCliente = await clientService.create({
+        ...cliente,
+        historico: [],
+        ativo: cliente.ativo !== false
+      });
+      
+      if (novoCliente) {
+        setClientes(prev => [...prev, novoCliente]);
+        toast.success(`${cliente.nome} foi adicionado com sucesso.`);
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar cliente:', error);
+      toast.error('Erro ao adicionar cliente');
     }
-  }, [clientes, isInitialized]);
-  
-  const adicionarCliente = (cliente: Omit<Client, 'id' | 'historico'>) => {
-    const novoCliente: Client = {
-      ...cliente,
-      id: `c${Date.now().toString()}`,
-      historico: [],
-      ativo: cliente.ativo !== false
-    };
-    setClientes([...clientes, novoCliente]);
-    toast.success(`${cliente.nome} foi adicionado com sucesso.`);
   };
   
-  const atualizarCliente = (id: string, clienteAtualizado: Partial<Client>) => {
-    setClientes(clientes.map(c => 
-      c.id === id ? { ...c, ...clienteAtualizado } : c
-    ));
-    toast.success("As informações do cliente foram atualizadas.");
+  const atualizarCliente = async (id: string, clienteAtualizado: Partial<Client>) => {
+    try {
+      const updated = await clientService.update(id, clienteAtualizado);
+      if (updated) {
+        setClientes(prev => prev.map(c => c.id === id ? updated : c));
+        toast.success("As informações do cliente foram atualizadas.");
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar cliente:', error);
+      toast.error('Erro ao atualizar cliente');
+    }
   };
   
-  const excluirCliente = (id: string) => {
+  const excluirCliente = async (id: string) => {
     const clienteComEventos = events.some(e => e.cliente.id === id);
     if (clienteComEventos) {
       toast.error("Este cliente possui eventos registrados e não pode ser excluído.");
       return;
     }
     
-    const cliente = clientes.find(c => c.id === id);
-    if (cliente) {
-      atualizarCliente(id, { ativo: false });
-      toast.success(`${cliente.nome} foi marcado como inativo com sucesso.`);
+    try {
+      const cliente = clientes.find(c => c.id === id);
+      if (cliente) {
+        await clientService.update(id, { ativo: false });
+        setClientes(prev => prev.map(c => c.id === id ? { ...c, ativo: false } : c));
+        toast.success(`${cliente.nome} foi marcado como inativo com sucesso.`);
+      }
+    } catch (error) {
+      console.error('Erro ao excluir cliente:', error);
+      toast.error('Erro ao excluir cliente');
     }
   };
   
