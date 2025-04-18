@@ -7,8 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { planService } from '@/services/planService';
 import { Plan } from '@/types/plans';
 import { Button } from '@/components/ui/button';
-import PlanList from '@/components/admin/plans/PlanList';
-import PlanForm from '@/components/admin/plans/PlanForm';
+import { PlanList } from '@/components/admin/plans/PlanList';
+import { PlanForm } from '@/components/admin/plans/PlanForm';
 
 const PlansManagement = () => {
   const queryClient = useQueryClient();
