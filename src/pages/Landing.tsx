@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -13,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import { planService } from '@/services/planService';
 import { formatCurrency } from '@/utils/format';
+import Switch from '@/components/ui/switch';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ const Landing = () => {
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [contactMessage, setContactMessage] = useState('');
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -171,13 +172,11 @@ const Landing = () => {
     }
   ];
 
-  // Update the pricingPlans section to use data from the service
   const { data: plans = [] } = useQuery({
     queryKey: ['active-plans'],
     queryFn: planService.getActivePlans
   });
 
-  // Replace the static pricingPlans with dynamic data from the service
   const pricingSection = (
     <section id="pricing" className="py-20">
       <div className="container mx-auto px-4">
@@ -186,6 +185,25 @@ const Landing = () => {
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Escolha o plano que melhor se adapta ao tamanho do seu negócio e necessidades
           </p>
+          
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Mensal
+            </span>
+            <Switch
+              checked={billingInterval === 'yearly'}
+              onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
+              className="data-[state=checked]:bg-primary"
+            />
+            <span className="inline-flex items-center gap-1">
+              <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                Anual
+              </span>
+              <span className="text-xs font-medium text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">
+                17% OFF
+              </span>
+            </span>
+          </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
@@ -194,8 +212,10 @@ const Landing = () => {
               <CardHeader className={`pb-8 ${index === 1 ? 'bg-primary/10' : ''}`}>
                 <CardTitle>{plan.name}</CardTitle>
                 <CardDescription className="mt-2">
-                  <span className="text-3xl font-bold">{formatCurrency(plan.price_monthly)}</span>
-                  <span className="text-muted-foreground">/mês</span>
+                  <span className="text-3xl font-bold">
+                    {formatCurrency(billingInterval === 'yearly' ? plan.price_yearly : plan.price_monthly)}
+                  </span>
+                  <span className="text-muted-foreground">/{billingInterval === 'yearly' ? 'ano' : 'mês'}</span>
                   <p className="mt-2">{plan.description}</p>
                 </CardDescription>
               </CardHeader>
@@ -339,7 +359,7 @@ const Landing = () => {
               <CarouselItem>
                 <div className="p-1">
                   <div className="overflow-hidden rounded-xl border shadow-lg">
-                    <img src="/placeholder.svg" alt="Seleção de Temas" className="w-full aspect-video object-cover" />
+                    <img src="/placeholder.svg" alt="Seleç��o de Temas" className="w-full aspect-video object-cover" />
                     <div className="p-4 bg-card">
                       <h3 className="font-medium text-lg">Seleção de Temas</h3>
                       <p className="text-muted-foreground">Navegue e selecione entre múltiplos temas e kits para festas.</p>

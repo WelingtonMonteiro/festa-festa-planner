@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -80,21 +79,21 @@ const PlansManagement = () => {
     }
   });
 
-  const handleCreatePlan = (plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
-    createPlanMutation.mutate(plan);
+  const handleCreatePlan = async (plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
+    await createPlanMutation.mutateAsync(plan);
   };
 
-  const handleUpdatePlan = (plan: Plan) => {
+  const handleUpdatePlan = async (plan: Plan) => {
     const { id, ...planData } = plan;
-    updatePlanMutation.mutate({ id, plan: planData });
+    await updatePlanMutation.mutateAsync({ id, plan: planData });
   };
 
-  const handleToggleStatus = (id: string, isActive: boolean) => {
-    togglePlanStatusMutation.mutate({ id, isActive });
+  const handleToggleStatus = async (id: string, isActive: boolean) => {
+    await togglePlanStatusMutation.mutateAsync({ id, isActive });
   };
 
-  const handleArchivePlan = (id: string) => {
-    archivePlanMutation.mutate(id);
+  const handleArchivePlan = async (id: string) => {
+    await archivePlanMutation.mutateAsync(id);
   };
 
   const handleEdit = (plan: Plan) => {
