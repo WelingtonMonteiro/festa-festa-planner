@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Plan } from '@/types/plans';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -7,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, CheckCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePlanService } from '@/services/entityServices/planService';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Switch } from '@/components/ui/switch';
 
 const PlansManagement = () => {
@@ -30,12 +31,13 @@ const PlansManagement = () => {
     setIsLoading(true);
     try {
       console.log("Carregando planos com serviço:", planService);
-      const plans = await planService.getAll();
-      console.log("Planos carregados:", plans);
-      setPlans(plans);
+      const fetchedPlans = await planService.getAll();
+      console.log("Planos carregados:", fetchedPlans);
+      setPlans(Array.isArray(fetchedPlans) ? fetchedPlans : []);
     } catch (error) {
       console.error('Error loading plans:', error);
       toast.error('Falha ao carregar planos');
+      setPlans([]);
     } finally {
       setIsLoading(false);
     }
@@ -65,7 +67,7 @@ const PlansManagement = () => {
   };
   
   const handleUpdatePlan = async (planData: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
-    if (!editingPlan || !editingPlan.id) {
+    if (!editingPlan || (!editingPlan.id && !editingPlan._id)) {
       console.error('ID do plano não disponível para atualização');
       toast.error('Falha ao identificar o plano para atualização');
       return;
@@ -77,8 +79,9 @@ const PlansManagement = () => {
         updated_at: new Date().toISOString(),
       };
       
-      console.log("Atualizando plano:", editingPlan.id, plan);
-      const updatedPlan = await planService.update(editingPlan.id, plan);
+      const planId = editingPlan.id || editingPlan._id;
+      console.log("Atualizando plano:", planId, plan);
+      const updatedPlan = await planService.update(planId, plan);
       console.log("Plano atualizado:", updatedPlan);
       
       if (updatedPlan) {
@@ -137,7 +140,7 @@ const PlansManagement = () => {
   };
   
   const handleEditPlan = (plan: Plan) => {
-    if (!plan || !plan.id) {
+    if (!plan || (!plan.id && !plan._id)) {
       console.error('Plano inválido para edição');
       toast.error('Falha ao preparar plano para edição');
       return;
@@ -248,96 +251,82 @@ const PlansManagement = () => {
 
       <Dialog open={!!previewPlan} onOpenChange={() => setPreviewPlan(null)}>
         <DialogContent className="max-w-4xl h-[80vh] overflow-y-auto">
-          <CardHeader>
-            <CardTitle>Preview do Plano</CardTitle>
-            <CardDescription>
+          <DialogHeader>
+            <DialogTitle>Preview do Plano</DialogTitle>
+            <p className="text-sm text-muted-foreground">
               Visualização do plano como será exibido na página inicial
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {previewPlan && (
-              <div className="bg-background">
-                <section className="py-20">
-                  <div className="container mx-auto px-4">
-                    <div className="text-center mb-16">
-                      <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                        Planos Simples e Transparentes
-                      </h2>
-                      <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-                        Escolha o plano que melhor se adapta ao tamanho do seu negócio e necessidades
-                      </p>
-                      
-                      <div className="flex items-center justify-center gap-4 mt-8">
-                        <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                          Mensal
-                        </span>
-                        <Switch
-                          checked={billingInterval === 'yearly'}
-                          onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
-                          className="data-[state=checked]:bg-primary"
-                        />
-                        <span className="inline-flex items-center gap-1">
-                          <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
-                            Anual
-                          </span>
-                          <span className="text-xs font-medium text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">
-                            17% OFF
-                          </span>
-                        </span>
-                      </div>
-                    </div>
+            </p>
+          </DialogHeader>
+          
+          {previewPlan && (
+            <div className="bg-background mt-4">
+              <section id="pricing" className="py-10">
+                <div className="container mx-auto px-4">
+                  <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Planos Simples e Transparentes</h2>
+                    <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                      Escolha o plano que melhor se adapta ao tamanho do seu negócio e necessidades
+                    </p>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                      <Card 
-                        className={`w-full ${previewPlan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
-                      >
-                        {previewPlan.is_popular && (
-                          <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
-                            Popular
-                          </div>
-                        )}
-                        <CardHeader>
-                          <CardTitle>{previewPlan.name}</CardTitle>
-                          <CardDescription>{previewPlan.description}</CardDescription>
-                          <div className="mt-4">
-                            <span className="text-4xl font-bold">
-                              R$ {billingInterval === 'yearly' 
-                                ? (previewPlan.price_yearly / 12).toFixed(2) 
-                                : previewPlan.price_monthly.toFixed(2)}
-                            </span>
-                            <span className="text-muted-foreground ml-2">/mês</span>
-                            {billingInterval === 'yearly' && (
-                              <div className="text-sm text-muted-foreground mt-1">
-                                Faturado como R$ {previewPlan.price_yearly.toFixed(2)} anualmente
-                              </div>
-                            )}
-                          </div>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-2">
-                            {(typeof previewPlan.features === 'string' 
-                              ? previewPlan.features.split(',') 
-                              : previewPlan.features
-                            ).map((feature, index) => (
-                              <div key={index} className="flex items-start">
-                                <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                                <span>{feature.trim()}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                        <CardFooter>
-                          <Button className="w-full">
-                            {previewPlan.is_popular ? 'Começar Agora' : 'Escolher Plano'}
-                          </Button>
-                        </CardFooter>
-                      </Card>
+                    <div className="flex items-center justify-center gap-4 mt-8">
+                      <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        Mensal
+                      </span>
+                      <Switch
+                        checked={billingInterval === 'yearly'}
+                        onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
+                        className="data-[state=checked]:bg-primary"
+                      />
+                      <span className="inline-flex items-center gap-1">
+                        <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                          Anual
+                        </span>
+                        <span className="text-xs font-medium text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">
+                          17% OFF
+                        </span>
+                      </span>
                     </div>
                   </div>
-                </section>
-              </div>
-            )}
-          </CardContent>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+                    <Card className={`border ${previewPlan.is_popular ? 'border-primary shadow-lg' : 'shadow-md'}`}>
+                      <CardHeader className={`pb-8 ${previewPlan.is_popular ? 'bg-primary/10' : ''}`}>
+                        <CardTitle>{previewPlan.name}</CardTitle>
+                        <CardDescription className="mt-2">
+                          <span className="text-3xl font-bold">
+                            {formatCurrency(billingInterval === 'yearly' ? previewPlan.price_yearly : previewPlan.price_monthly)}
+                          </span>
+                          <span className="text-muted-foreground">/{billingInterval === 'yearly' ? 'ano' : 'mês'}</span>
+                          <p className="mt-2">{previewPlan.description}</p>
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent className="pt-6">
+                        <ul className="space-y-3">
+                          {(typeof previewPlan.features === 'string' 
+                            ? previewPlan.features.split(',').map(f => f.trim())
+                            : previewPlan.features
+                          ).map((feature, featureIndex) => (
+                            <li key={featureIndex} className="flex items-center">
+                              <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                              <span>{feature}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </CardContent>
+                      <CardFooter>
+                        <Button 
+                          className={`w-full ${previewPlan.is_popular ? '' : 'bg-muted-foreground hover:bg-muted-foreground/80'}`}
+                          onClick={() => handlePlanSelection(previewPlan.name)}
+                        >
+                          {previewPlan.is_popular ? 'Começar Agora' : 'Escolher Plano'}
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  </div>
+                </div>
+              </section>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>

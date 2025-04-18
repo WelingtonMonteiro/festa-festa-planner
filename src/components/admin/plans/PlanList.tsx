@@ -1,3 +1,4 @@
+
 import { Plan } from "@/types/plans";
 import { 
   Table, 
@@ -39,7 +40,10 @@ export function PlanList({
   showArchived,
   onShowArchivedChange
 }: PlanListProps) {
-  const filteredPlans = plans.filter(plan => {
+  // Ensure plans is an array before filtering
+  const plansArray = Array.isArray(plans) ? plans : [];
+  
+  const filteredPlans = plansArray.filter(plan => {
     if (!showArchived && plan.is_archived) return false;
     if (statusFilter === 'active' && !plan.is_active) return false;
     if (statusFilter === 'inactive' && plan.is_active) return false;

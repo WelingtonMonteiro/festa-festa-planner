@@ -16,9 +16,11 @@ export const PricingSection = () => {
     const loadPlans = async () => {
       try {
         const activePlans = await planService.getActivePlans();
-        setPlans(activePlans);
+        console.log("Planos ativos carregados:", activePlans);
+        setPlans(Array.isArray(activePlans) ? activePlans : []);
       } catch (error) {
         console.error("Erro ao carregar planos:", error);
+        setPlans([]);
       } finally {
         setIsLoading(false);
       }
@@ -29,6 +31,7 @@ export const PricingSection = () => {
 
   // Função para formatar os recursos do plano
   const formatFeatures = (features: string | string[]): string[] => {
+    if (!features) return [];
     if (Array.isArray(features)) {
       return features;
     }
@@ -81,7 +84,7 @@ export const PricingSection = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {plans.map((plan) => {
               // Verifica se o ID é o id real ou o _id do MongoDB
-              const planId = plan.id || plan._id;
+              const planId = plan.id || plan._id || `plan-${Math.random()}`;
               
               return (
                 <Card 
@@ -98,12 +101,14 @@ export const PricingSection = () => {
                     <CardDescription>{plan.description}</CardDescription>
                     <div className="mt-4">
                       <span className="text-4xl font-bold">
-                        R$ {isYearly ? (plan.price_yearly / 12).toFixed(2) : plan.price_monthly.toFixed(2)}
+                        R$ {isYearly 
+                          ? ((plan.price_yearly || 0) / 12).toFixed(2) 
+                          : (plan.price_monthly || 0).toFixed(2)}
                       </span>
                       <span className="text-muted-foreground ml-2">/mês</span>
                       {isYearly && (
                         <div className="text-sm text-muted-foreground mt-1">
-                          Faturado como R$ {plan.price_yearly.toFixed(2)} anualmente
+                          Faturado como R$ {(plan.price_yearly || 0).toFixed(2)} anualmente
                         </div>
                       )}
                     </div>

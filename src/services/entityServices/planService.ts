@@ -33,6 +33,10 @@ export const usePlanService = (): CrudOperations<Plan> & {
   const getActivePlans = async (): Promise<Plan[]> => {
     try {
       const allPlans = await crudService.getAll();
+      if (!Array.isArray(allPlans)) {
+        console.error('Planos recebidos não são um array:', allPlans);
+        return [];
+      }
       return allPlans.filter(plan => plan.is_active === true && plan.is_archived === false);
     } catch (error) {
       console.error('Erro ao buscar planos ativos:', error);

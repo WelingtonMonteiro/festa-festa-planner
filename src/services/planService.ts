@@ -45,10 +45,19 @@ export const planService = {
   },
   
   async getActivePlans() {
-    const plans = await this.getPlans();
-    return plans.filter(plan => 
-      plan.is_active === true && plan.is_archived === false
-    );
+    try {
+      const plans = await this.getPlans();
+      if (!Array.isArray(plans)) {
+        console.error('Plans não é um array:', plans);
+        return [];
+      }
+      return plans.filter(plan => 
+        plan.is_active === true && plan.is_archived === false
+      );
+    } catch (error) {
+      console.error('Erro ao buscar planos ativos:', error);
+      return [];
+    }
   },
   
   async createPlan(plan: Omit<Plan, 'id' | '_id' | 'created_at' | 'updated_at'>) {
