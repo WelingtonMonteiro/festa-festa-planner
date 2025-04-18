@@ -19,7 +19,8 @@ import {
   InfoIcon,
   UserPlus,
   ScrollText,
-  ShieldAlert
+  ShieldAlert,
+  CreditCard
 } from 'lucide-react';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
@@ -127,6 +128,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       path: '/admin/settings',
       name: 'Configurações',
       icon: <Settings className="h-5 w-5" />
+    },
+    {
+      path: '/admin/plans',
+      name: 'Planos',
+      icon: <CreditCard className="h-5 w-5" />
     }
   ];
   
