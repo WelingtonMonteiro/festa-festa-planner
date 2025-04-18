@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { useQuery } from '@tanstack/react-query';
 import { planService } from '@/services/planService';
 import { formatCurrency } from '@/utils/format';
-import Switch from '@/components/ui/switch';
+import { Switch } from '@/components/ui/switch';
 
 const Landing = () => {
   const navigate = useNavigate();
