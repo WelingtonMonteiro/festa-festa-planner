@@ -2,8 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { Plan } from '@/types/plans';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import PlanList from '@/components/admin/plans/PlanList';
-import PlanForm from '@/components/admin/plans/PlanForm';
+import { PlanList } from '@/components/admin/plans/PlanList';
+import { PlanForm } from '@/components/admin/plans/PlanForm';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { toast } from 'sonner';
@@ -34,7 +34,7 @@ const PlansManagement = () => {
     }
   };
   
-  const handleCreatePlan = async (plan: Omit<Plan, 'id'>) => {
+  const handleCreatePlan = async (plan: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => {
     try {
       const newPlan = await planService.create(plan);
       if (newPlan) {
@@ -105,19 +105,6 @@ const PlansManagement = () => {
     setEditingPlan(null);
   };
   
-  // Plano padrão para novo
-  const defaultPlan: Omit<Plan, 'id'> = {
-    name: '',
-    description: '',
-    price_monthly: 0,
-    price_yearly: 0,
-    features: [],
-    is_active: true,
-    is_archived: false,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  };
-  
   return (
     <div className="container mx-auto py-6">
       <div className="flex justify-between items-center mb-6">
@@ -161,7 +148,7 @@ const PlansManagement = () => {
             </CardHeader>
             <CardContent>
               <PlanForm 
-                defaultValues={defaultPlan}
+                plan={null}
                 onSubmit={handleCreatePlan}
                 onCancel={handleCancelEdit}
               />
@@ -179,7 +166,7 @@ const PlansManagement = () => {
             </CardHeader>
             <CardContent>
               <PlanForm 
-                defaultValues={editingPlan}
+                plan={editingPlan}
                 onSubmit={handleUpdatePlan}
                 onCancel={handleCancelEdit}
               />

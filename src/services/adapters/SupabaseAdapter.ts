@@ -18,7 +18,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      return data as T[];
+      return (data || []) as T[];
     } catch (error) {
       console.error(`Falha ao buscar dados do Supabase (${this.tableName}):`, error);
       toast.error(`Falha ao carregar dados de ${this.tableName}`);
@@ -35,7 +35,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
         .single();
           
       if (error) throw error;
-      return data as T;
+      return data as unknown as T;
     } catch (error) {
       console.error(`Falha ao buscar item do Supabase (${this.tableName}):`, error);
       toast.error(`Falha ao buscar dado de ${this.tableName}`);
@@ -52,7 +52,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
         .single();
           
       if (error) throw error;
-      return data as T;
+      return data as unknown as T;
     } catch (error) {
       console.error(`Falha ao criar item no Supabase (${this.tableName}):`, error);
       toast.error(`Falha ao criar item em ${this.tableName}`);
@@ -70,7 +70,7 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
         .single();
           
       if (error) throw error;
-      return data as T;
+      return data as unknown as T;
     } catch (error) {
       console.error(`Falha ao atualizar item no Supabase (${this.tableName}):`, error);
       toast.error(`Falha ao atualizar item em ${this.tableName}`);

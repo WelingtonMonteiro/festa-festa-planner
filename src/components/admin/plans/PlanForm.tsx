@@ -135,3 +135,5 @@ export function PlanForm({ plan, onSubmit, onCancel }: PlanFormProps) {
     </form>
   );
 }
+
+export default PlanForm;

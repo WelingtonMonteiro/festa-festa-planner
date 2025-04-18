@@ -114,3 +114,5 @@ function PlanListSkeleton() {
     </Table>
   );
 }
+
+export default PlanList;
