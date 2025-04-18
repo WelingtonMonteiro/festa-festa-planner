@@ -10,21 +10,6 @@ import { Button } from '@/components/ui/button';
 import { PlanList } from '@/components/admin/plans/PlanList';
 import { PlanForm } from '@/components/admin/plans/PlanForm';
 
-// Define proper types based on the actual components
-type PlanFormProps = {
-  plan: Plan | null;
-  onSubmit: (plan: Plan) => Promise<void>;
-  onCancel: () => void;
-};
-
-type PlanListProps = {
-  plans: Plan[];
-  isLoading: boolean;
-  onEdit: (plan: Plan) => void;
-  onToggleStatus: (id: string, isActive: boolean) => Promise<void>;
-  onArchive: (id: string) => Promise<void>;
-};
-
 const PlansManagement = () => {
   const queryClient = useQueryClient();
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);

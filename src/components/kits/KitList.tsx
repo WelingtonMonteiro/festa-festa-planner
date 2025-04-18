@@ -26,16 +26,16 @@ const KitList = ({ kits, onAddKit, onEditKit, onDeleteKit }: KitListProps) => {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {kits.map(kit => (
-          <KitCard 
-            key={kit.id} 
-            kit={kit} 
-            onEdit={onEditKit} 
-            onDelete={onDeleteKit} 
-          />
-        ))}
-        
-        {kits.length === 0 && (
+        {kits && kits.length > 0 ? (
+          kits.map(kit => (
+            <KitCard 
+              key={kit.id} 
+              kit={kit} 
+              onEdit={onEditKit} 
+              onDelete={onDeleteKit} 
+            />
+          ))
+        ) : (
           <div className="col-span-full">
             <Card>
               <CardContent className="flex flex-col items-center justify-center p-8">
