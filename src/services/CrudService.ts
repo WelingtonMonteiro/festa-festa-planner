@@ -1,5 +1,5 @@
 
-import { CrudOperations, StorageAdapter, StorageAdapterConfig, StorageAdapterFactory } from "@/types/crud";
+import { CrudOperations, StorageAdapter, StorageAdapterConfig, StorageAdapterFactory, PaginatedResponse } from "@/types/crud";
 
 /**
  * Serviço CRUD genérico que utiliza o adaptador de armazenamento adequado
@@ -17,9 +17,9 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
     console.log(`CrudService criado com adaptador tipo: ${this.adapterType}`);
   }
 
-  async getAll(): Promise<T[]> {
-    console.log(`CrudService.getAll() chamado com adaptador: ${this.adapterType}`);
-    return this.adapter.getAll();
+  async getAll(page?: number, limit?: number): Promise<PaginatedResponse<T>> {
+    console.log(`CrudService.getAll(page: ${page}, limit: ${limit}) chamado com adaptador: ${this.adapterType}`);
+    return this.adapter.getAll(page, limit);
   }
 
   async getById(id: string): Promise<T | null> {
@@ -52,7 +52,7 @@ export const createCrudService = <T extends Record<string, any>>(
   
   // Retornar os métodos do serviço explicitamente para garantir que eles sejam acessíveis
   return {
-    getAll: () => service.getAll(),
+    getAll: (page?: number, limit?: number) => service.getAll(page, limit),
     getById: (id: string) => service.getById(id),
     create: (item: Omit<T, 'id'>) => service.create(item),
     update: (id: string, item: Partial<T>) => service.update(id, item),

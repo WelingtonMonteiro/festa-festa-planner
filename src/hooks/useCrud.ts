@@ -1,6 +1,6 @@
 
 import { useState, useCallback } from 'react';
-import { CrudOperations, StorageAdapterConfig } from '@/types/crud';
+import { CrudOperations, StorageAdapterConfig, PaginatedResponse } from '@/types/crud';
 import { createCrudService } from '@/services/CrudService';
 import { useStorageAdapterFactory } from '@/services/StorageAdapterFactory';
 
@@ -13,19 +13,30 @@ export function useCrud<T extends Record<string, any>>(
   const crudService = createCrudService<T>(factory, config);
 
   const [data, setData] = useState<T[]>(defaultData);
+  const [total, setTotal] = useState<number>(0);
+  const [page, setPage] = useState<number>(1);
+  const [limit, setLimit] = useState<number>(10);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchAll = useCallback(async () => {
+  const fetchAll = useCallback(async (pageNum: number = 1, limitNum: number = 10) => {
     setLoading(true);
     setError(null);
     try {
-      const result = await crudService.getAll();
-      setData(result);
+      const result = await crudService.getAll(pageNum, limitNum);
+      setData(result.data);
+      setTotal(result.total);
+      setPage(result.page);
+      setLimit(result.limit);
       return result;
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Erro ao buscar dados'));
-      return [];
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10
+      } as PaginatedResponse<T>;
     } finally {
       setLoading(false);
     }
@@ -97,12 +108,15 @@ export function useCrud<T extends Record<string, any>>(
   }, [crudService]);
 
   // Função para recarregar os dados
-  const refresh = useCallback(() => {
-    return fetchAll();
-  }, [fetchAll]);
+  const refresh = useCallback((pageNum?: number, limitNum?: number) => {
+    return fetchAll(pageNum || page, limitNum || limit);
+  }, [fetchAll, page, limit]);
 
   return {
     data,
+    total,
+    page,
+    limit,
     loading,
     error,
     refresh,

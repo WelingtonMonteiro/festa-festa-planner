@@ -1,8 +1,11 @@
+
 import { Plan } from "@/types/plans";
 import { 
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
-  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from "@/components/ui/table";
+import { 
+  Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle 
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -137,8 +140,8 @@ export function PlanList({
               filteredPlans.map((plan) => (
                 <TableRow key={plan.id || plan._id} className={plan.is_archived ? "bg-muted/50" : ""}>
                   <TableCell className="font-medium">{plan.name}</TableCell>
-                  <TableCell>R$ {plan.price_monthly.toFixed(2)}</TableCell>
-                  <TableCell>R$ {plan.price_yearly.toFixed(2)}</TableCell>
+                  <TableCell>{formatCurrency(plan.price_monthly)}</TableCell>
+                  <TableCell>{formatCurrency(plan.price_yearly)}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Switch 
@@ -237,14 +240,16 @@ export function PlanList({
                   onClick={() => onEdit(plan)}
                   disabled={plan.is_archived}
                 >
-                  <Edit2Icon className="h-4 w-4" />
+                  <Edit2Icon className="h-4 w-4 mr-2" />
+                  Editar
                 </Button>
                 <Button 
                   variant="outline"
                   onClick={() => onArchive(plan.id || plan._id)}
                   disabled={plan.is_archived}
                 >
-                  <ArchiveIcon className="h-4 w-4" />
+                  <ArchiveIcon className="h-4 w-4 mr-2" />
+                  Arquivar
                 </Button>
               </CardFooter>
             </Card>
@@ -257,7 +262,7 @@ export function PlanList({
           <PaginationItem>
             <PaginationPrevious 
               onClick={() => onPageChange(page - 1)}
-              disabled={page <= 1}
+              className={page <= 1 ? "pointer-events-none opacity-50" : ""}
             />
           </PaginationItem>
           
@@ -275,7 +280,7 @@ export function PlanList({
           <PaginationItem>
             <PaginationNext 
               onClick={() => onPageChange(page + 1)}
-              disabled={page >= totalPages}
+              className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
             />
           </PaginationItem>
         </PaginationContent>

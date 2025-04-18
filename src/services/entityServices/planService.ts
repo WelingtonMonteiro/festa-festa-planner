@@ -1,3 +1,4 @@
+
 import { Plan } from "@/types/plans";
 import { CrudOperations, PaginatedResponse } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
@@ -28,12 +29,11 @@ export const usePlanService = (): CrudOperations<Plan> & {
   const getActivePlans = async (): Promise<Plan[]> => {
     try {
       const response = await crudService.getAll();
-      const allPlans = response.data;
-      if (!Array.isArray(allPlans)) {
-        console.error('Planos recebidos não são um array:', allPlans);
+      if (!Array.isArray(response.data)) {
+        console.error('Planos recebidos não são um array:', response.data);
         return [];
       }
-      return allPlans.filter(plan => plan.is_active === true && plan.is_archived === false);
+      return response.data.filter(plan => plan.is_active === true && plan.is_archived === false);
     } catch (error) {
       console.error('Erro ao buscar planos ativos:', error);
       return [];

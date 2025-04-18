@@ -3,6 +3,7 @@ import { Plan } from "@/types/plans";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 import { createCrudService } from "@/services/CrudService";
 import { useApi } from "@/contexts/apiContext";
+import { PaginatedResponse } from "@/types/crud";
 
 // Classe para StorageAdapterFactory para uso estático
 class StorageAdapterFactory {
@@ -41,7 +42,8 @@ export const planService = {
       }
     });
     
-    return crudService.getAll();
+    const response = await crudService.getAll();
+    return response.data;
   },
   
   async getActivePlans() {

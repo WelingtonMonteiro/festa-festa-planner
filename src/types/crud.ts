@@ -1,3 +1,4 @@
+
 /**
  * Interface genérica para operações CRUD básicas
  */
