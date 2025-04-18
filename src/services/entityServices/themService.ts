@@ -1,65 +1,77 @@
 
-// Importações
-import { Kit } from '@/types/kits';
-import { CrudOperations } from '@/types/crud';
-import { createCrudService } from '@/services/CrudService';
-import { useStorageAdapterFactory } from '@/services/StorageAdapterFactory';
-import { useApi } from '@/contexts/apiContext';
+// Importamos o tipo Kit do arquivo correto
+import { Kit } from "@/types";
+import { createCrudService } from "@/services/CrudService";
+import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
+import { CrudOperations, PaginatedResponse } from "@/types/crud";
+import { useApi } from "@/contexts/apiContext";
 
-// Função auxiliar para obter o ID real (id ou _id)
-const getRealId = (item: any): string => {
-  if (!item) return '';
-  return item.id || item._id || '';
-};
+export interface Them {
+  id: string;
+  nome: string;
+  descricao: string;
+  valorGasto: number;
+  vezes_alugado: number;
+  imagens: string[];
+  is_archived: boolean;
+  kits: Kit[];
+  created_at: string;
+  updated_at: string;
+}
 
-// Serviço específico para Temas que estende o CRUD genérico
-export const useThemService = (): CrudOperations<Kit> & {
-  getActiveThems: () => Promise<Kit[]>;
-  toggleThemStatus: (id: string, isActive: boolean) => Promise<Kit | null>;
-  archiveTheme: (id: string) => Promise<Kit | null>;
+export const useThemService = (): CrudOperations<Them> & {
+  getActiveThems: () => Promise<Them[]>;
+  getByKitId: (kitId: string) => Promise<Them[]>;
+  archiveThem: (id: string) => Promise<Them | null>;
 } => {
   const factory = useStorageAdapterFactory();
   const { apiUrl } = useApi();
   
-  // Criar serviço CRUD base com configuração correta para API REST
-  const crudService = createCrudService<Kit>(factory, {
+  const crudService = createCrudService<Them>(factory, {
     type: 'apiRest',
-    config: { 
+    config: {
       apiUrl: apiUrl || '',
-      endpoint: 'thems' 
+      endpoint: 'thems'
     }
   });
-
-  // Métodos específicos para temas
-  const getActiveThems = async (): Promise<Kit[]> => {
+  
+  const kitService = createCrudService<Kit>(factory, {
+    type: 'apiRest',
+    config: {
+      apiUrl: apiUrl || '',
+      endpoint: 'kits'
+    }
+  });
+  
+  const getActiveThems = async (): Promise<Them[]> => {
     try {
-      const allThems = await crudService.getAll();
-      return allThems.filter(theme => theme.is_active === true && theme.is_archived === false);
+      const result = await crudService.getAll();
+      return result.data.filter(them => !them.is_archived);
     } catch (error) {
-      console.error('Erro ao buscar temas ativos:', error);
+      console.error("Error fetching active themes:", error);
       return [];
     }
   };
-
-  const toggleThemStatus = async (id: string, isActive: boolean): Promise<Kit | null> => {
-    console.log(`toggleThemStatus chamado com ID: ${id}, isActive: ${isActive}`);
-    if (!id) {
-      console.error('ID não fornecido para toggleThemStatus');
-      return null;
+  
+  const getByKitId = async (kitId: string): Promise<Them[]> => {
+    try {
+      const kitResult = await kitService.getById(kitId);
+      if (!kitResult) return [];
+      
+      const allThems = await crudService.getAll();
+      return allThems.data.filter(them => 
+        them.kits.some(kit => kit.id === kitId)
+      );
+    } catch (error) {
+      console.error(`Error fetching themes by kit ID ${kitId}:`, error);
+      return [];
     }
-    return crudService.update(id, { is_active: isActive });
   };
-
-  const archiveTheme = async (id: string): Promise<Kit | null> => {
-    console.log(`archiveTheme chamado com ID: ${id}`);
-    if (!id) {
-      console.error('ID não fornecido para archiveTheme');
-      return null;
-    }
+  
+  const archiveThem = async (id: string): Promise<Them | null> => {
     return crudService.update(id, { is_archived: true });
   };
-
-  // Retorna a combinação do CRUD genérico com métodos específicos
+  
   return {
     getAll: crudService.getAll,
     getById: crudService.getById,
@@ -67,7 +79,7 @@ export const useThemService = (): CrudOperations<Kit> & {
     update: crudService.update,
     delete: crudService.delete,
     getActiveThems,
-    toggleThemStatus,
-    archiveTheme
+    getByKitId,
+    archiveThem
   };
 };

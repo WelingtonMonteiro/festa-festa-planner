@@ -54,7 +54,11 @@ export function PlanList({
   onBillingIntervalChange
 }: PlanListProps) {
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
-  const totalPages = Math.ceil(total / limit);
+  
+  // Garantir que total e limit sejam números válidos
+  const safeTotal = Math.max(0, total || 0);
+  const safeLimit = Math.max(1, limit || 10);
+  const totalPages = Math.ceil(safeTotal / safeLimit);
 
   const plansArray = Array.isArray(plans) ? plans : [];
   
@@ -226,12 +230,27 @@ export function PlanList({
               </CardHeader>
               <CardContent className="pt-6">
                 <ul className="space-y-3">
-                  {(Array.isArray(plan.features) ? plan.features : plan.features.split(',')).map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center">
-                      <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
+                  {Array.isArray(plan.features) 
+                    ? plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-center">
+                          <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                          <span>{feature}</span>
+                        </li>
+                      ))
+                    : typeof plan.features === 'string'
+                      ? plan.features.split(',').map((feature, featureIndex) => (
+                          <li key={featureIndex} className="flex items-center">
+                            <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                            <span>{feature.trim()}</span>
+                          </li>
+                        ))
+                      : (
+                          <li className="flex items-center">
+                            <CheckCircle className="h-5 w-5 text-primary mr-2 flex-shrink-0" />
+                            <span>Funcionalidades não especificadas</span>
+                          </li>
+                        )
+                  }
                 </ul>
               </CardContent>
               <CardFooter className="flex gap-2">
@@ -257,34 +276,37 @@ export function PlanList({
         </div>
       )}
 
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious 
-              onClick={() => onPageChange(page - 1)}
-              className={page <= 1 ? "pointer-events-none opacity-50" : ""}
-            />
-          </PaginationItem>
-          
-          {[...Array(totalPages)].map((_, idx) => (
-            <PaginationItem key={idx + 1}>
-              <PaginationLink 
-                isActive={page === idx + 1}
-                onClick={() => onPageChange(idx + 1)}
-              >
-                {idx + 1}
-              </PaginationLink>
+      {totalPages > 0 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious 
+                onClick={() => onPageChange(Math.max(1, page - 1))}
+                className={page <= 1 ? "pointer-events-none opacity-50" : ""}
+              />
             </PaginationItem>
-          ))}
+            
+            {/* Renderizar botões de paginação apenas se houver páginas */}
+            {[...Array(totalPages > 0 ? totalPages : 0)].map((_, idx) => (
+              <PaginationItem key={idx + 1}>
+                <PaginationLink 
+                  isActive={page === idx + 1}
+                  onClick={() => onPageChange(idx + 1)}
+                >
+                  {idx + 1}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
 
-          <PaginationItem>
-            <PaginationNext 
-              onClick={() => onPageChange(page + 1)}
-              className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+            <PaginationItem>
+              <PaginationNext 
+                onClick={() => onPageChange(Math.min(totalPages, page + 1))}
+                className={page >= totalPages ? "pointer-events-none opacity-50" : ""}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }

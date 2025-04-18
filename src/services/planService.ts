@@ -31,7 +31,7 @@ class StorageAdapterFactory {
 
 // Serviço para landing page usando CRUD genérico
 export const planService = {
-  async getPlans() {
+  async getPlans(page = 1, limit = 10): Promise<PaginatedResponse<Plan>> {
     const factory = new StorageAdapterFactory('apiRest', 'http://localhost:3000');
     
     const crudService = createCrudService<Plan>(factory, {
@@ -42,18 +42,17 @@ export const planService = {
       }
     });
     
-    const response = await crudService.getAll();
-    return response.data;
+    return crudService.getAll(page, limit);
   },
   
-  async getActivePlans() {
+  async getActivePlans(): Promise<Plan[]> {
     try {
-      const plans = await this.getPlans();
-      if (!Array.isArray(plans)) {
-        console.error('Plans não é um array:', plans);
+      const response = await this.getPlans();
+      if (!Array.isArray(response.data)) {
+        console.error('Planos recebidos não são um array:', response.data);
         return [];
       }
-      return plans.filter(plan => 
+      return response.data.filter(plan => 
         plan.is_active === true && plan.is_archived === false
       );
     } catch (error) {
@@ -62,7 +61,7 @@ export const planService = {
     }
   },
   
-  async createPlan(plan: Omit<Plan, 'id' | '_id' | 'created_at' | 'updated_at'>) {
+  async createPlan(plan: Omit<Plan, 'id' | '_id' | 'created_at' | 'updated_at'>): Promise<Plan | null> {
     const factory = new StorageAdapterFactory('apiRest', 'http://localhost:3000');
     
     const crudService = createCrudService<Plan>(factory, {
@@ -82,7 +81,7 @@ export const planService = {
     return crudService.create(planData);
   },
   
-  async updatePlan(id: string, plan: Partial<Plan>) {
+  async updatePlan(id: string, plan: Partial<Plan>): Promise<Plan | null> {
     const factory = new StorageAdapterFactory('apiRest', 'http://localhost:3000');
     
     const crudService = createCrudService<Plan>(factory, {
@@ -99,11 +98,11 @@ export const planService = {
     });
   },
   
-  async togglePlanStatus(id: string, isActive: boolean) {
+  async togglePlanStatus(id: string, isActive: boolean): Promise<Plan | null> {
     return this.updatePlan(id, { is_active: isActive });
   },
   
-  async archivePlan(id: string) {
+  async archivePlan(id: string): Promise<Plan | null> {
     return this.updatePlan(id, { is_archived: true });
   }
 };
