@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -7,9 +7,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useHandleContext } from "@/contexts/handleContext";
 import { MessageSquare, Facebook, Instagram } from "lucide-react";
+import { useStorage } from "@/contexts/storageContext";
+import { toast } from "sonner";
 
 const IntegrationSettings = () => {
   const { integrations, updateIntegration, apiUrl, setApiUrl } = useHandleContext();
+  const { storageType } = useStorage();
   
   const getIntegrationIcon = (name: string) => {
     switch (name) {
@@ -21,6 +24,31 @@ const IntegrationSettings = () => {
         return <Instagram className="h-5 w-5" />;
       default:
         return <MessageSquare className="h-5 w-5" />;
+    }
+  };
+
+  const handleUpdateIntegration = (id: string, data: { enabled: boolean }) => {
+    // Verifica se o armazenamento é Supabase antes de permitir a atualização
+    if (storageType === 'supabase') {
+      updateIntegration(id, data);
+    } else {
+      // Se não for Supabase, atualiza localmente e mostra mensagem informativa
+      updateIntegration(id, data);
+      toast.info(
+        "Configuração salva apenas localmente. Para persistência permanente, configure o Supabase nas configurações de administrador.",
+        { duration: 5000 }
+      );
+    }
+  };
+
+  const handleSetApiUrl = (url: string) => {
+    // Verifica se o armazenamento é Supabase antes de permitir a atualização
+    setApiUrl(url);
+    if (storageType !== 'supabase') {
+      toast.info(
+        "URL da API salva apenas localmente. Para persistência permanente, configure o Supabase nas configurações de administrador.",
+        { duration: 5000 }
+      );
     }
   };
   
@@ -41,7 +69,7 @@ const IntegrationSettings = () => {
                 <Input 
                   id="apiUrl" 
                   value={apiUrl} 
-                  onChange={(e) => setApiUrl(e.target.value)} 
+                  onChange={(e) => handleSetApiUrl(e.target.value)} 
                   placeholder="https://sua-api.com"
                 />
               </div>
@@ -72,7 +100,7 @@ const IntegrationSettings = () => {
                 </div>
                 <Switch 
                   checked={integration.enabled}
-                  onCheckedChange={(checked) => updateIntegration(integration.id, { enabled: checked })}
+                  onCheckedChange={(checked) => handleUpdateIntegration(integration.id, { enabled: checked })}
                 />
               </div>
             ))}
