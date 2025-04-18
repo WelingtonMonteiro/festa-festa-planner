@@ -14,11 +14,18 @@ export interface PlanFormProps {
 }
 
 export function PlanForm({ plan, onSubmit, onCancel }: PlanFormProps) {
+  // Convert features to array if it's a string
+  const getInitialFeatures = (): string[] => {
+    if (!plan?.features) return [''];
+    if (Array.isArray(plan.features)) return plan.features;
+    return plan.features.split(',').map(f => f.trim());
+  };
+
   const [name, setName] = useState(plan?.name || '');
   const [description, setDescription] = useState(plan?.description || '');
   const [priceMonthly, setPriceMonthly] = useState(plan?.price_monthly?.toString() || '');
   const [priceYearly, setPriceYearly] = useState(plan?.price_yearly?.toString() || '');
-  const [features, setFeatures] = useState<string[]>(plan?.features || ['']);
+  const [features, setFeatures] = useState<string[]>(getInitialFeatures());
   const [isActive] = useState(plan?.is_active ?? true);
   
   const handleSubmit = async (e: React.FormEvent) => {

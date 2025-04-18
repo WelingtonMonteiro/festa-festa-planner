@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { SupabaseAdapterConfig, StorageAdapter } from "@/types/crud";
+import { SupabaseAdapterConfig, StorageAdapter, PaginatedResponse } from "@/types/crud";
 import { toast } from "sonner";
 
 export class SupabaseAdapter<T extends Record<string, any>> implements StorageAdapter<T> {
@@ -10,19 +10,43 @@ export class SupabaseAdapter<T extends Record<string, any>> implements StorageAd
     this.tableName = config.tableName;
   }
 
-  async getAll(): Promise<T[]> {
+  async getAll(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
     try {
+      // First, get the total count
+      const { count, error: countError } = await supabase
+        .from(this.tableName as any)
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) throw countError;
+      
+      // Calculate pagination
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+      
+      // Get paginated data
       const { data, error } = await supabase
         .from(this.tableName as any)
         .select('*')
+        .range(from, to)
         .order('created_at', { ascending: false });
         
       if (error) throw error;
-      return (data || []) as unknown as T[];
+      
+      return {
+        data: (data || []) as unknown as T[],
+        total: count || 0,
+        page,
+        limit
+      };
     } catch (error) {
       console.error(`Falha ao buscar dados do Supabase (${this.tableName}):`, error);
       toast.error(`Falha ao carregar dados de ${this.tableName}`);
-      return [];
+      return {
+        data: [],
+        total: 0,
+        page,
+        limit
+      };
     }
   }
 

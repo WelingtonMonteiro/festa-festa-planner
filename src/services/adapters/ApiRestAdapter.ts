@@ -1,5 +1,5 @@
 
-import { ApiRestAdapterConfig, StorageAdapter } from "@/types/crud";
+import { ApiRestAdapterConfig, StorageAdapter, PaginatedResponse } from "@/types/crud";
 import { toast } from "sonner";
 
 export class ApiRestAdapter<T extends Record<string, any>> implements StorageAdapter<T> {
@@ -43,10 +43,15 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
     return id;
   }
 
-  async getAll(): Promise<T[]> {
+  async getAll(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
     try {
-      console.log(`Fazendo requisição GET para ${this.baseUrl}`);
-      const response = await fetch(this.baseUrl);
+      // Add query parameters for pagination
+      const url = new URL(this.baseUrl);
+      url.searchParams.append('page', page.toString());
+      url.searchParams.append('limit', limit.toString());
+      
+      console.log(`Fazendo requisição GET para ${url.toString()}`);
+      const response = await fetch(url.toString());
       
       if (!response.ok) {
         throw new Error(`Erro ao buscar dados: ${response.statusText}`);
@@ -54,13 +59,36 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
       
       const data = await response.json();
       console.log(`Dados recebidos da API:`, data);
-      // Normaliza _id para id em todos os itens
+      
+      // Check if the response is already in PaginatedResponse format
+      if (data && typeof data === 'object' && 'data' in data) {
+        // The API already returns paginated data
+        const normalizedData = this.normalizeId(data.data);
+        return {
+          data: normalizedData,
+          total: data.total || normalizedData.length,
+          page: data.page || page,
+          limit: data.limit || limit
+        };
+      }
+      
+      // Normalize and return data in paginated format
       const normalizedData = this.normalizeId(data);
-      return normalizedData as T[];
+      return {
+        data: normalizedData,
+        total: normalizedData.length,
+        page,
+        limit
+      };
     } catch (error) {
       console.error(`Falha ao buscar dados da API (${this.endpoint}):`, error);
       toast.error(`Falha ao carregar dados de ${this.endpoint}`);
-      return [];
+      return {
+        data: [],
+        total: 0,
+        page,
+        limit
+      };
     }
   }
 

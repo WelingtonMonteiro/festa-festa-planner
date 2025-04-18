@@ -1,5 +1,5 @@
 
-import { LocalStorageAdapterConfig, StorageAdapter } from "@/types/crud";
+import { LocalStorageAdapterConfig, StorageAdapter, PaginatedResponse } from "@/types/crud";
 
 export class LocalStorageAdapter<T extends { id?: string }> implements StorageAdapter<T> {
   private storageKey: string;
@@ -12,23 +12,43 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
     this.idField = config.idField || 'id';
   }
 
-  async getAll(): Promise<T[]> {
+  async getAll(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
     try {
       const dataStr = localStorage.getItem(this.storageKey);
+      let allItems: T[] = [];
+      
       if (dataStr) {
-        return JSON.parse(dataStr);
+        allItems = JSON.parse(dataStr);
+      } else {
+        allItems = this.mockData as T[];
       }
-      return this.mockData as T[];
+      
+      // Implement pagination
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedItems = allItems.slice(startIndex, endIndex);
+      
+      return {
+        data: paginatedItems,
+        total: allItems.length,
+        page,
+        limit
+      };
     } catch (error) {
       console.error(`Error fetching data from localStorage (${this.storageKey}):`, error);
-      return this.mockData as T[];
+      return {
+        data: this.mockData as T[],
+        total: this.mockData.length,
+        page,
+        limit
+      };
     }
   }
 
   async getById(id: string): Promise<T | null> {
     try {
-      const items = await this.getAll();
-      return items.find(item => (item as any)[this.idField] === id) || null;
+      const response = await this.getAll();
+      return response.data.find(item => (item as any)[this.idField] === id) || null;
     } catch (error) {
       console.error(`Error fetching item by ID from localStorage (${this.storageKey}):`, error);
       return null;
@@ -37,7 +57,8 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
 
   async create(item: Omit<T, 'id'>): Promise<T | null> {
     try {
-      const items = await this.getAll();
+      const response = await this.getAll();
+      const items = response.data;
       const newItem = {
         ...item,
         id: `id_${Date.now().toString()}`, // Gera ID simples
@@ -55,7 +76,8 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
 
   async update(id: string, item: Partial<T>): Promise<T | null> {
     try {
-      const items = await this.getAll();
+      const response = await this.getAll();
+      const items = response.data;
       let updated: T | null = null;
 
       const updatedItems = items.map(existingItem => {
@@ -84,7 +106,8 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
 
   async delete(id: string): Promise<boolean> {
     try {
-      const items = await this.getAll();
+      const response = await this.getAll();
+      const items = response.data;
       const filteredItems = items.filter(item => (item as any)[this.idField] !== id);
       
       if (items.length !== filteredItems.length) {
