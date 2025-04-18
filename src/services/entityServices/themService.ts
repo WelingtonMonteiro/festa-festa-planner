@@ -1,22 +1,22 @@
 
-import { Them, ThemWithIds } from "@/types/index";
+import { Plan } from "@/types/plans";
 import { CrudOperations } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 import { useApi } from "@/contexts/apiContext";
+import { Them, Kit } from "@/types";
 
 // Serviço específico para Temas que estende o CRUD genérico
-export const useThemService = (): CrudOperations<ThemWithIds> & {
-  getActiveThems: () => Promise<ThemWithIds[]>;
-  toggleThemStatus: (id: string, isActive: boolean) => Promise<ThemWithIds | null>;
-  archiveThems: (id: string) => Promise<ThemWithIds | null>;
-  importThems: (thems: Them[]) => Promise<ThemWithIds[]>;
+export const useThemService = (): CrudOperations<Them> & {
+  getByIdWithKits: (id: string, allKits: Kit[]) => Promise<Them | null>;
+  createWithKits: (them: Omit<Them, 'id' | 'vezes_alugado'>, allKits: Kit[]) => Promise<Them | null>;
+  updateWithKits: (id: string, them: Partial<Them>, allKits: Kit[]) => Promise<Them | null>;
 } => {
   const factory = useStorageAdapterFactory();
   const { apiUrl } = useApi();
   
-  // Criar serviço CRUD base
-  const crudService = createCrudService<ThemWithIds>(factory, {
+  // Criar serviço CRUD base com configuração correta
+  const crudService = createCrudService<Them>(factory, {
     type: 'apiRest',
     config: { 
       apiUrl: apiUrl || '',
@@ -24,72 +24,105 @@ export const useThemService = (): CrudOperations<ThemWithIds> & {
     }
   });
 
-  // Métodos específicos para temas
-  const getActiveThems = async (): Promise<ThemWithIds[]> => {
+  // Função para mapear kits_ids para objetos Kit completos
+  const mapKitsToThem = (them: any, allKits: Kit[]): Them => {
+    if (!them) return them;
+    
+    // Se o tema tem kits_ids, mapeia para objetos Kit
+    const kitsIds = them.kits_ids || [];
+    const kits = kitsIds.map((kitId: string) => 
+      allKits.find(kit => kit.id === kitId) || allKits.find(kit => kit._id === kitId)
+    ).filter(Boolean);
+    
+    return {
+      ...them,
+      kits: kits || [],
+      valorGasto: them.valorgasto || them.valorGasto // Normaliza os dois formatos possíveis
+    };
+  };
+
+  // Função para obter o ID real (id ou _id)
+  const getRealId = (item: any): string => {
+    if (!item) return '';
+    return item.id || item._id || '';
+  };
+
+  // Métodos específicos para temas com integração de kits
+  const getByIdWithKits = async (id: string, allKits: Kit[]): Promise<Them | null> => {
     try {
-      const allThems = await crudService.getAll();
-      return allThems.filter(them => them.is_active === true && them.is_archived === false);
+      const them = await crudService.getById(id);
+      if (!them) return null;
+      return mapKitsToThem(them, allKits);
     } catch (error) {
-      console.error('Erro ao buscar temas ativos:', error);
-      return [];
-    }
-  };
-
-  const toggleThemStatus = async (id: string, isActive: boolean): Promise<ThemWithIds | null> => {
-    console.log(`toggleThemStatus chamado com ID: ${id}, isActive: ${isActive}`);
-    if (!id) {
-      console.error('ID não fornecido para toggleThemStatus');
+      console.error('Erro ao buscar tema com kits:', error);
       return null;
     }
-    return crudService.update(id, { is_active: isActive });
   };
 
-  const archiveThems = async (id: string): Promise<ThemWithIds | null> => {
-    console.log(`archiveThems chamado com ID: ${id}`);
-    if (!id) {
-      console.error('ID não fornecido para archiveThems');
-      return null;
-    }
-    return crudService.update(id, { is_archived: true });
-  };
-
-  const importThems = async (thems: Them[]): Promise<ThemWithIds[]> => {
+  const createWithKits = async (them: Omit<Them, 'id' | 'vezes_alugado'>, allKits: Kit[]): Promise<Them | null> => {
     try {
-      console.log('Importando temas:', thems);
-      const importedThems: ThemWithIds[] = [];
+      // Prepara os dados para salvar (kits_ids em vez de objetos kit)
+      const kitsIds = them.kits.map(kit => kit.id || kit._id).filter(Boolean);
       
-      for (const them of thems) {
-        const themToImport = {
-          ...them,
-          is_active: true,
-          is_archived: false,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-        
-        const importedThem = await crudService.create(themToImport);
-        if (importedThem) {
-          importedThems.push(importedThem);
-        }
+      const themToSave: any = {
+        nome: them.nome,
+        descricao: them.descricao,
+        imagens: them.imagens,
+        valorgasto: them.valorGasto, // Usa valorgasto em vez de valorGasto para compatibilidade
+        vezes_alugado: 0,
+        kits_ids: kitsIds
+      };
+      
+      const newThem = await crudService.create(themToSave);
+      if (!newThem) return null;
+      
+      return mapKitsToThem(newThem, allKits);
+    } catch (error) {
+      console.error('Erro ao criar tema com kits:', error);
+      return null;
+    }
+  };
+
+  const updateWithKits = async (id: string, them: Partial<Them>, allKits: Kit[]): Promise<Them | null> => {
+    try {
+      // Prepara os dados para salvar
+      const updateData: any = {
+        updated_at: new Date().toISOString()
+      };
+      
+      if (them.nome !== undefined) updateData.nome = them.nome;
+      if (them.descricao !== undefined) updateData.descricao = them.descricao;
+      if (them.imagens !== undefined) updateData.imagens = them.imagens;
+      if (them.valorGasto !== undefined) updateData.valorgasto = them.valorGasto;
+      if (them.vezes_alugado !== undefined) updateData.vezes_alugado = them.vezes_alugado;
+      
+      // Se kits são fornecidos, atualiza kits_ids
+      if (them.kits !== undefined) {
+        updateData.kits_ids = them.kits.map(kit => kit.id || kit._id).filter(Boolean);
       }
       
-      return importedThems;
+      const updatedThem = await crudService.update(id, updateData);
+      if (!updatedThem) return null;
+      
+      return mapKitsToThem(updatedThem, allKits);
     } catch (error) {
-      console.error('Erro ao importar temas:', error);
-      return [];
+      console.error('Erro ao atualizar tema com kits:', error);
+      return null;
     }
   };
 
   // Retorna a combinação do CRUD genérico com métodos específicos
   return {
-    getAll: crudService.getAll,
+    getAll: async () => {
+      const themes = await crudService.getAll();
+      return themes;
+    },
     getById: crudService.getById,
     create: crudService.create,
     update: crudService.update,
     delete: crudService.delete,
-    getActiveThems,
-    toggleThemStatus,
-    archiveThems,
-    importThems
+    getByIdWithKits,
+    createWithKits,
+    updateWithKits
   };
 };

@@ -14,6 +14,35 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
     console.log(`ApiRestAdapter inicializado com baseUrl: ${this.baseUrl}`);
   }
 
+  // Função auxiliar para normalizar IDs (_id -> id) para compatibilidade
+  private normalizeId(item: any): any {
+    if (!item) return item;
+    
+    // Se for um array, normaliza cada item
+    if (Array.isArray(item)) {
+      return item.map(i => this.normalizeId(i));
+    }
+    
+    // Se for um objeto único
+    if (item._id && !item.id) {
+      const normalized = { ...item, id: item._id };
+      console.log(`ID normalizado de _id para id: ${item._id}`);
+      return normalized;
+    }
+    
+    return item;
+  }
+
+  // Função para obter o ID real (id ou _id) de um objeto
+  private getActualId(item: any, id: string): string {
+    if (item && item._id) {
+      console.log(`Usando _id (${item._id}) em vez de id (${id})`);
+      return item._id;
+    }
+    console.log(`Usando id padrão: ${id}`);
+    return id;
+  }
+
   async getAll(): Promise<T[]> {
     try {
       console.log(`Fazendo requisição GET para ${this.baseUrl}`);
@@ -25,7 +54,9 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
       
       const data = await response.json();
       console.log(`Dados recebidos da API:`, data);
-      return data as T[];
+      // Normaliza _id para id em todos os itens
+      const normalizedData = this.normalizeId(data);
+      return normalizedData as T[];
     } catch (error) {
       console.error(`Falha ao buscar dados da API (${this.endpoint}):`, error);
       toast.error(`Falha ao carregar dados de ${this.endpoint}`);
@@ -46,7 +77,9 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
       }
       
       const data = await response.json();
-      return data as T;
+      // Normaliza _id para id
+      const normalizedData = this.normalizeId(data);
+      return normalizedData as T;
     } catch (error) {
       console.error(`Falha ao buscar item da API (${this.endpoint}):`, error);
       toast.error(`Falha ao buscar dado de ${this.endpoint}`);
@@ -70,7 +103,9 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
       }
       
       const data = await response.json();
-      return data as T;
+      // Normaliza _id para id
+      const normalizedData = this.normalizeId(data);
+      return normalizedData as T;
     } catch (error) {
       console.error(`Falha ao criar item na API (${this.endpoint}):`, error);
       toast.error(`Falha ao criar item em ${this.endpoint}`);
@@ -81,7 +116,22 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
   async update(id: string, item: Partial<T>): Promise<T | null> {
     try {
       console.log(`Fazendo requisição PUT para ${this.baseUrl}/${id}`, item);
-      const response = await fetch(`${this.baseUrl}/${id}`, {
+      
+      // Primeiro obtém o objeto atual para obter o ID real (_id ou id)
+      let currentItem = null;
+      try {
+        const currentResponse = await fetch(`${this.baseUrl}/${id}`);
+        if (currentResponse.ok) {
+          currentItem = await currentResponse.json();
+        }
+      } catch (e) {
+        console.warn(`Não foi possível obter o item atual para verificar _id:`, e);
+      }
+      
+      // Usa o ID atual (_id) se disponível
+      const actualId = currentItem ? this.getActualId(currentItem, id) : id;
+      
+      const response = await fetch(`${this.baseUrl}/${actualId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -94,7 +144,9 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
       }
       
       const data = await response.json();
-      return data as T;
+      // Normaliza _id para id
+      const normalizedData = this.normalizeId(data);
+      return normalizedData as T;
     } catch (error) {
       console.error(`Falha ao atualizar item na API (${this.endpoint}):`, error);
       toast.error(`Falha ao atualizar item em ${this.endpoint}`);
@@ -105,7 +157,22 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
   async delete(id: string): Promise<boolean> {
     try {
       console.log(`Fazendo requisição DELETE para ${this.baseUrl}/${id}`);
-      const response = await fetch(`${this.baseUrl}/${id}`, {
+      
+      // Primeiro obtém o objeto atual para obter o ID real (_id ou id)
+      let currentItem = null;
+      try {
+        const currentResponse = await fetch(`${this.baseUrl}/${id}`);
+        if (currentResponse.ok) {
+          currentItem = await currentResponse.json();
+        }
+      } catch (e) {
+        console.warn(`Não foi possível obter o item atual para verificar _id:`, e);
+      }
+      
+      // Usa o ID atual (_id) se disponível
+      const actualId = currentItem ? this.getActualId(currentItem, id) : id;
+      
+      const response = await fetch(`${this.baseUrl}/${actualId}`, {
         method: 'DELETE',
       });
       

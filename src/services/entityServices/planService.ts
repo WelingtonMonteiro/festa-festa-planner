@@ -23,6 +23,12 @@ export const usePlanService = (): CrudOperations<Plan> & {
     }
   });
 
+  // Função auxiliar para obter o ID real (id ou _id)
+  const getRealId = (item: Plan): string => {
+    if (!item) return '';
+    return item.id || item._id || '';
+  };
+
   // Métodos específicos para planos
   const getActivePlans = async (): Promise<Plan[]> => {
     try {

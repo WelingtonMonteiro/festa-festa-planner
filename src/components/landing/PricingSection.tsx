@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,10 @@ export const PricingSection = () => {
   }, []);
   
   // Função para formatar os recursos do plano
-  const formatFeatures = (features: string): string[] => {
+  const formatFeatures = (features: string | string[]): string[] => {
+    if (Array.isArray(features)) {
+      return features;
+    }
     return features.split(',').map(feature => feature.trim());
   };
 
@@ -87,7 +91,7 @@ export const PricingSection = () => {
               .sort((a, b) => a.price_monthly - b.price_monthly)
               .map((plan) => (
                 <Card 
-                  key={plan.id} 
+                  key={plan.id || plan._id} 
                   className={`w-full ${plan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
                 >
                   {plan.is_popular && (
