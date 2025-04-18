@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
@@ -727,4 +728,78 @@ const Landing = () => {
                 <h4 className="font-medium mb-3">Empresa</h4>
                 <ul className="space-y-2">
                   <li><a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">Sobre</a></li>
-                  <li><a href="#contact" className="text-muted-foreground hover
+                  <li><a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">Contato</a></li>
+                  <li><a href="#team" className="text-muted-foreground hover:text-foreground transition-colors">Nosso Time</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div className="border-t pt-8 mt-8">
+            <p className="text-center text-muted-foreground">
+              &copy; {new Date().getFullYear()} Festana. Todos os direitos reservados.
+            </p>
+          </div>
+        </div>
+      </footer>
+
+      {/* Login Modal */}
+      <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">
+              {selectedPlan ? `Começar com o plano ${selectedPlan}` : 'Entrar na sua conta'}
+            </DialogTitle>
+            <DialogDescription>
+              Digite suas credenciais para acessar o sistema de planejamento de eventos
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleLogin} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium">
+                Email
+              </label>
+              <Input 
+                id="email"
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="nome@exemplo.com"
+                required
+                className="w-full"
+              />
+            </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label htmlFor="password" className="text-sm font-medium">
+                  Senha
+                </label>
+                <Button type="button" variant="link" className="p-0 h-auto text-xs">
+                  Esqueceu a senha?
+                </Button>
+              </div>
+              <Input 
+                id="password"
+                type="password" 
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full"
+              />
+            </div>
+            <Button type="submit" className="w-full">Entrar</Button>
+            <div className="text-center">
+              <p className="text-sm text-muted-foreground">
+                Não tem uma conta?{" "}
+                <Button variant="link" className="p-0 h-auto">
+                  Entre em contato
+                </Button>
+              </p>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default Landing;
