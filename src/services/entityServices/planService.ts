@@ -11,9 +11,11 @@ export const usePlanService = (): CrudOperations<Plan> & {
   archivePlan: (id: string) => Promise<Plan | null>;
 } => {
   const factory = useStorageAdapterFactory();
+  
+  // Criar serviço CRUD base
   const crudService = createCrudService<Plan>(factory, {
-    type: 'supabase',
-    config: { tableName: 'plans' }
+    type: 'apiRest',
+    config: { endpoint: 'plans' }
   });
 
   // Métodos específicos para planos
@@ -37,7 +39,11 @@ export const usePlanService = (): CrudOperations<Plan> & {
 
   // Retorna a combinação do CRUD genérico com métodos específicos
   return {
-    ...crudService,
+    getAll: crudService.getAll,
+    getById: crudService.getById,
+    create: crudService.create,
+    update: crudService.update,
+    delete: crudService.delete,
     getActivePlans,
     togglePlanStatus,
     archivePlan

@@ -48,5 +48,14 @@ export const createCrudService = <T extends Record<string, any>>(
   factory: StorageAdapterFactory,
   config: StorageAdapterConfig
 ): CrudOperations<T> => {
-  return new CrudService<T>(factory, config);
+  const service = new CrudService<T>(factory, config);
+  
+  // Retornar os métodos do serviço explicitamente para garantir que eles sejam acessíveis
+  return {
+    getAll: () => service.getAll(),
+    getById: (id: string) => service.getById(id),
+    create: (item: Omit<T, 'id'>) => service.create(item),
+    update: (id: string, item: Partial<T>) => service.update(id, item),
+    delete: (id: string) => service.delete(id)
+  };
 };
