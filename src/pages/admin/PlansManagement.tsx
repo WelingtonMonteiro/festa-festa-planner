@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Plan } from '@/types/plans';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -13,6 +12,9 @@ import { Switch } from '@/components/ui/switch';
 
 const PlansManagement = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
   const [isLoading, setIsLoading] = useState(true);
   const [editingPlan, setEditingPlan] = useState<Plan | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -25,15 +27,16 @@ const PlansManagement = () => {
   
   useEffect(() => {
     loadPlans();
-  }, []);
+  }, [page]);
   
   const loadPlans = async () => {
     setIsLoading(true);
     try {
       console.log("Carregando planos com serviço:", planService);
-      const fetchedPlans = await planService.getAll();
-      console.log("Planos carregados:", fetchedPlans);
-      setPlans(Array.isArray(fetchedPlans) ? fetchedPlans : []);
+      const response = await planService.getAll(page, limit);
+      console.log("Planos carregados:", response);
+      setPlans(response.data);
+      setTotal(response.total);
     } catch (error) {
       console.error('Error loading plans:', error);
       toast.error('Falha ao carregar planos');
@@ -197,7 +200,10 @@ const PlansManagement = () => {
             </CardHeader>
             <CardContent>
               <PlanList 
-                plans={plans} 
+                plans={plans}
+                total={total}
+                page={page}
+                limit={limit}
                 isLoading={isLoading}
                 onEdit={handleEditPlan}
                 onToggleStatus={handleTogglePlanStatus}
@@ -207,6 +213,9 @@ const PlansManagement = () => {
                 onStatusFilterChange={setStatusFilter}
                 showArchived={showArchived}
                 onShowArchivedChange={setShowArchived}
+                onPageChange={setPage}
+                billingInterval={billingInterval}
+                onBillingIntervalChange={setBillingInterval}
               />
             </CardContent>
           </Card>

@@ -1,11 +1,9 @@
-
 import { Plan } from "@/types/plans";
-import { CrudOperations } from "@/types/crud";
+import { CrudOperations, PaginatedResponse } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 import { useApi } from "@/contexts/apiContext";
 
-// Serviço específico para Planos que estende o CRUD genérico
 export const usePlanService = (): CrudOperations<Plan> & {
   getActivePlans: () => Promise<Plan[]>;
   togglePlanStatus: (id: string, isActive: boolean) => Promise<Plan | null>;
@@ -14,7 +12,6 @@ export const usePlanService = (): CrudOperations<Plan> & {
   const factory = useStorageAdapterFactory();
   const { apiUrl } = useApi();
   
-  // Criar serviço CRUD base com configuração correta para API REST
   const crudService = createCrudService<Plan>(factory, {
     type: 'apiRest',
     config: { 
@@ -23,16 +20,15 @@ export const usePlanService = (): CrudOperations<Plan> & {
     }
   });
 
-  // Função auxiliar para obter o ID real (id ou _id)
   const getRealId = (item: Plan): string => {
     if (!item) return '';
     return item.id || item._id || '';
   };
 
-  // Métodos específicos para planos
   const getActivePlans = async (): Promise<Plan[]> => {
     try {
-      const allPlans = await crudService.getAll();
+      const response = await crudService.getAll();
+      const allPlans = response.data;
       if (!Array.isArray(allPlans)) {
         console.error('Planos recebidos não são um array:', allPlans);
         return [];
@@ -62,7 +58,6 @@ export const usePlanService = (): CrudOperations<Plan> & {
     return crudService.update(id, { is_archived: true });
   };
 
-  // Retorna a combinação do CRUD genérico com métodos específicos
   return {
     getAll: crudService.getAll,
     getById: crudService.getById,

@@ -1,13 +1,12 @@
-
 /**
  * Interface genérica para operações CRUD básicas
  */
 export interface CrudOperations<T> {
-  getAll(): Promise<T[]>;
-  getById(id: string): Promise<T | null>;
-  create(item: Omit<T, 'id'>): Promise<T | null>;
-  update(id: string, item: Partial<T>): Promise<T | null>;
-  delete(id: string): Promise<boolean>;
+  getAll: (page?: number, limit?: number) => Promise<PaginatedResponse<T>>;
+  getById: (id: string) => Promise<T | null>;
+  create: (item: Omit<T, 'id'>) => Promise<T | null>;
+  update: (id: string, item: Partial<T>) => Promise<T | null>;
+  delete: (id: string) => Promise<boolean>;
 }
 
 /**
@@ -21,11 +20,11 @@ export interface StorageProvider<T> extends CrudOperations<T> {
  * Interface para adaptadores de armazenamento específicos
  */
 export interface StorageAdapter<T> {
-  getAll(): Promise<T[]>;
-  getById(id: string): Promise<T | null>;
-  create(item: Omit<T, 'id'>): Promise<T | null>;
-  update(id: string, item: Partial<T>): Promise<T | null>;
-  delete(id: string): Promise<boolean>;
+  getAll: (page?: number, limit?: number) => Promise<PaginatedResponse<T>>;
+  getById: (id: string) => Promise<T | null>;
+  create: (item: Omit<T, 'id'>) => Promise<T | null>;
+  update: (id: string, item: Partial<T>) => Promise<T | null>;
+  delete: (id: string) => Promise<boolean>;
 }
 
 /**
@@ -66,4 +65,14 @@ export type StorageAdapterConfig =
 export interface StorageAdapterFactory {
   createAdapter<T>(config: StorageAdapterConfig): StorageAdapter<T>;
   getCurrentStorageType(): 'localStorage' | 'supabase' | 'apiRest';
+}
+
+/**
+ * Interface para resposta paginada
+ */
+export interface PaginatedResponse<T> {
+  total: number;
+  page: number;
+  limit: number;
+  data: T[];
 }
