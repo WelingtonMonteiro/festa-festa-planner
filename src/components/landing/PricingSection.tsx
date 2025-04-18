@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { CheckIcon } from "lucide-react";
 import { Plan } from "@/types/plans";
-import { usePlanService } from "@/services/planService";
+import { planService } from "@/services/planService";
+import { Switch } from "@/components/ui/switch";
 
 export const PricingSection = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -13,9 +14,7 @@ export const PricingSection = () => {
   useEffect(() => {
     const loadPlans = async () => {
       try {
-        const planService = usePlanService();
         const activePlans = await planService.getActivePlans();
-        console.log("Planos ativos carregados na landing page:", activePlans);
         setPlans(activePlans);
       } catch (error) {
         console.error("Erro ao carregar planos:", error);
@@ -26,7 +25,7 @@ export const PricingSection = () => {
     
     loadPlans();
   }, []);
-  
+
   // Função para formatar os recursos do plano
   const formatFeatures = (features: string | string[]): string[] => {
     if (Array.isArray(features)) {
@@ -50,19 +49,12 @@ export const PricingSection = () => {
             <span className={`mr-4 ${!isYearly ? 'font-bold' : 'text-muted-foreground'}`}>
               Mensal
             </span>
-            <button 
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background ${isYearly ? 'bg-primary' : 'bg-input'}`}
-              onClick={() => setIsYearly(!isYearly)}
-              type="button"
-              role="switch"
-              aria-checked={isYearly}
-            >
-              <span 
-                className={`pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform ${isYearly ? 'translate-x-5' : 'translate-x-0'}`} 
-              />
-            </button>
+            <Switch
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+            />
             <span className={`ml-4 ${isYearly ? 'font-bold' : 'text-muted-foreground'}`}>
-              Anual <span className="text-green-500 text-sm">(Economize 16%)</span>
+              Anual <span className="text-green-500 text-sm">(Economize 17%)</span>
             </span>
           </div>
         </div>
@@ -86,54 +78,52 @@ export const PricingSection = () => {
           </div>
         ) : plans.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {plans
-              .sort((a, b) => a.price_monthly - b.price_monthly)
-              .map((plan) => (
-                <Card 
-                  key={plan.id || plan._id} 
-                  className={`w-full ${plan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
-                >
-                  {plan.is_popular && (
-                    <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
-                      Popular
-                    </div>
-                  )}
-                  <CardHeader>
-                    <CardTitle>{plan.name}</CardTitle>
-                    <CardDescription>{plan.description}</CardDescription>
-                    <div className="mt-4">
-                      <span className="text-4xl font-bold">
-                        R$ {isYearly ? (plan.price_yearly / 12).toFixed(2) : plan.price_monthly.toFixed(2)}
-                      </span>
-                      <span className="text-muted-foreground ml-2">/mês</span>
-                      {isYearly && (
-                        <div className="text-sm text-muted-foreground mt-1">
-                          Faturado como R$ {plan.price_yearly.toFixed(2)} anualmente
-                        </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      {formatFeatures(plan.features).map((feature, index) => (
+            {plans.map((plan) => (
+              <Card 
+                key={plan.id || plan._id} 
+                className={`w-full ${plan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
+              >
+                {plan.is_popular && (
+                  <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
+                    Popular
+                  </div>
+                )}
+                <CardHeader>
+                  <CardTitle>{plan.name}</CardTitle>
+                  <CardDescription>{plan.description}</CardDescription>
+                  <div className="mt-4">
+                    <span className="text-4xl font-bold">
+                      R$ {isYearly ? (plan.price_yearly / 12).toFixed(2) : plan.price_monthly.toFixed(2)}
+                    </span>
+                    <span className="text-muted-foreground ml-2">/mês</span>
+                    {isYearly && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        Faturado como R$ {plan.price_yearly.toFixed(2)} anualmente
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    {(typeof plan.features === 'string' ? plan.features.split(',') : plan.features)
+                      .map((feature, index) => (
                         <div key={index} className="flex items-start">
                           <CheckIcon className="h-5 w-5 text-green-500 mr-2 shrink-0" />
-                          <span>{feature}</span>
+                          <span>{feature.trim()}</span>
                         </div>
                       ))}
-                    </div>
-                  </CardContent>
-                  <CardFooter>
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={() => document.dispatchEvent(new CustomEvent('openLoginModal'))}
-                    >
-                      {plan.is_popular ? 'Comece Agora' : 'Assinar'}
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+                  </div>
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => document.dispatchEvent(new CustomEvent('openLoginModal'))}
+                  >
+                    {plan.is_popular ? 'Comece Agora' : 'Assinar'}
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
           </div>
         ) : (
           <div className="text-center p-8 border rounded-lg">

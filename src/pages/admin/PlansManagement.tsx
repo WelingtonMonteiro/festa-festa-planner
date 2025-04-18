@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { usePlanService } from '@/services/entityServices/planService';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { PricingSection } from '@/components/landing/PricingSection';
+import { Switch } from '@/components/ui/switch';
 
 const PlansManagement = () => {
   const [plans, setPlans] = useState<Plan[]>([]);
@@ -18,7 +19,8 @@ const PlansManagement = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [showArchived, setShowArchived] = useState(false);
   const [previewPlan, setPreviewPlan] = useState<Plan | null>(null);
-  
+  const [billingInterval, setBillingInterval] = useState<'monthly' | 'yearly'>('monthly');
+
   const planService = usePlanService();
   
   useEffect(() => {
@@ -245,39 +247,84 @@ const PlansManagement = () => {
           <CardContent>
             {previewPlan && (
               <div className="bg-background">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                  <Card 
-                    className={`w-full ${previewPlan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
-                  >
-                    {previewPlan.is_popular && (
-                      <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
-                        Popular
-                      </div>
-                    )}
-                    <CardHeader>
-                      <CardTitle>{previewPlan.name}</CardTitle>
-                      <CardDescription>{previewPlan.description}</CardDescription>
-                      <div className="mt-4">
-                        <span className="text-4xl font-bold">
-                          R$ {previewPlan.price_monthly.toFixed(2)}
+                <section className="py-20">
+                  <div className="container mx-auto px-4">
+                    <div className="text-center mb-16">
+                      <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                        Planos Simples e Transparentes
+                      </h2>
+                      <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                        Escolha o plano que melhor se adapta ao tamanho do seu negócio e necessidades
+                      </p>
+                      
+                      <div className="flex items-center justify-center gap-4 mt-8">
+                        <span className={`text-sm font-medium ${billingInterval === 'monthly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                          Mensal
                         </span>
-                        <span className="text-muted-foreground ml-2">/mês</span>
+                        <Switch
+                          checked={billingInterval === 'yearly'}
+                          onCheckedChange={(checked) => setBillingInterval(checked ? 'yearly' : 'monthly')}
+                          className="data-[state=checked]:bg-primary"
+                        />
+                        <span className="inline-flex items-center gap-1">
+                          <span className={`text-sm font-medium ${billingInterval === 'yearly' ? 'text-foreground' : 'text-muted-foreground'}`}>
+                            Anual
+                          </span>
+                          <span className="text-xs font-medium text-emerald-600 bg-emerald-100 px-1.5 py-0.5 rounded">
+                            17% OFF
+                          </span>
+                        </span>
                       </div>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        {(typeof previewPlan.features === 'string' 
-                          ? previewPlan.features.split(',') 
-                          : previewPlan.features
-                        ).map((feature, index) => (
-                          <div key={index} className="flex items-start">
-                            <span>• {feature.trim()}</span>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                      <Card 
+                        className={`w-full ${previewPlan.is_popular ? 'ring-2 ring-primary shadow-lg' : ''}`}
+                      >
+                        {previewPlan.is_popular && (
+                          <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-medium rounded-bl-md rounded-tr-md">
+                            Popular
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                        )}
+                        <CardHeader>
+                          <CardTitle>{previewPlan.name}</CardTitle>
+                          <CardDescription>{previewPlan.description}</CardDescription>
+                          <div className="mt-4">
+                            <span className="text-4xl font-bold">
+                              R$ {billingInterval === 'yearly' 
+                                ? (previewPlan.price_yearly / 12).toFixed(2) 
+                                : previewPlan.price_monthly.toFixed(2)}
+                            </span>
+                            <span className="text-muted-foreground ml-2">/mês</span>
+                            {billingInterval === 'yearly' && (
+                              <div className="text-sm text-muted-foreground mt-1">
+                                Faturado como R$ {previewPlan.price_yearly.toFixed(2)} anualmente
+                              </div>
+                            )}
+                          </div>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-2">
+                            {(typeof previewPlan.features === 'string' 
+                              ? previewPlan.features.split(',') 
+                              : previewPlan.features
+                            ).map((feature, index) => (
+                              <div key={index} className="flex items-start">
+                                <span className="mr-2">•</span>
+                                <span>{feature.trim()}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                        <CardFooter>
+                          <Button className="w-full">
+                            {previewPlan.is_popular ? 'Começar Agora' : 'Escolher Plano'}
+                          </Button>
+                        </CardFooter>
+                      </Card>
+                    </div>
+                  </div>
+                </section>
               </div>
             )}
           </CardContent>
