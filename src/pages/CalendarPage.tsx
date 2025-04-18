@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +14,7 @@ import { CalendarPlus, Clock, MapPin } from 'lucide-react';
 import { DayContentProps } from 'react-day-picker';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+
 const CalendarPage = () => {
   const {
     clients,
@@ -195,13 +197,28 @@ const CalendarPage = () => {
     }
     return null;
   };
-  return <div className="space-y-6">
+
+  // Custom day content component to avoid prop warnings
+  const CustomDayContent = (props: DayContentProps) => {
+    const { date: dayDate, ...rest } = props;
+    return (
+      <div className="relative h-9 w-9 p-0">
+        <div className="flex h-full w-full items-center justify-center">
+          {dayDate?.getDate()}
+        </div>
+        {dayWithEvents(dayDate)}
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Calendário de Eventos</h1>
         <Button onClick={() => {
-        setSelectedDay(new Date());
-        setDialogOpen(true);
-      }} className="bg-festa-primary hover:bg-festa-primary/90">
+          setSelectedDay(new Date());
+          setDialogOpen(true);
+        }} className="bg-festa-primary hover:bg-festa-primary/90">
           <CalendarPlus className="mr-2 h-4 w-4" />
           Novo Evento
         </Button>
@@ -215,14 +232,17 @@ const CalendarPage = () => {
             <CardDescription>Visualize e gerencie seus eventos</CardDescription>
           </CardHeader>
           <CardContent>
-            <Calendar mode="single" selected={date} onSelect={setDate} onDayClick={handleDayClick} locale={ptBR} components={{
-            DayContent: (props: DayContentProps) => <div className="relative h-9 w-9 p-0" {...props}>
-                    <div className="flex h-full w-full items-center justify-center">
-                      {props?.date?.getDate()}
-                    </div>
-                    {dayWithEvents(props?.date)}
-                  </div>
-          }} className="border py-0 my-0 mx-[100px] rounded-md" />
+            <Calendar 
+              mode="single" 
+              selected={date} 
+              onSelect={setDate} 
+              onDayClick={handleDayClick} 
+              locale={ptBR} 
+              components={{
+                DayContent: CustomDayContent
+              }} 
+              className="border py-0 my-0 mx-[100px] rounded-md" 
+            />
           </CardContent>
         </Card>
         
@@ -370,6 +390,8 @@ const CalendarPage = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </div>;
+    </div>
+  );
 };
+
 export default CalendarPage;
