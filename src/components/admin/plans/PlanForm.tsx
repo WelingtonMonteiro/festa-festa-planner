@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Plan } from "@/types/plans";
 import { Input } from "@/components/ui/input";
@@ -8,18 +7,18 @@ import { Label } from "@/components/ui/label";
 import { Plus, X } from "lucide-react";
 
 interface PlanFormProps {
-  initialData?: Partial<Plan>;
+  plan?: Partial<Plan> | null;
   onSubmit: (data: Omit<Plan, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
   onCancel: () => void;
 }
 
-export function PlanForm({ initialData, onSubmit, onCancel }: PlanFormProps) {
-  const [name, setName] = useState(initialData?.name || '');
-  const [description, setDescription] = useState(initialData?.description || '');
-  const [priceMonthly, setPriceMonthly] = useState(initialData?.price_monthly?.toString() || '');
-  const [priceYearly, setPriceYearly] = useState(initialData?.price_yearly?.toString() || '');
-  const [features, setFeatures] = useState<string[]>(initialData?.features || ['']);
-  const [isActive] = useState(initialData?.is_active ?? true);
+export function PlanForm({ plan, onSubmit, onCancel }: PlanFormProps) {
+  const [name, setName] = useState(plan?.name || '');
+  const [description, setDescription] = useState(plan?.description || '');
+  const [priceMonthly, setPriceMonthly] = useState(plan?.price_monthly?.toString() || '');
+  const [priceYearly, setPriceYearly] = useState(plan?.price_yearly?.toString() || '');
+  const [features, setFeatures] = useState<string[]>(plan?.features || ['']);
+  const [isActive] = useState(plan?.is_active ?? true);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,7 +128,7 @@ export function PlanForm({ initialData, onSubmit, onCancel }: PlanFormProps) {
           Cancelar
         </Button>
         <Button type="submit">
-          {initialData ? 'Atualizar Plano' : 'Criar Plano'}
+          {plan ? 'Atualizar Plano' : 'Criar Plano'}
         </Button>
       </div>
     </form>

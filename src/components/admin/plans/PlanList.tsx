@@ -5,21 +5,56 @@ import { Badge } from "@/components/ui/badge";
 import { Archive, Edit, Power, PowerOff } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/utils/format";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PlanListProps {
   plans: Plan[];
+  isLoading?: boolean;
   onEdit: (plan: Plan) => void;
   onToggleStatus: (id: string, status: boolean) => Promise<void>;
   onArchive: (id: string) => Promise<void>;
 }
 
-export function PlanList({ plans, onEdit, onToggleStatus, onArchive }: PlanListProps) {
+export function PlanList({ plans, isLoading = false, onEdit, onToggleStatus, onArchive }: PlanListProps) {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
   };
+  
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[1, 2, 3].map((item) => (
+          <Card key={item} className="opacity-70">
+            <CardHeader>
+              <Skeleton className="h-6 w-3/4" />
+              <Skeleton className="h-4 w-1/2 mt-2" />
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Skeleton className="h-5 w-1/3" />
+                <Skeleton className="h-5 w-1/3" />
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-full" />
+                  <Skeleton className="h-4 w-3/4" />
+                </div>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <div className="ml-auto flex gap-2">
+                <Skeleton className="h-8 w-8 rounded-md" />
+                <Skeleton className="h-8 w-8 rounded-md" />
+                <Skeleton className="h-8 w-8 rounded-md" />
+              </div>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  }
   
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -84,6 +119,21 @@ export function PlanList({ plans, onEdit, onToggleStatus, onArchive }: PlanListP
           </CardFooter>
         </Card>
       ))}
+      
+      {plans.length === 0 && (
+        <div className="col-span-full">
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center p-8">
+              <p className="text-center text-muted-foreground">
+                Nenhum plano encontrado.
+              </p>
+              <p className="text-center text-muted-foreground">
+                Crie um novo plano para começar.
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }
