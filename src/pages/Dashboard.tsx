@@ -183,7 +183,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => navigate('/kits-temas')}
+                  onClick={() => navigate('/kits-themes')}
                 >
                   Gerenciar temas
                 </Button>
@@ -193,7 +193,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum tema registrado
                 </p>
-                <Button variant="link" onClick={() => navigate('/kits-temas')}>
+                <Button variant="link" onClick={() => navigate('/kits-themes')}>
                   Adicionar temas
                 </Button>
               </div>
