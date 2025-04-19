@@ -70,6 +70,16 @@
     --input: 217 33% 17%;
     --ring: 262 83% 58%;
   }
+
+  /* Sidebar specific colors for light theme */
+  --sidebar-background: 220 16% 96%; /* #F3F4F6 */
+  --sidebar-foreground: 222 47% 11%; /* #0F172A */
+  --sidebar-border: 217 13% 91%; /* #E2E8F0 */
+  --sidebar-primary: 262 83% 58%; /* #7C3AED */
+  --sidebar-primary-foreground: 210 40% 98%;
+  --sidebar-accent: 199 95% 74%; /* #C7EEFF */
+  --sidebar-accent-foreground: 222 47% 11%;
+  --sidebar-ring: 262 83% 58%;
 }
 
 @layer base {
