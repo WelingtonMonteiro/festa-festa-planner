@@ -257,10 +257,10 @@ const KitsThems = () => {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Kits & Temas</h1>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <StorageModeIndicator />
           <StorageToggle />
-        </div>
+        </div> */}
       </div>
       
       <Tabs defaultValue="kits" className="w-full">
