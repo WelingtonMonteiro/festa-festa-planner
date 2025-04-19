@@ -4,6 +4,7 @@ import { Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
+import StorageToggle from '@/components/layout/StorageToggle';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -91,11 +92,32 @@ const Header = () => {
   const navigateToNotifications = () => {
     navigate('/notifications');
   };
+
+  const StorageModeIndicator = () => {
+    let label = 'Local Storage';
+    let description = apiUrl || '';
+    
+    if (dataSource === 'supabase') {
+      label = 'Supabase';
+    } else if (dataSource === 'apiRest') {
+      label = 'API REST';
+    }
+    
+    return (
+      <div className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-md">
+        {label}{description ? `: ${description}` : ''}
+      </div>
+    );
+  };
   
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-end bg-sidebar px-6 shadow-sm text-sidebar-foreground">
       <div className="mr-auto">
         <h2 className="text-xl font-medium capitalize">{formattedDate}</h2>
+         <div className="flex items-center gap-2">
+          <StorageModeIndicator />
+          <StorageToggle />
+        </div>
       </div>
       
       <div className="flex items-center gap-4">
