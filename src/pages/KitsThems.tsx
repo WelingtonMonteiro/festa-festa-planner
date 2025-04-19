@@ -4,7 +4,6 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } f
 import { useHandleContext } from '@/contexts/handleContext';
 import { Package, Tag } from 'lucide-react';
 import { toast } from 'sonner';
-import StorageToggle from '@/components/layout/StorageToggle';
 import KitList from '@/components/kits/KitList';
 import KitForm from '@/components/kits/KitForm';
 import ThemList from '@/components/thems/ThemList';
@@ -17,7 +16,7 @@ import { unifiedKitService, DataSource } from '@/services/unifiedKitService';
 import { unifiedThemService } from '@/services/unifiedThemService';
 
 const KitsThems = () => {
-  const { kits, thems, addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
+  const { addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
   const { storageType } = useStorage();
   const { apiType, apiUrl } = useApi();
   
@@ -235,32 +234,11 @@ const KitsThems = () => {
       }
     }
   };
-  
-  const StorageModeIndicator = () => {
-    let label = 'Local Storage';
-    let description = apiUrl || '';
-    
-    if (dataSource === 'supabase') {
-      label = 'Supabase';
-    } else if (dataSource === 'apiRest') {
-      label = 'API REST';
-    }
-    
-    return (
-      <div className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-md">
-        {label}{description ? `: ${description}` : ''}
-      </div>
-    );
-  };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Kits & Temas</h1>
-        {/* <div className="flex items-center gap-2">
-          <StorageModeIndicator />
-          <StorageToggle />
-        </div> */}
       </div>
       
       <Tabs defaultValue="kits" className="w-full">
