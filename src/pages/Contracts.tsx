@@ -3,21 +3,81 @@ import { useState, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Pagination } from '@/components/ui/pagination';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
 import ContractTemplates from '@/components/contracts/ContractTemplates';
 import ContractsList from '@/components/contracts/ContractsList';
 import ContractEditor from '@/components/contracts/ContractEditor';
 
 const Contracts = () => {
-  const { contracts, contractTemplates, total, page, limit, setPage, setLimit, refresh } = useHandleContext();
+  const { contracts, contractTemplates, contractsTotal, contractsPage, contractsLimit, setContractsPage, setContractsLimit, refreshContracts } = useHandleContext();
   const [activeTab, setActiveTab] = useState<string>('templates');
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   useEffect(() => {
     // Carregamos dados quando o componente montar
-    refresh();
-  }, []);  // Empty dependency array ensures this only runs once on mount
+    refreshContracts();
+  }, [refreshContracts]);  // Add refreshContracts to dependency array to prevent warnings
+
+  // Calculate total pages
+  const totalPages = Math.max(1, Math.ceil((contractsTotal || 0) / (contractsLimit || 10)));
+  
+  // Create an array of page numbers to display
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      // Show all pages if there are few
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show first page, last page, and pages around current
+      const currentPage = contractsPage || 1;
+      
+      // Always include first page
+      pages.push(1);
+      
+      // Calculate start and end of page range around current page
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+      
+      // Adjust if at edges
+      if (currentPage <= 2) {
+        endPage = Math.min(totalPages - 1, 4);
+      } else if (currentPage >= totalPages - 1) {
+        startPage = Math.max(2, totalPages - 3);
+      }
+      
+      // Add ellipsis after first page if needed
+      if (startPage > 2) {
+        pages.push(null); // null represents ellipsis
+      }
+      
+      // Add page numbers around current page
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i);
+      }
+      
+      // Add ellipsis before last page if needed
+      if (endPage < totalPages - 1) {
+        pages.push(null); // null represents ellipsis
+      }
+      
+      // Always include last page
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
 
   return (
     <div className="container py-6">
@@ -47,13 +107,41 @@ const Contracts = () => {
             setSelectedContract={setSelectedContract}
           />
           
-          {activeTab === 'contracts' && (
-            <div className="mt-6 flex justify-center">
-              <Pagination
-                currentPage={page}
-                totalPages={Math.ceil(total / limit)}
-                onPageChange={(newPage) => setPage(newPage)}
-              />
+          {activeTab === 'contracts' && totalPages > 1 && (
+            <div className="mt-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => contractsPage > 1 && setContractsPage(contractsPage - 1)}
+                      className={contractsPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                  
+                  {getPageNumbers().map((pageNumber, index) => (
+                    <PaginationItem key={index}>
+                      {pageNumber === null ? (
+                        <span className="px-4">...</span>
+                      ) : (
+                        <PaginationLink 
+                          isActive={pageNumber === contractsPage}
+                          onClick={() => setContractsPage(pageNumber)}
+                          className="cursor-pointer"
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      )}
+                    </PaginationItem>
+                  ))}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => contractsPage < totalPages && setContractsPage(contractsPage + 1)}
+                      className={contractsPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
           )}
         </TabsContent>

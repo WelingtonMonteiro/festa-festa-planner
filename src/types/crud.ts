@@ -1,3 +1,4 @@
+
 /* ---------------------------------------------
  * Interfaces e Tipos para Operações CRUD Genéricas
  * e Adaptação a diferentes provedores de dados

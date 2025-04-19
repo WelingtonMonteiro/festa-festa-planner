@@ -114,8 +114,10 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
 
   const previewClient = previewClientId ? clients.find(c => c.id === previewClientId) : undefined;
 
-  const filteredTemplates = contractTemplates.filter(template => 
-    template.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const safeContractTemplates = contractTemplates || [];
+  const filteredTemplates = safeContractTemplates.filter(template => 
+    template && template.name && 
+    template.name.toLowerCase().includes((searchQuery || '').toLowerCase())
   );
 
   return (
@@ -178,13 +180,18 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
               <CardContent>
                 <CardDescription className="line-clamp-3 h-12" 
                   dangerouslySetInnerHTML={{ 
-                    __html: template.content.replace(/<[^>]*>?/gm, ' ').substring(0, 100) + '...' 
+                    __html: template.content ? 
+                      template.content.replace(/<[^>]*>?/gm, ' ').substring(0, 100) + '...' :
+                      'Sem conteúdo'
                   }} 
                 />
               </CardContent>
               <CardFooter className="flex justify-between">
                 <span className="text-xs text-muted-foreground">
-                  Criado em: {format(new Date(template.createdAt), 'dd/MM/yyyy', { locale: ptBR })}
+                  Criado em: {template.createdAt ? 
+                    format(new Date(template.createdAt), 'dd/MM/yyyy', { locale: ptBR }) : 
+                    'Data desconhecida'
+                  }
                 </span>
                 <Button variant="outline" size="sm" onClick={() => handleEditTemplate(template)}>
                   <Edit className="mr-2 h-3 w-3" /> Editar
@@ -258,7 +265,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">Nenhum cliente</SelectItem>
-                  {clients.map(client => (
+                  {(clients || []).map(client => (
                     <SelectItem key={client.id} value={client.id}>
                       {client.nome}
                     </SelectItem>

@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Contract, ContractTemplate, Message } from '../../types';
 import { toast } from 'sonner';
 import { useCrud } from '@/hooks/useCrud';
+import { StorageType } from '@/types/crud';
 
 interface ContractsContextType {
   contracts: Contract[];
@@ -35,7 +36,7 @@ export const ContractsProvider: React.FC<{
 }> = ({ children, onAddMessage }) => {
   // Use CRUD hook for contracts
   const contractsCrud = useCrud<Contract>({
-    type: 'apiRest',
+    type: StorageType.ApiRest,
     config: {
       apiUrl: import.meta.env.VITE_APP_API_URL || '',
       endpoint: 'contracts'
@@ -44,7 +45,7 @@ export const ContractsProvider: React.FC<{
 
   // Use CRUD hook for templates
   const templatesCrud = useCrud<ContractTemplate>({
-    type: 'apiRest',
+    type: StorageType.ApiRest,
     config: {
       apiUrl: import.meta.env.VITE_APP_API_URL || '',
       endpoint: 'contractTemplates'
@@ -68,7 +69,8 @@ export const ContractsProvider: React.FC<{
     
     if (resultado) {
       toast.success(`${modelo.name} foi adicionado com sucesso.`);
-      return resultado;
+      // Return as non-Promise to match interface
+      return resultado as ContractTemplate;
     } else {
       toast.error('Erro ao adicionar modelo de contrato.');
       // Return a default template to prevent errors
@@ -120,7 +122,8 @@ export const ContractsProvider: React.FC<{
     
     if (resultado) {
       toast.success(`${contrato.title} foi adicionado com sucesso.`);
-      return resultado;
+      // Return as non-Promise to match interface
+      return resultado as Contract;
     } else {
       toast.error('Erro ao adicionar contrato.');
       // Return a default contract to prevent errors
