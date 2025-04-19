@@ -20,6 +20,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
+import { Client } from "@/types";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,11 +52,18 @@ const Clients = () => {
   const [busca, setBusca] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [clienteParaEditar, setClienteParaEditar] = useState(null);
+  const [clienteParaEditar, setClienteParaEditar] = useState<{
+    id: string;
+    nome: string;
+    telefone: string;
+    email: string;
+    endereco?: string;
+    ativo?: boolean;
+  } | null>(null);
 
   useEffect(() => {
     refresh();
-  }, [page, limit, refresh]);
+  }, [page, limit]);
 
   const clientesFiltrados = clients.filter(
     cliente =>
@@ -87,17 +96,10 @@ const Clients = () => {
       const cliente = clients.find(c => c.id === clienteId);
       if (cliente) {
         updateClients(clienteId, { ...cliente, ativo: false });
-        toast({
-          title: "Cliente desativado",
-          description: "O cliente foi marcado como inativo com sucesso.",
-        });
+        toast(`${cliente.nome} foi marcado como inativo com sucesso.`);
       }
     } catch (error) {
-      toast({
-        title: "Erro ao desativar",
-        description: "Ocorreu um erro ao desativar o cliente.",
-        variant: "destructive",
-      });
+      toast.error('Erro ao desativar o cliente.');
     }
   };
 
@@ -106,17 +108,10 @@ const Clients = () => {
       const cliente = clients.find(c => c.id === clienteId);
       if (cliente) {
         updateClients(clienteId, { ...cliente, ativo: true });
-        toast({
-          title: "Cliente reativado",
-          description: "O cliente foi reativado com sucesso.",
-        });
+        toast(`${cliente.nome} foi reativado com sucesso.`);
       }
     } catch (error) {
-      toast({
-        title: "Erro ao reativar",
-        description: "Ocorreu um erro ao reativar o cliente.",
-        variant: "destructive",
-      });
+      toast.error('Erro ao reativar o cliente.');
     }
   };
 
