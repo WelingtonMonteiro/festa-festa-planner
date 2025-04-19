@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+
+import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Contract, ContractTemplate, Client } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -57,7 +58,7 @@ const statusColors = {
 };
 
 const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListProps) => {
-  const { contracts, clients, contractTemplates, addContract, updateContract, removeContract } = useHandleContext();
+  const { contracts, clients, contractTemplates, addContract, updateContract, removeContract, refresh } = useHandleContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -70,8 +71,28 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
   const [contractToEdit, setContractToEdit] = useState<Contract | null>(null);
   const [contractToView, setContractToView] = useState<Contract | null>(null);
   const [contractToDelete, setContractToDelete] = useState<string | null>(null);
+  const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
 
-  const handleCreateContract = useCallback(() => {
+  // Filter contracts whenever contracts array, search query, or status filter changes
+  useEffect(() => {
+    if (contracts) {
+      const filtered = contracts.filter(contract => {
+        const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
+        return matchesSearch && matchesStatus;
+      });
+      setFilteredContracts(filtered);
+    }
+  }, [contracts, searchQuery, statusFilter]);
+
+  // Apply search or filter, but only refresh data when needed
+  useEffect(() => {
+    if (searchQuery === '' && statusFilter === 'all') {
+      refresh(); // Only refresh when we're not filtering/searching
+    }
+  }, [searchQuery, statusFilter, refresh]);
+
+  const handleCreateContract = useCallback(async () => {
     if (!newContractTitle.trim()) {
       toast.error('O título do contrato não pode estar vazio');
       return;
@@ -98,26 +119,19 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       templateId: newContractTemplate !== 'none' ? newContractTemplate : undefined
     };
 
-    addContract(contractData);
+    const newContract = await addContract(contractData);
     
     setNewContractTitle('');
     setNewContractClient('');
     setNewContractTemplate('');
     setIsCreateDialogOpen(false);
     
-    setTimeout(() => {
-      const newContract = contracts.find(c => 
-        c.title === contractData.title && 
-        c.clientId === contractData.clientId
-      );
-      
-      if (newContract) {
-        setSelectedContract(newContract.id);
-        setContractToEdit(newContract);
-        setIsEditDialogOpen(true);
-      }
-    }, 100);
-  }, [newContractTitle, newContractClient, newContractTemplate, contractTemplates, addContract, contracts, setSelectedContract]);
+    if (newContract) {
+      setSelectedContract(newContract.id);
+      setContractToEdit(newContract);
+      setIsEditDialogOpen(true);
+    }
+  }, [newContractTitle, newContractClient, newContractTemplate, contractTemplates, addContract, setSelectedContract]);
 
   const handleViewContract = useCallback((contract: Contract) => {
     setContractToView(contract);
@@ -131,9 +145,9 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
     setIsEditDialogOpen(true);
   }, [setSelectedContract]);
 
-  const handleDeleteContract = useCallback(() => {
+  const handleDeleteContract = useCallback(async () => {
     if (contractToDelete) {
-      removeContract(contractToDelete);
+      await removeContract(contractToDelete);
       setContractToDelete(null);
       setIsDeleteDialogOpen(false);
 
@@ -143,7 +157,7 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
     }
   }, [contractToDelete, removeContract, selectedContract, setSelectedContract]);
 
-  const handleCopyContract = useCallback((contract: Contract) => {
+  const handleCopyContract = useCallback(async (contract: Contract) => {
     const copyData = {
       title: `${contract.title} (Cópia)`,
       content: contract.content,
@@ -151,13 +165,13 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       status: 'draft' as const
     };
 
-    addContract(copyData);
+    await addContract(copyData);
     toast.success(`Contrato "${contract.title}" copiado com sucesso`);
   }, [addContract]);
 
-  const handleSaveContract = useCallback((content: string) => {
+  const handleSaveContract = useCallback(async (content: string) => {
     if (contractToEdit) {
-      updateContract(contractToEdit.id, { content });
+      await updateContract(contractToEdit.id, { content });
       setIsEditDialogOpen(false);
       setContractToEdit(null);
       toast.success('Contrato salvo com sucesso');
@@ -167,12 +181,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
   const getClientById = (id: string): Client | undefined => {
     return clients.find(client => client.id === id);
   };
-
-  const filteredContracts = contracts.filter(contract => {
-    const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
   return (
     <>

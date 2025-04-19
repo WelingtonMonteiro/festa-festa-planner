@@ -106,6 +106,15 @@ export const useHandleContext = () => {
     sendContractToClient: contracts.sendContractToClient,
     signContract: contracts.signContract,
     
+    // Add contract pagination props
+    contractsTotal: contracts.total,
+    contractsPage: contracts.page,
+    contractsLimit: contracts.limit,
+    contractsLoading: contracts.loading,
+    setContractsPage: contracts.setPage,
+    setContractsLimit: contracts.setLimit,
+    refreshContracts: contracts.refresh,
+    
     setApiUrl: settings.setApiUrl,
     updateIntegration: settings.updateIntegration,
     addIntegration: settings.addIntegration,
