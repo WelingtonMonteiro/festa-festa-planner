@@ -20,7 +20,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { toast } from "@/components/ui/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -30,8 +29,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Client } from "@/types";
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from "@/components/ui/pagination";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { useEffect } from "react";
 
 const Clients = () => {
   const { 
@@ -39,18 +45,16 @@ const Clients = () => {
     total, page, limit, loading,
     setPage, setLimit, refresh 
   } = useHandleContext();
+  
   const navigate = useNavigate();
   const [busca, setBusca] = useState("");
   const [dialogAberto, setDialogAberto] = useState(false);
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [clienteParaEditar, setClienteParaEditar] = useState<{
-    id: string;
-    nome: string;
-    telefone: string;
-    email: string;
-    endereco?: string;
-    ativo?: boolean;
-  } | null>(null);
+  const [clienteParaEditar, setClienteParaEditar] = useState(null);
+
+  useEffect(() => {
+    refresh();
+  }, [page, limit, refresh]);
 
   const clientesFiltrados = clients.filter(
     cliente =>
@@ -121,6 +125,11 @@ const Clients = () => {
     if (!open) {
       setClienteParaEditar(null);
     }
+  };
+
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
   };
 
   return (

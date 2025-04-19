@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext } from 'react';
 import { Client, Event } from '@/types';
 import { toast } from 'sonner';
