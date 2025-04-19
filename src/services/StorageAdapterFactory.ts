@@ -1,22 +1,22 @@
 
 import { useStorage } from "@/contexts/storageContext";
 import { useApi } from "@/contexts/apiContext";
-import { StorageAdapter, StorageAdapterConfig, StorageAdapterFactory } from "@/types/crud";
+import { StorageAdapter, StorageAdapterConfig, StorageAdapterFactory, StorageType } from "@/types/crud";
 import { ApiRestAdapter } from "./adapters/ApiRestAdapter";
 import { LocalStorageAdapter } from "./adapters/LocalStorageAdapter";
 import { SupabaseAdapter } from "./adapters/SupabaseAdapter";
 
 export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
-  private storageType: 'localStorage' | 'supabase' | 'apiRest';
+  private storageType: StorageType;
   private apiUrl?: string;
 
-  constructor(storageType: 'localStorage' | 'supabase' | 'apiRest', apiUrl?: string) {
+  constructor(storageType: StorageType, apiUrl?: string) {
     this.storageType = storageType;
     this.apiUrl = apiUrl;
     console.log("StorageAdapterFactory created with storage type:", storageType, "and API URL:", apiUrl);
   }
 
-  getCurrentStorageType(): 'localStorage' | 'supabase' | 'apiRest' {
+  getCurrentStorageType(): StorageType {
     return this.storageType;
   }
 
@@ -28,19 +28,19 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
     let adaptedConfig: StorageAdapterConfig;
     
     // Determinar o endpoint/storageKey/tableName 
-    if (this.storageType === 'apiRest') {
+    if (this.storageType === StorageType.ApiRest) {
       let resourceIdentifier: string;
       
-      if (config.type === 'supabase') {
+      if (config.type === StorageType.Supabase) {
         resourceIdentifier = config.config.tableName;
-      } else if (config.type === 'localStorage') {
+      } else if (config.type === StorageType.LocalStorage) {
         resourceIdentifier = config.config.storageKey;
       } else { // apiRest
         resourceIdentifier = config.config.endpoint;
       }
       
       adaptedConfig = {
-        type: 'apiRest',
+        type: StorageType.ApiRest,
         config: { 
           apiUrl: this.apiUrl || '',
           endpoint: resourceIdentifier
@@ -53,39 +53,39 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
 
     // Criar o adaptador com base no tipo de armazenamento atual
     switch (this.storageType) {
-      case 'localStorage': 
-        const storageKey = adaptedConfig.type === 'localStorage' 
+      case StorageType.LocalStorage: 
+        const storageKey = adaptedConfig.type === StorageType.LocalStorage 
           ? adaptedConfig.config.storageKey 
-          : adaptedConfig.type === 'supabase' 
+          : adaptedConfig.type === StorageType.Supabase 
             ? adaptedConfig.config.tableName 
             : adaptedConfig.config.endpoint;
             
         console.log(`Criando LocalStorageAdapter com chave: ${storageKey}`);
         return new LocalStorageAdapter<T>({ storageKey });
         
-      case 'supabase':
-        const tableName = adaptedConfig.type === 'supabase' 
+      case StorageType.Supabase:
+        const tableName = adaptedConfig.type === StorageType.Supabase 
           ? adaptedConfig.config.tableName 
-          : adaptedConfig.type === 'localStorage' 
+          : adaptedConfig.type === StorageType.LocalStorage 
             ? adaptedConfig.config.storageKey 
             : adaptedConfig.config.endpoint;
             
         console.log(`Criando SupabaseAdapter com tabela: ${tableName}`);
         return new SupabaseAdapter<T>({ tableName });
         
-      case 'apiRest':
+      case StorageType.ApiRest:
         if (!this.apiUrl) {
           console.warn('URL da API não configurada, usando localStorage como fallback');
-          return new LocalStorageAdapter<T>({ storageKey: adaptedConfig.type === 'localStorage' 
+          return new LocalStorageAdapter<T>({ storageKey: adaptedConfig.type === StorageType.LocalStorage 
             ? adaptedConfig.config.storageKey 
-            : adaptedConfig.type === 'supabase' 
+            : adaptedConfig.type === StorageType.Supabase 
               ? adaptedConfig.config.tableName 
               : adaptedConfig.config.endpoint });
         }
         
-        const endpoint = adaptedConfig.type === 'apiRest' 
+        const endpoint = adaptedConfig.type === StorageType.ApiRest 
           ? adaptedConfig.config.endpoint 
-          : adaptedConfig.type === 'supabase' 
+          : adaptedConfig.type === StorageType.Supabase 
             ? adaptedConfig.config.tableName 
             : adaptedConfig.config.storageKey;
             
@@ -104,8 +104,9 @@ export const useStorageAdapterFactory = (): StorageAdapterFactory => {
   const { apiType, apiUrl } = useApi();
   
   // Determina o tipo de armazenamento com base nas configurações
-  const currentStorageType: 'localStorage' | 'supabase' | 'apiRest' = 
-    apiType === 'rest' ? 'apiRest' : storageType;
+  const currentStorageType: StorageType = 
+    apiType === 'rest' ? StorageType.ApiRest : 
+    storageType === 'supabase' ? StorageType.Supabase : StorageType.LocalStorage;
   
   console.log("useStorageAdapterFactory: currentStorageType =", currentStorageType, "apiType =", apiType, "apiUrl =", apiUrl);
   

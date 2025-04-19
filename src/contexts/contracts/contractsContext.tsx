@@ -58,27 +58,30 @@ export const ContractsProvider: React.FC<{
     templatesCrud.refresh();
   }, []);
   
-  const adicionarModeloContrato = async (modelo: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const adicionarModeloContrato = (modelo: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>): ContractTemplate => {
     const novoModelo: Omit<ContractTemplate, 'id'> = {
       ...modelo,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     
-    const resultado = await templatesCrud.create(novoModelo);
+    // Start creating the template and return a default template immediately
+    const defaultTemplate: ContractTemplate = {
+      ...novoModelo,
+      id: `pending-${Date.now()}`
+    } as ContractTemplate;
     
-    if (resultado) {
-      toast.success(`${modelo.name} foi adicionado com sucesso.`);
-      // Return as non-Promise to match interface
-      return resultado as ContractTemplate;
-    } else {
-      toast.error('Erro ao adicionar modelo de contrato.');
-      // Return a default template to prevent errors
-      return {
-        ...novoModelo,
-        id: `error-${Date.now()}`
-      } as ContractTemplate;
-    }
+    // Create in the background
+    templatesCrud.create(novoModelo).then(resultado => {
+      if (resultado) {
+        toast.success(`${modelo.name} foi adicionado com sucesso.`);
+      } else {
+        toast.error('Erro ao adicionar modelo de contrato.');
+      }
+    });
+    
+    // Return immediately for interface compatibility
+    return defaultTemplate;
   };
   
   const atualizarModeloContrato = async (id: string, modeloAtualizado: Partial<ContractTemplate>) => {
@@ -111,27 +114,30 @@ export const ContractsProvider: React.FC<{
     }
   };
   
-  const adicionarContrato = async (contrato: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const adicionarContrato = (contrato: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>): Contract => {
     const novoContrato: Omit<Contract, 'id'> = {
       ...contrato,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     
-    const resultado = await contractsCrud.create(novoContrato);
+    // Create a default contract to return immediately
+    const defaultContract: Contract = {
+      ...novoContrato,
+      id: `pending-${Date.now()}`
+    } as Contract;
     
-    if (resultado) {
-      toast.success(`${contrato.title} foi adicionado com sucesso.`);
-      // Return as non-Promise to match interface
-      return resultado as Contract;
-    } else {
-      toast.error('Erro ao adicionar contrato.');
-      // Return a default contract to prevent errors
-      return {
-        ...novoContrato,
-        id: `error-${Date.now()}`
-      } as Contract;
-    }
+    // Create in the background
+    contractsCrud.create(novoContrato).then(resultado => {
+      if (resultado) {
+        toast.success(`${contrato.title} foi adicionado com sucesso.`);
+      } else {
+        toast.error('Erro ao adicionar contrato.');
+      }
+    });
+    
+    // Return immediately for interface compatibility
+    return defaultContract;
   };
   
   const atualizarContrato = async (id: string, contratoAtualizado: Partial<Contract>) => {

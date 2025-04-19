@@ -1,6 +1,5 @@
-
 import { Client } from "@/types";
-import { CrudOperations } from "@/types/crud";
+import { CrudOperations, StorageType } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 import { useApi } from "@/contexts/apiContext";
@@ -21,7 +20,7 @@ export const useClientService = (): ClientService => {
   const { apiUrl } = useApi();
   
   const crudService = createCrudService<Client>(factory, {
-    type: 'apiRest',
+    type: StorageType.ApiRest,
     config: { 
       apiUrl: apiUrl || '',
       endpoint: 'clients' 

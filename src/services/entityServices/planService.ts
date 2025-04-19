@@ -1,6 +1,6 @@
 
 import { Plan } from "@/types/plans";
-import { CrudOperations, PaginatedResponse } from "@/types/crud";
+import { CrudOperations, PaginatedResponse, StorageType } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 import { useApi } from "@/contexts/apiContext";
@@ -14,7 +14,7 @@ export const usePlanService = (): CrudOperations<Plan> & {
   const { apiUrl } = useApi();
   
   const crudService = createCrudService<Plan>(factory, {
-    type: 'apiRest',
+    type: StorageType.ApiRest,
     config: { 
       apiUrl: apiUrl || '',
       endpoint: 'plans' 

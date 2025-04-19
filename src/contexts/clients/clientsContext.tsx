@@ -1,8 +1,10 @@
+
 import React, {createContext, useContext} from 'react';
 import {Client, Event} from '@/types';
 import {toast} from 'sonner';
 import {useClientService} from '@/services/entityServices/clientService';
 import {useCrud} from '@/hooks/useCrud';
+import { StorageType } from '@/types/crud';
 
 interface ClientsContextType {
     clients: Client[];
@@ -25,7 +27,7 @@ export const ClientsProvider: React.FC<{
     events: Event[]
 }> = ({children, events}) => {
     const crud = useCrud<Client>({
-        type: 'apiRest',
+        type: StorageType.ApiRest,
         config: {
             apiUrl: import.meta.env.VITE_APP_API_URL || '',
             endpoint: 'clients'

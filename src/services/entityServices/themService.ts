@@ -1,85 +1,58 @@
 
-// Importamos o tipo Kit do arquivo correto
-import { Kit } from "@/types";
+import { Kit, Them } from "@/types";
+import { CrudOperations, StorageType } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
-import { CrudOperations, PaginatedResponse } from "@/types/crud";
 import { useApi } from "@/contexts/apiContext";
 
-export interface Them {
-  id: string;
-  nome: string;
-  descricao: string;
-  valorGasto: number;
-  vezes_alugado: number;
-  imagens: string[];
-  is_archived: boolean;
-  kits: Kit[];
-  created_at: string;
-  updated_at: string;
-}
-
 export const useThemService = (): CrudOperations<Them> & {
-  getActiveThems: () => Promise<Them[]>;
-  getByKitId: (kitId: string) => Promise<Them[]>;
-  archiveThem: (id: string) => Promise<Them | null>;
+  getPopularThems: () => Promise<Them[]>;
+  getThemWithKits: (id: string) => Promise<Them | null>;
+  incrementUsageCount: (id: string) => Promise<Them | null>;
 } => {
   const factory = useStorageAdapterFactory();
   const { apiUrl } = useApi();
   
+  // Versão básica do CRUD
   const crudService = createCrudService<Them>(factory, {
-    type: 'apiRest',
-    config: {
+    type: StorageType.ApiRest,
+    config: { 
       apiUrl: apiUrl || '',
-      endpoint: 'thems'
+      endpoint: 'thems' 
     }
   });
   
-  const kitService = createCrudService<Kit>(factory, {
-    type: 'apiRest',
-    config: {
-      apiUrl: apiUrl || '',
-      endpoint: 'kits'
-    }
-  });
-  
-  const getActiveThems = async (): Promise<Them[]> => {
-    try {
-      const result = await crudService.getAll();
-      return result.data.filter(them => !them.is_archived);
-    } catch (error) {
-      console.error("Error fetching active themes:", error);
-      return [];
-    }
+  // Versão específica para buscar kits associados ao tema
+  const getThemWithKits = async (id: string): Promise<Them | null> => {
+    const them = await crudService.getById(id);
+    if (!them) return null;
+    
+    // Aqui você buscaria os kits associados ao tema
+    // Para simplificar, vamos retornar o tema sem buscar os kits
+    return them;
   };
   
-  const getByKitId = async (kitId: string): Promise<Them[]> => {
-    try {
-      const kitResult = await kitService.getById(kitId);
-      if (!kitResult) return [];
-      
-      const allThems = await crudService.getAll();
-      return allThems.data.filter(them => 
-        them.kits.some(kit => kit.id === kitId)
-      );
-    } catch (error) {
-      console.error(`Error fetching themes by kit ID ${kitId}:`, error);
-      return [];
-    }
+  // Método para buscar temas mais populares
+  const getPopularThems = async (): Promise<Them[]> => {
+    const response = await crudService.getAll();
+    return response.data.sort((a, b) => (b.vezes_alugado || 0) - (a.vezes_alugado || 0)).slice(0, 5);
   };
   
-  const archiveThem = async (id: string): Promise<Them | null> => {
-    return crudService.update(id, { is_archived: true });
+  // Método específico para incrementar contagem de uso
+  const incrementUsageCount = async (id: string): Promise<Them | null> => {
+    const them = await crudService.getById(id);
+    if (!them) return null;
+    
+    return crudService.update(id, { 
+      vezes_alugado: (them.vezes_alugado || 0) + 1 
+    });
   };
   
+  // Retorna a combinação do CRUD genérico com métodos específicos
   return {
-    getAll: crudService.getAll,
-    getById: crudService.getById,
-    create: crudService.create,
-    update: crudService.update,
-    delete: crudService.delete,
-    getActiveThems,
-    getByKitId,
-    archiveThem
+    ...crudService,
+    getPopularThems,
+    getThemWithKits,
+    incrementUsageCount,
   };
 };

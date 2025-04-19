@@ -1,6 +1,6 @@
 
 import { Kit } from "@/types";
-import { CrudOperations } from "@/types/crud";
+import { CrudOperations, StorageType } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
 
@@ -10,7 +10,7 @@ export const useKitService = (): CrudOperations<Kit> & {
 } => {
   const factory = useStorageAdapterFactory();
   const crudService = createCrudService<Kit>(factory, {
-    type: 'supabase',
+    type: StorageType.Supabase,
     config: { tableName: 'kits' }
   });
 
