@@ -1,16 +1,15 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Search, Plus } from 'lucide-react';
 import { toast } from 'sonner';
-import ContractEditor from './ContractEditor';
 import TemplatesList from './templates/TemplatesList';
-import VariableForm from './templates/VariableForm';
 import CreateTemplateDialog from './templates/CreateTemplateDialog';
 import DeleteTemplateDialog from './templates/DeleteTemplateDialog';
+import EditTemplateDialog from './templates/EditTemplateDialog';
+import VariableDialog from './templates/VariableDialog';
 
 export interface TemplateVariable {
   name: string;
@@ -172,54 +171,40 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
         onDeleteTemplate={handleDeleteTemplate}
       />
 
-      {templateToEdit && (
-        <Dialog open={isEditDialogOpen} onOpenChange={(open) => {
+      <EditTemplateDialog
+        isOpen={isEditDialogOpen}
+        onOpenChange={(open) => {
           setIsEditDialogOpen(open);
           if (!open) {
             setTemplateToEdit(null);
             setCurrentVariables([]);
           }
-        }}>
-          <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
-            <ContractEditor
-              isOpen={isEditDialogOpen}
-              onOpenChange={setIsEditDialogOpen}
-              template={templateToEdit}
-              onSave={handleSaveTemplate}
-              onEditVariables={() => setIsVariableDialogOpen(true)}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+        }}
+        template={templateToEdit}
+        onSave={handleSaveTemplate}
+        onEditVariables={() => setIsVariableDialogOpen(true)}
+      />
 
-      {templateToEdit && (
-        <Dialog open={isVariableDialogOpen} onOpenChange={setIsVariableDialogOpen}>
-          <DialogContent>
-            <VariableForm 
-              onSubmit={handleAddVariable}
-              onCancel={() => {
-                setIsVariableDialogOpen(false);
-                setEditingVariableIndex(null);
-              }}
-              currentVariables={currentVariables}
-              editingVariable={editingVariableIndex !== null ? currentVariables[editingVariableIndex] : undefined}
-              onEditVariable={(index) => {
-                setEditingVariableIndex(index);
-              }}
-              onDeleteVariable={(index) => {
-                const newVariables = currentVariables.filter((_, i) => i !== index);
-                setCurrentVariables(newVariables);
-                if (templateToEdit) {
-                  updateContractTemplate(templateToEdit.id, {
-                    variables: JSON.stringify(newVariables)
-                  });
-                }
-                toast.success('Variável removida');
-              }}
-            />
-          </DialogContent>
-        </Dialog>
-      )}
+      <VariableDialog
+        isOpen={isVariableDialogOpen}
+        onOpenChange={setIsVariableDialogOpen}
+        onSubmit={handleAddVariable}
+        currentVariables={currentVariables}
+        editingVariable={editingVariableIndex !== null ? currentVariables[editingVariableIndex] : undefined}
+        onEditVariable={(index) => {
+          setEditingVariableIndex(index);
+        }}
+        onDeleteVariable={(index) => {
+          const newVariables = currentVariables.filter((_, i) => i !== index);
+          setCurrentVariables(newVariables);
+          if (templateToEdit) {
+            updateContractTemplate(templateToEdit.id, {
+              variables: JSON.stringify(newVariables)
+            });
+          }
+          toast.success('Variável removida');
+        }}
+      />
     </>
   );
 };
