@@ -14,7 +14,7 @@ import ContractTemplates from '@/components/contracts/ContractTemplates';
 import ContractsList from '@/components/contracts/ContractsList';
 
 const Contracts = () => {
-  const { contracts, contractTemplates, contractsTotal, contractsPage, contractsLimit, setContractsPage, setContractsLimit, refreshContracts } = useHandleContext();
+  const { contractsTotal, contractsPage, contractsLimit, setContractsPage, setContractsLimit, refreshContracts } = useHandleContext();
   const [activeTab, setActiveTab] = useState<string>('templates');
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
@@ -27,7 +27,7 @@ const Contracts = () => {
       refreshContracts();
       setIsInitialLoad(false);
     }
-  }, [refreshContracts, isInitialLoad]);  
+  }, [isInitialLoad, refreshContracts]);  
 
   // Calculate total pages
   const totalPages = Math.max(1, Math.ceil((contractsTotal || 0) / (contractsLimit || 10)));
@@ -109,6 +109,7 @@ const Contracts = () => {
           <ContractTemplates 
             selectedTemplate={selectedTemplate} 
             setSelectedTemplate={setSelectedTemplate}
+            isActive={activeTab === 'templates'}
           />
         </TabsContent>
 
@@ -116,6 +117,7 @@ const Contracts = () => {
           <ContractsList 
             selectedContract={selectedContract} 
             setSelectedContract={setSelectedContract}
+            isActive={activeTab === 'contracts'}
           />
           
           {activeTab === 'contracts' && totalPages > 1 && (

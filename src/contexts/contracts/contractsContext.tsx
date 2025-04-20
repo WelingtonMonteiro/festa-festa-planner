@@ -51,15 +51,29 @@ export const ContractsProvider: React.FC<{
       endpoint: 'contractTemplates'
     }
   });
+
+  // Estado para controlar quando os dados já foram inicialmente carregados
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
   
   // Memoize refresh function to prevent unnecessary rerenders
   const refreshData = useCallback(async () => {
-    console.log('ContractsContext: Atualizando dados');
-    await Promise.all([
-      contractsCrud.refresh(),
-      templatesCrud.refresh()
-    ]);
-  }, [contractsCrud, templatesCrud]);
+    // Evitar chamadas em loop se os dados já estiverem carregados
+    if (!initialDataLoaded) {
+      console.log('ContractsContext: Carregando dados iniciais');
+      
+      try {
+        await Promise.all([
+          contractsCrud.refresh(),
+          templatesCrud.refresh()
+        ]);
+        setInitialDataLoaded(true);
+      } catch (error) {
+        console.error('Erro ao carregar dados iniciais:', error);
+      }
+    } else {
+      console.log('ContractsContext: Dados já carregados, ignorando refresh automático');
+    }
+  }, [contractsCrud, templatesCrud, initialDataLoaded]);
 
   // Load data only once on initial mount
   useEffect(() => {
@@ -67,7 +81,7 @@ export const ContractsProvider: React.FC<{
     let isMounted = true;
 
     const loadInitialData = async () => {
-      if (isMounted) {
+      if (isMounted && !initialDataLoaded) {
         await refreshData();
       }
     };
@@ -77,7 +91,20 @@ export const ContractsProvider: React.FC<{
     return () => {
       isMounted = false;
     };
-  }, [refreshData]);
+  }, [refreshData, initialDataLoaded]);
+  
+  // Reset do estado de "initialDataLoaded" quando mudar a página ou limite
+  const forceRefresh = useCallback(async () => {
+    console.log('ContractsContext: Forçando atualização de dados');
+    try {
+      await Promise.all([
+        contractsCrud.refresh(),
+        templatesCrud.refresh()
+      ]);
+    } catch (error) {
+      console.error('Erro ao forçar atualização de dados:', error);
+    }
+  }, [contractsCrud, templatesCrud]);
   
   const adicionarModeloContrato = async (modelo: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContractTemplate> => {
     const novoModelo: Omit<ContractTemplate, 'id'> = {
@@ -289,7 +316,7 @@ export const ContractsProvider: React.FC<{
       loading: contractsCrud.loading,
       setPage: handleSetPage,
       setLimit: handleSetLimit,
-      refresh: refreshData
+      refresh: forceRefresh
     }}>
       {children}
     </ContractsContext.Provider>

@@ -38,6 +38,7 @@ import ContractView from './ContractView';
 interface ContractsListProps {
   selectedContract: string | null;
   setSelectedContract: (id: string | null) => void;
+  isActive?: boolean;
 }
 
 const statusLabels = {
@@ -56,7 +57,7 @@ const statusColors = {
   'cancelled': 'bg-red-100 text-red-800 hover:bg-red-200'
 };
 
-const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListProps) => {
+const ContractsList = ({ selectedContract, setSelectedContract, isActive = false }: ContractsListProps) => {
   const { contracts, clients, contractTemplates, addContract, updateContract, removeContract } = useHandleContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -73,10 +74,8 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
   const [shouldRefresh, setShouldRefresh] = useState(false);
 
-  // Filter contracts whenever contracts array, search query, or status filter changes
   useEffect(() => {
     if (contracts) {
-      console.log('ContractsList: Filtrando contratos', contracts.length);
       const filtered = contracts.filter(contract => {
         const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
@@ -125,7 +124,7 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
         setSelectedContract(newContract.id);
         setContractToEdit(newContract);
         setIsEditDialogOpen(true);
-        setShouldRefresh(true); // Marcar para atualizar após edição
+        setShouldRefresh(true);
       }
     } catch (error) {
       console.error('Erro ao criar contrato:', error);
@@ -173,7 +172,7 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
     try {
       await addContract(copyData);
       toast.success(`Contrato "${contract.title}" copiado com sucesso`);
-      setShouldRefresh(true); // Marcar para atualizar após cópia
+      setShouldRefresh(true);
     } catch (error) {
       console.error('Erro ao copiar contrato:', error);
       toast.error('Ocorreu um erro ao copiar o contrato');
@@ -187,7 +186,7 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
         setIsEditDialogOpen(false);
         setContractToEdit(null);
         toast.success('Contrato salvo com sucesso');
-        setShouldRefresh(true); // Marcar para atualizar após salvar
+        setShouldRefresh(true);
       } catch (error) {
         console.error('Erro ao salvar contrato:', error);
         toast.error('Ocorreu um erro ao salvar o contrato');

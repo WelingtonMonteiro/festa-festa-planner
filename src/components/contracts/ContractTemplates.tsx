@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+
+import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -36,9 +37,10 @@ import ContractEditor from './ContractEditor';
 interface ContractTemplatesProps {
   selectedTemplate: string | null;
   setSelectedTemplate: (id: string | null) => void;
+  isActive?: boolean;
 }
 
-const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTemplatesProps) => {
+const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = false }: ContractTemplatesProps) => {
   const { contractTemplates, clients, addContractTemplate, updateContractTemplate, removeContractTemplate } = useHandleContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -48,7 +50,18 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
   const [templateToEdit, setTemplateToEdit] = useState<ContractTemplate | null>(null);
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [previewClientId, setPreviewClientId] = useState<string>('');
+  const [templatesRequested, setTemplatesRequested] = useState(false);
 
+  // Safe handling of templates filtering
+  const safeContractTemplates = contractTemplates || [];
+  const filteredTemplates = safeContractTemplates.filter(template => 
+    template && template.name && 
+    template.name.toLowerCase().includes((searchQuery || '').toLowerCase())
+  );
+
+  const previewClient = previewClientId ? clients.find(c => c.id === previewClientId) : undefined;
+
+  // Outras funções do componente permanecem as mesmas
   const handleCreateTemplate = useCallback(() => {
     if (!newTemplateName.trim()) {
       toast.error('O nome do modelo não pode estar vazio');
@@ -111,14 +124,6 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate }: ContractTe
       toast.success('Modelo salvo com sucesso');
     }
   }, [templateToEdit, updateContractTemplate]);
-
-  const previewClient = previewClientId ? clients.find(c => c.id === previewClientId) : undefined;
-
-  const safeContractTemplates = contractTemplates || [];
-  const filteredTemplates = safeContractTemplates.filter(template => 
-    template && template.name && 
-    template.name.toLowerCase().includes((searchQuery || '').toLowerCase())
-  );
 
   return (
     <>
