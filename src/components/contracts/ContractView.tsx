@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Contract, Client } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -43,6 +43,16 @@ const statusColors = {
 const ContractView = ({ contract, client, isOpen, onOpenChange }: ContractViewProps) => {
   const { signContract, sendContractToClient } = useHandleContext();
   const [isSignDialogOpen, setIsSignDialogOpen] = useState(false);
+  const [processedContent, setProcessedContent] = useState<string>(contract?.content || '');
+  
+  // Processa o conteúdo do contrato para substituir variáveis pelos dados do cliente
+  useEffect(() => {
+    if (contract && client) {
+      setProcessedContent(replaceVariables(contract.content, client));
+    } else {
+      setProcessedContent(contract?.content || '');
+    }
+  }, [contract, client]);
   
   const handleSign = () => {
     // In a real implementation, this would involve a digital signature process
@@ -80,7 +90,7 @@ const ContractView = ({ contract, client, isOpen, onOpenChange }: ContractViewPr
               <p>${client ? `Cliente: ${client.nome}` : ''}</p>
               <p>Data: ${format(new Date(contract.createdAt), 'dd/MM/yyyy', { locale: ptBR })}</p>
             </div>
-            ${contract.content}
+            ${processedContent}
             ${contract.signatureUrl ? `<div class="signature">${contract.signatureUrl}</div>` : ''}
           </body>
         </html>
@@ -118,7 +128,7 @@ const ContractView = ({ contract, client, isOpen, onOpenChange }: ContractViewPr
           <div className="flex-1 overflow-y-auto my-4 border p-6 bg-white rounded-md">
             <div 
               className="contract-content prose prose-sm max-w-none" 
-              dangerouslySetInnerHTML={{ __html: contract.content }} 
+              dangerouslySetInnerHTML={{ __html: processedContent }} 
             />
             
             {contract.signatureUrl && (
@@ -179,6 +189,60 @@ const ContractView = ({ contract, client, isOpen, onOpenChange }: ContractViewPr
       )}
     </>
   );
+};
+
+// Helper function to replace variables with actual data
+const replaceVariables = (text: string, client: Client) => {
+  if (!text) return '';
+
+  const today = new Date();
+  
+  const replacements: Record<string, string> = {
+    '{cliente.nome}': client.nome || '',
+    '{cliente.email}': client.email || '',
+    '{cliente.telefone}': client.telefone || '',
+    '{cliente.endereco}': client.endereco || '',
+    '{client.nome}': client.nome || '',
+    '{client.email}': client.email || '',
+    '{client.telefone}': client.telefone || '',
+    '{client.endereco}': client.endereco || '',
+    '{client.name}': client.nome || '',
+    '{empresa.nome}': 'Festana Decorações',
+    '{empresa.telefone}': '(11) 98765-4321',
+    '{empresa.email}': 'contato@festanadecoracoes.com',
+    '{data.hoje}': today.toLocaleDateString('pt-BR'),
+    '{data.mes}': today.toLocaleDateString('pt-BR', { month: 'long' }),
+    '{data.ano}': today.getFullYear().toString(),
+    // Additional placeholders for event, kit, and theme could be populated if data was available
+    '{evento.nome}': 'Nome do Evento',
+    '{evento.data}': today.toLocaleDateString('pt-BR'),
+    '{evento.local}': 'Local do Evento',
+    '{evento.valor}': 'R$ 0,00',
+    '{kit.nome}': 'Kit Básico',
+    '{kit.descricao}': 'Descrição do Kit',
+    '{kit.valor}': 'R$ 0,00',
+    '{tema.nome}': 'Tema Padrão',
+    '{tema.descricao}': 'Descrição do Tema',
+    '{tema.valor}': 'R$ 0,00',
+    // Suporte para variáveis com chaves duplas
+    '{{cliente.nome}}': client.nome || '',
+    '{{cliente.email}}': client.email || '',
+    '{{cliente.telefone}}': client.telefone || '',
+    '{{cliente.endereco}}': client.endereco || '',
+    '{{client.nome}}': client.nome || '',
+    '{{client.email}}': client.email || '',
+    '{{client.telefone}}': client.telefone || '',
+    '{{client.endereco}}': client.endereco || '',
+    '{{client.name}}': client.nome || '',
+  };
+
+  let processedText = text;
+  
+  Object.entries(replacements).forEach(([variable, value]) => {
+    processedText = processedText.replace(new RegExp(variable, 'g'), value);
+  });
+  
+  return processedText;
 };
 
 export default ContractView;
