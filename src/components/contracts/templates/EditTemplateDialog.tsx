@@ -1,6 +1,6 @@
 
 import { ContractTemplate } from '@/types';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import ContractEditor from '../ContractEditor';
 
 interface EditTemplateDialogProps {
@@ -24,6 +24,14 @@ const EditTemplateDialog = ({
       onOpenChange={onOpenChange}
     >
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+        {/* Adding DialogTitle and DialogDescription for accessibility */}
+        <DialogTitle className="sr-only">
+          {template ? `Editar Modelo: ${template.name}` : 'Editor de Modelo'}
+        </DialogTitle>
+        <DialogDescription className="sr-only">
+          Editor de modelo de contrato com formatação avançada
+        </DialogDescription>
+        
         {template && (
           <ContractEditor
             isOpen={isOpen}

@@ -1,5 +1,5 @@
 
-import { useRef } from 'react';
+import { useRef, forwardRef } from 'react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 
@@ -36,7 +36,7 @@ const ContractEditorQuill = ({
   };
 
   if (isInitializing) {
-    return null;
+    return <div className="min-h-[450px] flex items-center justify-center">Carregando editor...</div>;
   }
 
   return (

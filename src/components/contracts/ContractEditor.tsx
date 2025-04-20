@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button';
 import { 
   Dialog, 
   DialogContent, 
-  DialogFooter
+  DialogFooter,
+  DialogTitle,
+  DialogDescription
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { replaceVariables } from '@/utils/contractUtils';
@@ -88,9 +90,21 @@ const ContractEditor = ({
     onOpenChange(false);
   };
 
+  const editorTitle = template 
+    ? `Editar Modelo: ${template.name}` 
+    : contract 
+      ? `Editar Contrato: ${contract.title}` 
+      : 'Editor de Documento';
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
+        {/* Adding DialogTitle and DialogDescription for accessibility */}
+        <DialogTitle className="sr-only">{editorTitle}</DialogTitle>
+        <DialogDescription className="sr-only">
+          Editor de documento com formatação avançada
+        </DialogDescription>
+        
         <ContractEditorHeader 
           template={template}
           contract={contract}

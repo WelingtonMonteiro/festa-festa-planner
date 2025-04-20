@@ -40,6 +40,13 @@ const ContractEditorHeader = ({
           Visualizando com dados de: <strong>{previewClient.nome}</strong>
         </DialogDescription>
       )}
+      {!previewClient && (
+        <DialogDescription>
+          {template 
+            ? 'Use o editor para personalizar o modelo de contrato' 
+            : 'Use o editor para personalizar o conteúdo do contrato'}
+        </DialogDescription>
+      )}
     </DialogHeader>
   );
 };
