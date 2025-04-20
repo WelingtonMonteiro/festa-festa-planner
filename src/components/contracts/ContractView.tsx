@@ -40,6 +40,71 @@ const statusColors = {
   'cancelled': 'bg-red-100 text-red-800'
 };
 
+type AnyData = Record<string, any>;
+
+export const replaceVariables = (text: string, dataSources: AnyData) => {
+  if (!text) return '';
+
+  return text.replace(/{{(.*?)}}/g, (_, keyPath) => {
+    const keys = keyPath.trim().split('.');
+    let value: any = dataSources;
+
+    for (const key of keys) {
+      if (value && key in value) {
+        value = value[key];
+      } else {
+        return `{{${keyPath}}}`; // mantém a variável se não encontrada
+      }
+    }
+
+    return String(value ?? '');
+  });
+};
+
+// Helper function to replace variables with actual data
+// const replaceVariables = (text: string, client: Client) => {
+//   if (!text) return '';
+//
+//   const today = new Date();
+//
+//   const replacements: Record<string, string> = {
+//     '{{cliente.nome}}': client.nome || '',
+//     '{{cliente.email}}': client.email || '',
+//     '{{cliente.telefone}}': client.telefone || '',
+//     '{{cliente.endereco}}': client.endereco || '',
+//     '{{client.nome}}': client.nome || '',
+//     '{{client.email}}': client.email || '',
+//     '{{client.telefone}}': client.telefone || '',
+//     '{{client.endereco}}': client.endereco || '',
+//     '{{client.name}}': client.nome || '',
+//     '{{empresa.nome}}': 'Festana Decorações',
+//     '{{empresa.telefone}}': '(11) 98765-4321',
+//     '{{empresa.email}}': 'contato@festanadecoracoes.com',
+//     '{{data.hoje}}': today.toLocaleDateString('pt-BR'),
+//     '{{data.mes}}': today.toLocaleDateString('pt-BR', { month: 'long' }),
+//     '{{data.ano}}': today.getFullYear().toString(),
+//     // Additional placeholders for event, kit, and theme could be populated if data was available
+//     '{{evento.nome}}': 'Nome do Evento',
+//     '{{evento.data}}': today.toLocaleDateString('pt-BR'),
+//     '{{evento.local}}': 'Local do Evento',
+//     '{{evento.valor}}': 'R$ 0,00',
+//     '{{kit.nome}}': 'Kit Básico',
+//     '{{kit.descricao}}': 'Descrição do Kit',
+//     '{{kit.valor}}': 'R$ 0,00',
+//     '{{tema.nome}}': 'Tema Padrão',
+//     '{{tema.descricao}}': 'Descrição do Tema',
+//     '{{tema.valor}}': 'R$ 0,00'
+//   };
+//
+//   let processedText = text;
+//
+//   Object.entries(replacements).forEach(([variable, value]) => {
+//     processedText = processedText.replace(new RegExp(variable, 'g'), value);
+//   });
+//
+//   return processedText;
+// };
+
 const ContractView = ({ contract, client, isOpen, onOpenChange }: ContractViewProps) => {
   const { signContract, sendContractToClient } = useHandleContext();
   const [isSignDialogOpen, setIsSignDialogOpen] = useState(false);
@@ -48,7 +113,7 @@ const ContractView = ({ contract, client, isOpen, onOpenChange }: ContractViewPr
   // Processa o conteúdo do contrato para substituir variáveis pelos dados do cliente
   useEffect(() => {
     if (contract && client) {
-      setProcessedContent(replaceVariables(contract.content, client));
+      setProcessedContent(replaceVariables(contract.content, { client }));
     } else {
       setProcessedContent(contract?.content || '');
     }
@@ -189,60 +254,6 @@ const ContractView = ({ contract, client, isOpen, onOpenChange }: ContractViewPr
       )}
     </>
   );
-};
-
-// Helper function to replace variables with actual data
-const replaceVariables = (text: string, client: Client) => {
-  if (!text) return '';
-
-  const today = new Date();
-  
-  const replacements: Record<string, string> = {
-    '{cliente.nome}': client.nome || '',
-    '{cliente.email}': client.email || '',
-    '{cliente.telefone}': client.telefone || '',
-    '{cliente.endereco}': client.endereco || '',
-    '{client.nome}': client.nome || '',
-    '{client.email}': client.email || '',
-    '{client.telefone}': client.telefone || '',
-    '{client.endereco}': client.endereco || '',
-    '{client.name}': client.nome || '',
-    '{empresa.nome}': 'Festana Decorações',
-    '{empresa.telefone}': '(11) 98765-4321',
-    '{empresa.email}': 'contato@festanadecoracoes.com',
-    '{data.hoje}': today.toLocaleDateString('pt-BR'),
-    '{data.mes}': today.toLocaleDateString('pt-BR', { month: 'long' }),
-    '{data.ano}': today.getFullYear().toString(),
-    // Additional placeholders for event, kit, and theme could be populated if data was available
-    '{evento.nome}': 'Nome do Evento',
-    '{evento.data}': today.toLocaleDateString('pt-BR'),
-    '{evento.local}': 'Local do Evento',
-    '{evento.valor}': 'R$ 0,00',
-    '{kit.nome}': 'Kit Básico',
-    '{kit.descricao}': 'Descrição do Kit',
-    '{kit.valor}': 'R$ 0,00',
-    '{tema.nome}': 'Tema Padrão',
-    '{tema.descricao}': 'Descrição do Tema',
-    '{tema.valor}': 'R$ 0,00',
-    // Suporte para variáveis com chaves duplas
-    '{{cliente.nome}}': client.nome || '',
-    '{{cliente.email}}': client.email || '',
-    '{{cliente.telefone}}': client.telefone || '',
-    '{{cliente.endereco}}': client.endereco || '',
-    '{{client.nome}}': client.nome || '',
-    '{{client.email}}': client.email || '',
-    '{{client.telefone}}': client.telefone || '',
-    '{{client.endereco}}': client.endereco || '',
-    '{{client.name}}': client.nome || '',
-  };
-
-  let processedText = text;
-  
-  Object.entries(replacements).forEach(([variable, value]) => {
-    processedText = processedText.replace(new RegExp(variable, 'g'), value);
-  });
-  
-  return processedText;
 };
 
 export default ContractView;
