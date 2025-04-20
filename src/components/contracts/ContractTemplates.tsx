@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
@@ -20,6 +19,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from '@/components/ui/input';
 import { 
   Select,
@@ -28,17 +28,29 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Plus, MoreVertical, Edit, Copy, Trash, FileText, Eye } from 'lucide-react';
+import { Search, Plus, MoreVertical, Edit, Copy, Trash, FileText, Variable } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import ContractEditor from './ContractEditor';
+import { Badge } from '../ui/badge';
+import { z } from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 interface ContractTemplatesProps {
   selectedTemplate: string | null;
   setSelectedTemplate: (id: string | null) => void;
   isActive?: boolean;
 }
+
+const variableSchema = z.object({
+  name: z.string().min(1, "Nome da variável é obrigatório"),
+  description: z.string().min(1, "Descrição da variável é obrigatória"),
+  defaultValue: z.string().optional(),
+});
+
+type VariableForm = z.infer<typeof variableSchema>;
 
 const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = false }: ContractTemplatesProps) => {
   const { contractTemplates, clients, addContractTemplate, updateContractTemplate, removeContractTemplate } = useHandleContext();
@@ -51,8 +63,74 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [previewClientId, setPreviewClientId] = useState<string>('');
   const [templatesRequested, setTemplatesRequested] = useState(false);
+  const [isVariableDialogOpen, setIsVariableDialogOpen] = useState(false);
+  const [currentVariables, setCurrentVariables] = useState<any[]>([]);
+  const [editingVariableIndex, setEditingVariableIndex] = useState<number | null>(null);
 
-  // Safe handling of templates filtering
+  const form = useForm<VariableForm>({
+    resolver: zodResolver(variableSchema),
+    defaultValues: {
+      name: '',
+      description: '',
+      defaultValue: '',
+    },
+  });
+
+  const handleAddVariable = (data: VariableForm) => {
+    if (editingVariableIndex !== null) {
+      const newVariables = [...currentVariables];
+      newVariables[editingVariableIndex] = data;
+      setCurrentVariables(newVariables);
+      if (templateToEdit) {
+        updateContractTemplate(templateToEdit.id, {
+          variables: JSON.stringify(newVariables)
+        });
+      }
+    } else {
+      const newVariables = [...currentVariables, data];
+      setCurrentVariables(newVariables);
+      if (templateToEdit) {
+        updateContractTemplate(templateToEdit.id, {
+          variables: JSON.stringify(newVariables)
+        });
+      }
+    }
+    setIsVariableDialogOpen(false);
+    form.reset();
+    setEditingVariableIndex(null);
+    toast.success(editingVariableIndex !== null ? 'Variável atualizada' : 'Variável adicionada');
+  };
+
+  const handleEditVariable = (index: number) => {
+    const variable = currentVariables[index];
+    form.reset(variable);
+    setEditingVariableIndex(index);
+    setIsVariableDialogOpen(true);
+  };
+
+  const handleDeleteVariable = (index: number) => {
+    const newVariables = currentVariables.filter((_, i) => i !== index);
+    setCurrentVariables(newVariables);
+    if (templateToEdit) {
+      updateContractTemplate(templateToEdit.id, {
+        variables: JSON.stringify(newVariables)
+      });
+    }
+    toast.success('Variável removida');
+  };
+
+  useEffect(() => {
+    if (templateToEdit) {
+      try {
+        const variables = templateToEdit.variables ? JSON.parse(templateToEdit.variables as string) : [];
+        setCurrentVariables(variables);
+      } catch (error) {
+        console.error('Erro ao carregar variáveis:', error);
+        setCurrentVariables([]);
+      }
+    }
+  }, [templateToEdit]);
+
   const safeContractTemplates = contractTemplates || [];
   const filteredTemplates = safeContractTemplates.filter(template => 
     template && template.name && 
@@ -61,7 +139,6 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
 
   const previewClient = previewClientId ? clients.find(c => c.id === previewClientId) : undefined;
 
-  // Outras funções do componente permanecem as mesmas
   const handleCreateTemplate = useCallback(() => {
     if (!newTemplateName.trim()) {
       toast.error('O nome do modelo não pode estar vazio');
@@ -247,36 +324,47 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
           setIsEditDialogOpen(open);
           if (!open) {
             setTemplateToEdit(null);
+            setCurrentVariables([]);
           }
         }}>
           <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
             <DialogHeader>
               <DialogTitle>Editar Modelo: {templateToEdit.name}</DialogTitle>
               <DialogDescription>
-                Edite o conteúdo do modelo de contrato e adicione variáveis conforme necessário.
+                Edite o conteúdo do modelo de contrato e gerencie suas variáveis.
               </DialogDescription>
             </DialogHeader>
             
-            <div className="mb-4">
-              <label htmlFor="previewClient" className="text-sm font-medium">
-                Cliente para visualização de variáveis (opcional)
-              </label>
-              <Select
-                value={previewClientId}
-                onValueChange={setPreviewClientId}
-              >
-                <SelectTrigger id="previewClient" className="mt-1">
-                  <SelectValue placeholder="Selecione um cliente para visualizar" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">Nenhum cliente</SelectItem>
-                  {(clients || []).map(client => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.nome}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="flex justify-between items-center mb-4">
+              <div className="text-sm font-medium">Variáveis do Modelo</div>
+              <Button onClick={() => {
+                form.reset();
+                setEditingVariableIndex(null);
+                setIsVariableDialogOpen(true);
+              }} variant="outline" size="sm">
+                <Plus className="h-4 w-4 mr-2" /> Adicionar Variável
+              </Button>
+            </div>
+
+            <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
+              {currentVariables.map((variable, index) => (
+                <div key={index} className="flex items-center justify-between p-2 border rounded">
+                  <div>
+                    <Badge variant="secondary" className="mb-1">
+                      {`{${variable.name}}`}
+                    </Badge>
+                    <p className="text-sm text-muted-foreground">{variable.description}</p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="ghost" size="sm" onClick={() => handleEditVariable(index)}>
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm" onClick={() => handleDeleteVariable(index)}>
+                      <Trash className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
             
             <ContractEditor
@@ -289,6 +377,78 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
           </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={isVariableDialogOpen} onOpenChange={setIsVariableDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{editingVariableIndex !== null ? 'Editar Variável' : 'Nova Variável'}</DialogTitle>
+            <DialogDescription>
+              {editingVariableIndex !== null 
+                ? 'Edite os detalhes da variável para o modelo de contrato' 
+                : 'Adicione uma nova variável ao modelo de contrato'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleAddVariable)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nome da Variável</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: cliente_nome" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Descrição</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: Nome completo do cliente" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="defaultValue"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Valor Padrão (opcional)</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Ex: João da Silva" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <DialogFooter>
+                <Button variant="outline" type="button" onClick={() => {
+                  setIsVariableDialogOpen(false);
+                  form.reset();
+                  setEditingVariableIndex(null);
+                }}>
+                  Cancelar
+                </Button>
+                <Button type="submit">
+                  {editingVariableIndex !== null ? 'Atualizar' : 'Adicionar'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
