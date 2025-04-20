@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { ContractTemplate, Contract, Client } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -14,7 +13,7 @@ import { toast } from 'sonner';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { Variable } from 'lucide-react';
-import { TemplateVariable } from './ContractTemplates'; // Importando a interface do outro arquivo
+import { TemplateVariable } from '@/types/contracts'; // Update the import statement
 
 interface ContractEditorProps {
   isOpen: boolean;
@@ -41,11 +40,9 @@ const ContractEditor = ({
   const [processedContent, setProcessedContent] = useState<string>('');
   const editorRef = useRef<ReactQuill>(null);
 
-  // Use this effect to only set content when the dialog is opened or the template/contract changes
   useEffect(() => {
     if (isOpen) {
       if (template) {
-        // Delay initialization slightly to avoid freezing
         setTimeout(() => {
           setContent(template.content);
           setInitialContent(template.content);
@@ -69,12 +66,10 @@ const ContractEditor = ({
         }, 100);
       }
     } else {
-      // Reset the initializing state when the dialog closes
       setIsInitializing(true);
     }
   }, [template, contract, isOpen, previewClient]);
 
-  // Update processed content whenever content or previewClient changes
   useEffect(() => {
     if (previewClient && !isInitializing) {
       setProcessedContent(replaceVariables(content, previewClient));
@@ -87,10 +82,8 @@ const ContractEditor = ({
       return;
     }
 
-    // Call the save function passed from the parent
     onSave(content);
     
-    // Close the dialog after saving with a slight delay to prevent errors
     setTimeout(() => {
       onOpenChange(false);
     }, 200);
@@ -191,7 +184,6 @@ const ContractEditor = ({
   );
 };
 
-// Helper function to parse template variables from string to array
 const parseTemplateVariables = (variables: string | undefined): TemplateVariable[] => {
   if (!variables) return [];
   
@@ -199,9 +191,7 @@ const parseTemplateVariables = (variables: string | undefined): TemplateVariable
     const parsedVariables = JSON.parse(variables);
     if (!Array.isArray(parsedVariables)) return [];
     
-    // Garantir que cada item tem as propriedades obrigatórias
     return parsedVariables.filter(item => {
-      // Filtramos itens que não tenham as propriedades obrigatórias
       return item && typeof item === 'object' && 
              typeof item.name === 'string' && 
              typeof item.description === 'string';
@@ -212,7 +202,6 @@ const parseTemplateVariables = (variables: string | undefined): TemplateVariable
   }
 };
 
-// Helper function to group variables by entity
 const groupVariablesByEntity = (variables: TemplateVariable[]) => {
   return variables.reduce((groups: Record<string, TemplateVariable[]>, variable) => {
     const entity = variable.entity || 'outros';
@@ -224,7 +213,6 @@ const groupVariablesByEntity = (variables: TemplateVariable[]) => {
   }, {});
 };
 
-// Helper function to replace variables with actual data
 const replaceVariables = (text: string, client: Client) => {
   if (!text) return '';
 
@@ -241,7 +229,6 @@ const replaceVariables = (text: string, client: Client) => {
     '{data.hoje}': today.toLocaleDateString('pt-BR'),
     '{data.mes}': today.toLocaleDateString('pt-BR', { month: 'long' }),
     '{data.ano}': today.getFullYear().toString(),
-    // Additional placeholders for event, kit, and theme could be populated if data was available
     '{evento.nome}': 'Nome do Evento',
     '{evento.data}': today.toLocaleDateString('pt-BR'),
     '{evento.local}': 'Local do Evento',
