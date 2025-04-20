@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from '@/components/ui/button';
 import { entityFields, EntityType } from '@/utils/contractEntityFields';
-import { TemplateVariable } from '../ContractTemplates';
+import { TemplateVariable } from '@/types/contracts';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash } from 'lucide-react';
 

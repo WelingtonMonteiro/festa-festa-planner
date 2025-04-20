@@ -1,6 +1,6 @@
 
-import { useState } from 'react';
-import { useTemplateManagement, TemplateVariable } from '@/hooks/useTemplateManagement';
+import { useTemplateManagement } from '@/hooks/useTemplateManagement';
+import { useTemplateDialogs } from '@/hooks/useTemplateDialogs';
 import TemplatesList from './templates/TemplatesList';
 import CreateTemplateDialog from './templates/CreateTemplateDialog';
 import DeleteTemplateDialog from './templates/DeleteTemplateDialog';
@@ -15,24 +15,11 @@ interface ContractTemplatesProps {
 }
 
 const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = false }: ContractTemplatesProps) => {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [isVariableDialogOpen, setIsVariableDialogOpen] = useState(false);
-
   const {
     searchQuery,
     setSearchQuery,
     newTemplateName,
     setNewTemplateName,
-    templateToEdit,
-    setTemplateToEdit,
-    templateToDelete,
-    setTemplateToDelete,
-    currentVariables,
-    setCurrentVariables,
-    editingVariableIndex,
-    setEditingVariableIndex,
     filteredTemplates,
     handleCreateTemplate,
     handleEditTemplate,
@@ -41,6 +28,26 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
     handleSaveTemplate,
     handleAddVariable
   } = useTemplateManagement({ onTemplateSelect: setSelectedTemplate });
+
+  const {
+    isCreateDialogOpen,
+    setIsCreateDialogOpen,
+    isEditDialogOpen,
+    setIsEditDialogOpen,
+    isDeleteDialogOpen,
+    setIsDeleteDialogOpen,
+    isVariableDialogOpen,
+    setIsVariableDialogOpen,
+    templateToEdit,
+    setTemplateToEdit,
+    templateToDelete,
+    setTemplateToDelete,
+    currentVariables,
+    setCurrentVariables,
+    editingVariableIndex,
+    setEditingVariableIndex,
+    closeEditDialog
+  } = useTemplateDialogs();
 
   return (
     <>
@@ -76,13 +83,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
 
       <EditTemplateDialog
         isOpen={isEditDialogOpen}
-        onOpenChange={(open) => {
-          setIsEditDialogOpen(open);
-          if (!open) {
-            setTemplateToEdit(null);
-            setCurrentVariables([]);
-          }
-        }}
+        onOpenChange={closeEditDialog}
         template={templateToEdit}
         onSave={handleSaveTemplate}
         onEditVariables={() => setIsVariableDialogOpen(true)}
@@ -110,3 +111,4 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
 };
 
 export default ContractTemplates;
+

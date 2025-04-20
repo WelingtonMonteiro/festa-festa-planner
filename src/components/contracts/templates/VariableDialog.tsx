@@ -1,7 +1,6 @@
-
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import VariableForm from './VariableForm';
-import { TemplateVariable } from '../ContractTemplates';
+import { TemplateVariable } from '@/types/contracts';
 
 interface VariableDialogProps {
   isOpen: boolean;

@@ -1,16 +1,8 @@
-
 import { useState, useCallback } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
+import { TemplateVariable } from '@/types/contracts';
 import { toast } from 'sonner';
-
-export interface TemplateVariable {
-  name: string;
-  description: string;
-  entity?: string;
-  entityField?: string;
-  defaultValue?: string;
-}
 
 interface UseTemplateManagementProps {
   onTemplateSelect?: (id: string | null) => void;
