@@ -111,8 +111,8 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
     setIsVariableDialogOpen(true);
   };
 
-  const handleDeleteVariable = (index: number) => {
-    const newVariables = currentVariables.filter((_, i) => i !== index);
+  const handleDeleteVariable = (indexToDelete: number) => {
+    const newVariables = currentVariables.filter((_, i) => i !== indexToDelete);
     setCurrentVariables(newVariables);
     if (templateToEdit) {
       updateContractTemplate(templateToEdit.id, {
@@ -208,6 +208,15 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
   const handleOpenVariablesDialog = () => {
     setIsVariableDialogOpen(true);
   };
+
+  const groupedVariables = currentVariables.reduce((acc: Record<string, any[]>, variable) => {
+    const entity = variable.entity || 'outros';
+    if (!acc[entity]) {
+      acc[entity] = [];
+    }
+    acc[entity].push(variable);
+    return acc;
+  }, {});
 
   return (
     <>
@@ -504,26 +513,46 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
           {currentVariables.length > 0 && (
             <div className="mt-6">
               <h4 className="font-medium mb-2">Variáveis Existentes</h4>
-              <div className="space-y-2">
-                {currentVariables.map((variable, index) => (
-                  <div key={index} className="flex items-center justify-between p-2 border rounded">
-                    <div>
-                      <Badge variant="secondary" className="mb-1">
-                        {`{${variable.name}}`}
-                      </Badge>
-                      <p className="text-sm text-muted-foreground">{variable.description}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleEditVariable(index)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDeleteVariable(index)}>
-                        <Trash className="h-4 w-4" />
-                      </Button>
+              {Object.entries(groupedVariables).map(([entity, variables]) => (
+                variables.length > 0 && (
+                  <div key={entity} className="mb-4">
+                    <h5 className="text-sm font-medium mb-2 capitalize">{entity}</h5>
+                    <div className="space-y-2">
+                      {variables.map((variable: any, index: number) => {
+                        const globalIndex = currentVariables.findIndex(v => v === variable);
+                        return (
+                          <div key={index} className="flex items-center justify-between p-2 border rounded">
+                            <div>
+                              <Badge variant="secondary" className="mb-1">
+                                {`{${variable.name}}`}
+                              </Badge>
+                              <p className="text-sm text-muted-foreground">{variable.description}</p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleEditVariable(globalIndex)}
+                                title="Editar variável"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                onClick={() => handleDeleteVariable(globalIndex)}
+                                title="Remover variável"
+                              >
+                                <Trash className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))}
-              </div>
+                )
+              ))}
             </div>
           )}
         </DialogContent>

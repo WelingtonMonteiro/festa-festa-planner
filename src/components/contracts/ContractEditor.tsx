@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { ContractTemplate, Contract, Client } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -131,7 +130,7 @@ const ContractEditor = ({
                 className="flex gap-2"
               >
                 <Variable className="h-4 w-4" />
-                <span>Editar Variáveis</span>
+                <span>Adicionar Variável</span>
               </Button>
             )}
           </div>
@@ -160,56 +159,24 @@ const ContractEditor = ({
         <div className="border-t pt-4">
           <h3 className="text-sm font-medium mb-2">Variáveis disponíveis:</h3>
           <div className="flex flex-wrap gap-2 text-xs">
-            <div className="border rounded p-2">
-              <h4 className="font-medium mb-1">Cliente</h4>
-              <div className="flex flex-wrap gap-1">
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{cliente.nome}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{cliente.email}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{cliente.telefone}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{cliente.endereco}'}</code>
-              </div>
-            </div>
-            <div className="border rounded p-2">
-              <h4 className="font-medium mb-1">Evento</h4>
-              <div className="flex flex-wrap gap-1">
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{evento.nome}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{evento.data}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{evento.local}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{evento.valor}'}</code>
-              </div>
-            </div>
-            <div className="border rounded p-2">
-              <h4 className="font-medium mb-1">Kit</h4>
-              <div className="flex flex-wrap gap-1">
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{kit.nome}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{kit.descricao}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{kit.valor}'}</code>
-              </div>
-            </div>
-            <div className="border rounded p-2">
-              <h4 className="font-medium mb-1">Tema</h4>
-              <div className="flex flex-wrap gap-1">
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{tema.nome}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{tema.descricao}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{tema.valor}'}</code>
-              </div>
-            </div>
-            <div className="border rounded p-2">
-              <h4 className="font-medium mb-1">Empresa</h4>
-              <div className="flex flex-wrap gap-1">
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{empresa.nome}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{empresa.telefone}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{empresa.email}'}</code>
-              </div>
-            </div>
-            <div className="border rounded p-2">
-              <h4 className="font-medium mb-1">Data</h4>
-              <div className="flex flex-wrap gap-1">
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{data.hoje}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{data.mes}'}</code>
-                <code className="bg-secondary px-1 py-0.5 rounded">{'{data.ano}'}</code>
-              </div>
-            </div>
+            {template?.variables ? 
+              Object.entries(groupVariablesByEntity(JSON.parse(template.variables))).map(([entity, variables]) => (
+                variables.length > 0 && (
+                  <div key={entity} className="border rounded p-2">
+                    <h4 className="font-medium mb-1 capitalize">{entity}</h4>
+                    <div className="flex flex-wrap gap-1">
+                      {variables.map((variable: any, index: number) => (
+                        <div key={index} className="flex items-center gap-1">
+                          <code className="bg-secondary px-1 py-0.5 rounded">
+                            {`{${variable.name}}`}
+                          </code>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              ))
+            : null}
           </div>
         </div>
         
@@ -220,6 +187,18 @@ const ContractEditor = ({
       </DialogContent>
     </Dialog>
   );
+};
+
+// Helper function to group variables by entity
+const groupVariablesByEntity = (variables: any[]) => {
+  return variables.reduce((groups: any, variable) => {
+    const entity = variable.entity || 'outros';
+    if (!groups[entity]) {
+      groups[entity] = [];
+    }
+    groups[entity].push(variable);
+    return groups;
+  }, {});
 };
 
 // Helper function to replace variables with actual data
@@ -262,4 +241,3 @@ const replaceVariables = (text: string, client: Client) => {
 };
 
 export default ContractEditor;
-
