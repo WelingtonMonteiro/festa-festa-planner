@@ -46,7 +46,7 @@ interface ContractTemplatesProps {
   isActive?: boolean;
 }
 
-interface TemplateVariable {
+export interface TemplateVariable {
   name: string;
   description: string;
   entity?: string;
@@ -91,7 +91,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
   const handleAddVariable = (data: VariableForm) => {
     if (editingVariableIndex !== null) {
       const newVariables = [...currentVariables];
-      newVariables[editingVariableIndex] = data;
+      newVariables[editingVariableIndex] = data as TemplateVariable;
       setCurrentVariables(newVariables);
       if (templateToEdit) {
         updateContractTemplate(templateToEdit.id, {
@@ -99,7 +99,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
         });
       }
     } else {
-      const newVariables = [...currentVariables, data];
+      const newVariables = [...currentVariables, data as TemplateVariable];
       setCurrentVariables(newVariables);
       if (templateToEdit) {
         updateContractTemplate(templateToEdit.id, {
@@ -134,7 +134,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
   useEffect(() => {
     if (templateToEdit) {
       try {
-        const variables = templateToEdit.variables ? JSON.parse(templateToEdit.variables) : [];
+        const variables = parseTemplateVariables(templateToEdit.variables);
         setCurrentVariables(variables);
       } catch (error) {
         console.error('Erro ao carregar variáveis:', error);
@@ -218,12 +218,20 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
     setIsVariableDialogOpen(true);
   };
 
-  // Helper function to parse JSON safely
-  const parseVariables = (jsonString: string | undefined): TemplateVariable[] => {
+  // Helper function to parse JSON safely and ensure all required fields exist
+  const parseTemplateVariables = (jsonString: string | undefined): TemplateVariable[] => {
     if (!jsonString) return [];
     try {
       const parsed = JSON.parse(jsonString);
-      return Array.isArray(parsed) ? parsed : [];
+      if (!Array.isArray(parsed)) return [];
+      
+      // Garantir que cada item tem as propriedades obrigatórias
+      return parsed.filter(item => {
+        // Filtramos itens que não tenham as propriedades obrigatórias
+        return item && typeof item === 'object' && 
+               typeof item.name === 'string' && 
+               typeof item.description === 'string';
+      }) as TemplateVariable[];
     } catch (e) {
       console.error('Erro ao analisar JSON de variáveis:', e);
       return [];

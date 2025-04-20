@@ -14,6 +14,7 @@ import { toast } from 'sonner';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import { Variable } from 'lucide-react';
+import { TemplateVariable } from './ContractTemplates'; // Importando a interface do outro arquivo
 
 interface ContractEditorProps {
   isOpen: boolean;
@@ -23,14 +24,6 @@ interface ContractEditorProps {
   onSave: (content: string) => void;
   previewClient?: Client;
   onEditVariables?: () => void;
-}
-
-interface TemplateVariable {
-  name: string;
-  description: string;
-  entity?: string;
-  entityField?: string;
-  defaultValue?: string;
 }
 
 const ContractEditor = ({ 
@@ -204,10 +197,15 @@ const parseTemplateVariables = (variables: string | undefined): TemplateVariable
   
   try {
     const parsedVariables = JSON.parse(variables);
-    if (Array.isArray(parsedVariables)) {
-      return parsedVariables;
-    }
-    return [];
+    if (!Array.isArray(parsedVariables)) return [];
+    
+    // Garantir que cada item tem as propriedades obrigatórias
+    return parsedVariables.filter(item => {
+      // Filtramos itens que não tenham as propriedades obrigatórias
+      return item && typeof item === 'object' && 
+             typeof item.name === 'string' && 
+             typeof item.description === 'string';
+    }) as TemplateVariable[];
   } catch (error) {
     console.error('Erro ao analisar variáveis:', error);
     return [];
