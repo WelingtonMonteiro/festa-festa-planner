@@ -88,6 +88,7 @@ export interface ContractTemplate {
   content: string;
   createdAt: string;
   updatedAt: string;
+  variables?: string; // Adding variables property to the interface
 }
 
 export type { Plan } from "./plans";
