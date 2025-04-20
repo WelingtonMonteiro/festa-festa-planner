@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Contract, ContractTemplate, Client } from '@/types';
@@ -77,8 +78,12 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
   useEffect(() => {
     if (contracts) {
       const filtered = contracts.filter(contract => {
-        const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
+        // Adicionar verificação para garantir que contract.title existe e não é undefined
+        const contractTitle = contract?.title || '';
+        const matchesSearch = searchQuery 
+          ? contractTitle.toLowerCase().includes(searchQuery.toLowerCase()) 
+          : true;
+        const matchesStatus = statusFilter === 'all' || contract?.status === statusFilter;
         return matchesSearch && matchesStatus;
       });
       setFilteredContracts(filtered);
@@ -230,7 +235,7 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
         </Button>
       </div>
 
-      {filteredContracts.length === 0 ? (
+      {!contracts || filteredContracts.length === 0 ? (
         <div className="text-center p-8">
           <FileText className="mx-auto h-12 w-12 text-muted-foreground opacity-50" />
           <h3 className="mt-4 text-lg font-semibold">Nenhum contrato encontrado</h3>

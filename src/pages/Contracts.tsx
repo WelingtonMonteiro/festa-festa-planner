@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -21,7 +20,6 @@ const Contracts = () => {
   const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
 
   useEffect(() => {
-    // Carregamos dados apenas na montagem inicial do componente
     if (isInitialLoad) {
       console.log('Contracts: Carregando dados iniciais');
       refreshContracts();
@@ -29,60 +27,48 @@ const Contracts = () => {
     }
   }, [isInitialLoad, refreshContracts]);  
 
-  // Calculate total pages
   const totalPages = Math.max(1, Math.ceil((contractsTotal || 0) / (contractsLimit || 10)));
   
-  // Create an array of page numbers to display
   const getPageNumbers = () => {
     const pages = [];
     const maxPagesToShow = 5;
     
     if (totalPages <= maxPagesToShow) {
-      // Show all pages if there are few
       for (let i = 1; i <= totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Show first page, last page, and pages around current
       const currentPage = contractsPage || 1;
       
-      // Always include first page
       pages.push(1);
       
-      // Calculate start and end of page range around current page
       let startPage = Math.max(2, currentPage - 1);
       let endPage = Math.min(totalPages - 1, currentPage + 1);
       
-      // Adjust if at edges
       if (currentPage <= 2) {
         endPage = Math.min(totalPages - 1, 4);
       } else if (currentPage >= totalPages - 1) {
         startPage = Math.max(2, totalPages - 3);
       }
       
-      // Add ellipsis after first page if needed
       if (startPage > 2) {
-        pages.push(null); // null represents ellipsis
+        pages.push(null);
       }
       
-      // Add page numbers around current page
       for (let i = startPage; i <= endPage; i++) {
         pages.push(i);
       }
       
-      // Add ellipsis before last page if needed
       if (endPage < totalPages - 1) {
-        pages.push(null); // null represents ellipsis
+        pages.push(null);
       }
       
-      // Always include last page
       pages.push(totalPages);
     }
     
     return pages;
   };
 
-  // Handler para mudar de página
   const handlePageChange = (pageNumber: number) => {
     if (pageNumber !== contractsPage) {
       console.log(`Contracts: Mudando para página ${pageNumber}`);
@@ -120,7 +106,7 @@ const Contracts = () => {
             isActive={activeTab === 'contracts'}
           />
           
-          {activeTab === 'contracts' && totalPages > 1 && (
+          {activeTab === 'contracts' && contractsTotal > 0 && totalPages > 1 && (
             <div className="mt-6">
               <Pagination>
                 <PaginationContent>
