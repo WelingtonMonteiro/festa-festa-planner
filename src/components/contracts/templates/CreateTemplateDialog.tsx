@@ -8,7 +8,7 @@ interface CreateTemplateDialogProps {
   onOpenChange: (open: boolean) => void;
   newTemplateName: string;
   onNameChange: (name: string) => void;
-  onCreateTemplate: () => void;
+  onCreateTemplate: () => Promise<any>;
   isCreating?: boolean;
 }
 
@@ -21,9 +21,11 @@ const CreateTemplateDialog = ({
   isCreating = false
 }: CreateTemplateDialogProps) => {
   const handleCreate = async () => {
-    const result = await onCreateTemplate();
-    if (result) {
+    try {
+      await onCreateTemplate();
       onOpenChange(false);
+    } catch (error) {
+      console.error("Error creating template:", error);
     }
   };
 
