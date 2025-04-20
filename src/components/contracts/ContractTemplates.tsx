@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
@@ -45,6 +46,14 @@ interface ContractTemplatesProps {
   isActive?: boolean;
 }
 
+interface TemplateVariable {
+  name: string;
+  description: string;
+  entity?: string;
+  entityField?: string;
+  defaultValue?: string;
+}
+
 const variableSchema = z.object({
   name: z.string().min(1, "Nome da variável é obrigatório"),
   description: z.string().min(1, "Descrição da variável é obrigatória"),
@@ -67,7 +76,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
   const [previewClientId, setPreviewClientId] = useState<string>('');
   const [templatesRequested, setTemplatesRequested] = useState(false);
   const [isVariableDialogOpen, setIsVariableDialogOpen] = useState(false);
-  const [currentVariables, setCurrentVariables] = useState<any[]>([]);
+  const [currentVariables, setCurrentVariables] = useState<TemplateVariable[]>([]);
   const [editingVariableIndex, setEditingVariableIndex] = useState<number | null>(null);
 
   const form = useForm<VariableForm>({
@@ -209,14 +218,30 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
     setIsVariableDialogOpen(true);
   };
 
-  const groupedVariables = currentVariables.reduce((acc: Record<string, any[]>, variable) => {
-    const entity = variable.entity || 'outros';
-    if (!acc[entity]) {
-      acc[entity] = [];
+  // Helper function to parse JSON safely
+  const parseVariables = (jsonString: string | undefined): TemplateVariable[] => {
+    if (!jsonString) return [];
+    try {
+      const parsed = JSON.parse(jsonString);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      console.error('Erro ao analisar JSON de variáveis:', e);
+      return [];
     }
-    acc[entity].push(variable);
-    return acc;
-  }, {});
+  };
+
+  const groupVariables = (variables: TemplateVariable[]): Record<string, TemplateVariable[]> => {
+    return variables.reduce((acc: Record<string, TemplateVariable[]>, variable) => {
+      const entity = variable.entity || 'outros';
+      if (!acc[entity]) {
+        acc[entity] = [];
+      }
+      acc[entity].push(variable);
+      return acc;
+    }, {});
+  };
+
+  const groupedVariables = groupVariables(currentVariables);
 
   return (
     <>
@@ -518,7 +543,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
                   <div key={entity} className="mb-4">
                     <h5 className="text-sm font-medium mb-2 capitalize">{entity}</h5>
                     <div className="space-y-2">
-                      {variables.map((variable: any, index: number) => {
+                      {variables.map((variable: TemplateVariable, index: number) => {
                         const globalIndex = currentVariables.findIndex(v => v === variable);
                         return (
                           <div key={index} className="flex items-center justify-between p-2 border rounded">

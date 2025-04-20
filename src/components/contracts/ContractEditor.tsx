@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { ContractTemplate, Contract, Client } from '@/types';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,14 @@ interface ContractEditorProps {
   onSave: (content: string) => void;
   previewClient?: Client;
   onEditVariables?: () => void;
+}
+
+interface TemplateVariable {
+  name: string;
+  description: string;
+  entity?: string;
+  entityField?: string;
+  defaultValue?: string;
 }
 
 const ContractEditor = ({ 
@@ -160,12 +169,12 @@ const ContractEditor = ({
           <h3 className="text-sm font-medium mb-2">Variáveis disponíveis:</h3>
           <div className="flex flex-wrap gap-2 text-xs">
             {template?.variables ? 
-              Object.entries(groupVariablesByEntity(JSON.parse(template.variables))).map(([entity, variables]) => (
+              Object.entries(groupVariablesByEntity(parseTemplateVariables(template.variables))).map(([entity, variables]) => (
                 variables.length > 0 && (
                   <div key={entity} className="border rounded p-2">
                     <h4 className="font-medium mb-1 capitalize">{entity}</h4>
                     <div className="flex flex-wrap gap-1">
-                      {variables.map((variable: any, index: number) => (
+                      {variables.map((variable: TemplateVariable, index: number) => (
                         <div key={index} className="flex items-center gap-1">
                           <code className="bg-secondary px-1 py-0.5 rounded">
                             {`{${variable.name}}`}
@@ -189,9 +198,25 @@ const ContractEditor = ({
   );
 };
 
+// Helper function to parse template variables from string to array
+const parseTemplateVariables = (variables: string | undefined): TemplateVariable[] => {
+  if (!variables) return [];
+  
+  try {
+    const parsedVariables = JSON.parse(variables);
+    if (Array.isArray(parsedVariables)) {
+      return parsedVariables;
+    }
+    return [];
+  } catch (error) {
+    console.error('Erro ao analisar variáveis:', error);
+    return [];
+  }
+};
+
 // Helper function to group variables by entity
-const groupVariablesByEntity = (variables: any[]) => {
-  return variables.reduce((groups: any, variable) => {
+const groupVariablesByEntity = (variables: TemplateVariable[]) => {
+  return variables.reduce((groups: Record<string, TemplateVariable[]>, variable) => {
     const entity = variable.entity || 'outros';
     if (!groups[entity]) {
       groups[entity] = [];
