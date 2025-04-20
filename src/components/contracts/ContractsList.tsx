@@ -59,7 +59,7 @@ const statusColors = {
 };
 
 const ContractsList = ({ selectedContract, setSelectedContract, isActive = false }: ContractsListProps) => {
-  const { contracts, clients, contractTemplates, addContract, updateContract, removeContract } = useHandleContext();
+  const { contracts, clients, contractTemplates, addContract, updateContract, removeContract, refresh } = useHandleContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -74,6 +74,18 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
   const [contractToDelete, setContractToDelete] = useState<string | null>(null);
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
   const [shouldRefresh, setShouldRefresh] = useState(false);
+  const [availableClients, setAvailableClients] = useState<Client[]>([]);
+  
+  // Carregar clientes quando o componente for montado
+  useEffect(() => {
+    if (clients && clients.length > 0) {
+      console.log('Clientes carregados:', clients.length);
+      setAvailableClients(clients);
+    } else {
+      console.log('Nenhum cliente carregado ou array de clientes vazio');
+      refresh();
+    }
+  }, [clients, refresh]);
 
   useEffect(() => {
     if (contracts) {
@@ -203,6 +215,30 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
     return clients.find(client => client.id === id);
   };
 
+  // Log para depuração
+  useEffect(() => {
+    console.log('Clientes disponíveis no ContractsList:', availableClients.length);
+    if (availableClients.length === 0 && clients.length > 0) {
+      setAvailableClients(clients);
+    }
+  }, [availableClients, clients]);
+
+  // Forçar um refresh inicial para carregar os dados
+  useEffect(() => {
+    if (isActive && shouldRefresh) {
+      refresh();
+      setShouldRefresh(false);
+    }
+  }, [isActive, shouldRefresh, refresh]);
+
+  const handleOpenCreateDialog = () => {
+    // Garantir que temos clientes disponíveis
+    if (clients.length === 0) {
+      refresh();
+    }
+    setIsCreateDialogOpen(true);
+  };
+
   return (
     <>
       <div className="flex justify-between items-center mb-6">
@@ -230,7 +266,7 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
             </SelectContent>
           </Select>
         </div>
-        <Button onClick={() => setIsCreateDialogOpen(true)}>
+        <Button onClick={handleOpenCreateDialog}>
           <Plus className="h-4 w-4 mr-2" /> Novo Contrato
         </Button>
       </div>
@@ -334,11 +370,17 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
                   <SelectValue placeholder="Selecione um cliente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      {client.nome}
+                  {clients && clients.length > 0 ? (
+                    clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        {client.nome}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    <SelectItem key="no-clients" value="" disabled>
+                      Nenhum cliente disponível
                     </SelectItem>
-                  ))}
+                  )}
                 </SelectContent>
               </Select>
             </div>
@@ -350,7 +392,7 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem key="template-none" value="none">Sem modelo</SelectItem>
-                  {contractTemplates.map((template) => (
+                  {contractTemplates && contractTemplates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
                     </SelectItem>
