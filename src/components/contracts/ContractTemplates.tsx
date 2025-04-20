@@ -27,7 +27,9 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
     handleDeleteTemplate,
     handleCopyTemplate,
     handleSaveTemplate,
-    handleAddVariable
+    handleAddVariable,
+    templateToDelete,
+    setTemplateToDelete
   } = useTemplateManagement({ onTemplateSelect: setSelectedTemplate });
 
   const {
@@ -41,14 +43,15 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
     setIsVariableDialogOpen,
     templateToEdit,
     setTemplateToEdit,
-    templateToDelete,
-    setTemplateToDelete,
     currentVariables,
     setCurrentVariables,
     editingVariableIndex,
     setEditingVariableIndex,
     closeEditDialog
   } = useTemplateDialogs();
+
+  // Encontrar o nome do template que está sendo excluído
+  const templateToDeleteName = filteredTemplates.find(t => t.id === templateToDelete)?.name || 'este modelo';
 
   return (
     <>
@@ -85,6 +88,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
         onDeleteTemplate={handleDeleteTemplate}
+        templateName={templateToDeleteName}
       />
 
       <EditTemplateDialog

@@ -80,15 +80,18 @@ export const useTemplateManagement = ({ onTemplateSelect }: UseTemplateManagemen
     if (templateToDelete) {
       try {
         await removeContractTemplate(templateToDelete);
-        setTemplateToDelete(null);
-
+        toast.success('Modelo excluído com sucesso');
+        
         if (onTemplateSelect) {
           onTemplateSelect(null);
         }
+        return true;
       } catch (error) {
         console.error('Erro ao excluir template:', error);
+        toast.error('Erro ao excluir modelo de contrato');
       }
     }
+    return false;
   }, [templateToDelete, removeContractTemplate, onTemplateSelect]);
 
   const handleCopyTemplate = useCallback(async (template: ContractTemplate) => {

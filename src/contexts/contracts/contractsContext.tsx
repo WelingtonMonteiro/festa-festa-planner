@@ -2,8 +2,8 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Contract, ContractTemplate, Message } from '../../types';
 import { toast } from 'sonner';
-import { useCrud } from '@/hooks/useCrud';
-import { StorageType } from '@/types/crud';
+import { useContractService, useContractTemplateService } from '@/services/entityServices/contractService';
+import { PaginatedResponse } from '@/types/crud';
 
 interface ContractsContextType {
   contracts: Contract[];
@@ -34,26 +34,50 @@ export const ContractsProvider: React.FC<{
   children: React.ReactNode,
   onAddMessage?: (message: Omit<Message, 'id' | 'datahora'>) => void 
 }> = ({ children, onAddMessage }) => {
-  // Use CRUD hook for contracts with a fixed API configuration
-  const contractsCrud = useCrud<Contract>({
-    type: StorageType.ApiRest,
-    config: {
-      apiUrl: import.meta.env.VITE_APP_API_URL || '',
-      endpoint: 'contracts'
-    }
-  });
-
-  // Use CRUD hook for templates with a fixed API configuration
-  const templatesCrud = useCrud<ContractTemplate>({
-    type: StorageType.ApiRest,
-    config: {
-      apiUrl: import.meta.env.VITE_APP_API_URL || '',
-      endpoint: 'contractTemplates'
-    }
-  });
-
-  // Estado para controlar quando os dados já foram inicialmente carregados
+  // Use os serviços de contrato e template
+  const contractService = useContractService();
+  const templateService = useContractTemplateService();
+  
+  // Estado para contratos e templates
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [contractTemplates, setContractTemplates] = useState<ContractTemplate[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [loading, setLoading] = useState(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  
+  // Função para buscar e atualizar a lista de contratos
+  const fetchContracts = useCallback(async (pageNum: number = page, limitNum: number = limit) => {
+    setLoading(true);
+    try {
+      const result: PaginatedResponse<Contract> = await contractService.getAll(pageNum, limitNum);
+      
+      setContracts(result.data);
+      setTotal(result.total);
+      setPage(result.page);
+      setLimit(result.limit);
+      
+      return result;
+    } catch (error) {
+      console.error('Erro ao buscar contratos:', error);
+      return { data: [], total: 0, page: 1, limit: 10 } as PaginatedResponse<Contract>;
+    } finally {
+      setLoading(false);
+    }
+  }, [contractService, page, limit]);
+
+  // Função para buscar e atualizar a lista de templates
+  const fetchTemplates = useCallback(async () => {
+    try {
+      const result = await templateService.getAll();
+      setContractTemplates(result.data);
+      return result;
+    } catch (error) {
+      console.error('Erro ao buscar templates:', error);
+      return { data: [], total: 0, page: 1, limit: 10 } as PaginatedResponse<ContractTemplate>;
+    }
+  }, [templateService]);
   
   // Memoize refresh function to prevent unnecessary rerenders
   const refreshData = useCallback(async () => {
@@ -63,8 +87,8 @@ export const ContractsProvider: React.FC<{
       
       try {
         await Promise.all([
-          contractsCrud.refresh(),
-          templatesCrud.refresh()
+          fetchContracts(),
+          fetchTemplates()
         ]);
         setInitialDataLoaded(true);
       } catch (error) {
@@ -73,7 +97,7 @@ export const ContractsProvider: React.FC<{
     } else {
       console.log('ContractsContext: Dados já carregados, ignorando refresh automático');
     }
-  }, [contractsCrud, templatesCrud, initialDataLoaded]);
+  }, [fetchContracts, fetchTemplates, initialDataLoaded]);
 
   // Load data only once on initial mount
   useEffect(() => {
@@ -98,14 +122,15 @@ export const ContractsProvider: React.FC<{
     console.log('ContractsContext: Forçando atualização de dados');
     try {
       await Promise.all([
-        contractsCrud.refresh(),
-        templatesCrud.refresh()
+        fetchContracts(),
+        fetchTemplates()
       ]);
     } catch (error) {
       console.error('Erro ao forçar atualização de dados:', error);
     }
-  }, [contractsCrud, templatesCrud]);
+  }, [fetchContracts, fetchTemplates]);
   
+  // Operações de CRUD para modelos de contrato
   const adicionarModeloContrato = async (modelo: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContractTemplate> => {
     const novoModelo: Omit<ContractTemplate, 'id'> = {
       ...modelo,
@@ -114,10 +139,11 @@ export const ContractsProvider: React.FC<{
     };
     
     try {
-      const resultado = await templatesCrud.create(novoModelo);
+      const resultado = await templateService.create(novoModelo);
       
       if (resultado) {
         toast.success(`${modelo.name} foi adicionado com sucesso.`);
+        await fetchTemplates(); // Atualizar a lista após adicionar
         return resultado;
       } else {
         toast.error('Erro ao adicionar modelo de contrato.');
@@ -132,13 +158,14 @@ export const ContractsProvider: React.FC<{
   
   const atualizarModeloContrato = async (id: string, modeloAtualizado: Partial<ContractTemplate>) => {
     try {
-      const updated = await templatesCrud.update(id, {
+      const updated = await templateService.update(id, {
         ...modeloAtualizado,
         updatedAt: new Date().toISOString()
       });
       
       if (updated) {
         toast.success("O modelo de contrato foi atualizado com sucesso.");
+        await fetchTemplates(); // Atualizar a lista após editar
       } else {
         toast.error("Erro ao atualizar modelo de contrato.");
       }
@@ -151,17 +178,18 @@ export const ContractsProvider: React.FC<{
   
   const excluirModeloContrato = async (id: string) => {
     try {
-      const modeloEmUso = contractsCrud.data.some(c => c.templateId === id);
+      const modeloEmUso = contracts.some(c => c.templateId === id);
       if (modeloEmUso) {
         toast.error("Este modelo está associado a contratos e não pode ser excluído.");
         return;
       }
       
-      const modeloRemovido = templatesCrud.data.find(m => m.id === id);
-      const resultado = await templatesCrud.remove(id);
+      const modeloRemovido = contractTemplates.find(m => m.id === id);
+      const resultado = await templateService.delete(id);
       
       if (resultado && modeloRemovido) {
         toast.success(`${modeloRemovido.name} foi removido com sucesso.`);
+        await fetchTemplates(); // Atualizar a lista após excluir
       } else {
         toast.error("Erro ao remover modelo de contrato.");
       }
@@ -172,6 +200,7 @@ export const ContractsProvider: React.FC<{
     }
   };
   
+  // Operações de CRUD para contratos
   const adicionarContrato = async (contrato: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>): Promise<Contract> => {
     const novoContrato: Omit<Contract, 'id'> = {
       ...contrato,
@@ -180,10 +209,11 @@ export const ContractsProvider: React.FC<{
     };
     
     try {
-      const resultado = await contractsCrud.create(novoContrato);
+      const resultado = await contractService.create(novoContrato);
       
       if (resultado) {
         toast.success(`${contrato.title} foi adicionado com sucesso.`);
+        await fetchContracts(); // Atualizar a lista após adicionar
         return resultado;
       } else {
         toast.error('Erro ao adicionar contrato.');
@@ -198,13 +228,14 @@ export const ContractsProvider: React.FC<{
   
   const atualizarContrato = async (id: string, contratoAtualizado: Partial<Contract>) => {
     try {
-      const updated = await contractsCrud.update(id, {
+      const updated = await contractService.update(id, {
         ...contratoAtualizado,
         updatedAt: new Date().toISOString()
       });
       
       if (updated) {
         toast.success("O contrato foi atualizado com sucesso.");
+        await fetchContracts(); // Atualizar a lista após editar
       } else {
         toast.error("Erro ao atualizar contrato.");
       }
@@ -217,11 +248,12 @@ export const ContractsProvider: React.FC<{
   
   const excluirContrato = async (id: string) => {
     try {
-      const contratoRemovido = contractsCrud.data.find(c => c.id === id);
-      const resultado = await contractsCrud.remove(id);
+      const contratoRemovido = contracts.find(c => c.id === id);
+      const resultado = await contractService.delete(id);
       
       if (resultado && contratoRemovido) {
         toast.success(`${contratoRemovido.title} foi removido com sucesso.`);
+        await fetchContracts(); // Atualizar a lista após excluir
       } else {
         toast.error("Erro ao remover contrato.");
       }
@@ -234,7 +266,7 @@ export const ContractsProvider: React.FC<{
   
   const enviarContratoParaCliente = async (contractId: string, clientId: string) => {
     try {
-      const contrato = contractsCrud.data.find(c => c.id === contractId);
+      const contrato = contracts.find(c => c.id === contractId);
       
       if (!contrato) {
         toast.error("Contrato não encontrado.");
@@ -250,8 +282,9 @@ export const ContractsProvider: React.FC<{
         });
       }
       
-      await atualizarContrato(contractId, { status: 'sent' });
+      await contractService.sendToClient(contractId, clientId);
       toast.success("O contrato foi enviado para o cliente com sucesso.");
+      await fetchContracts(); // Atualizar contratos após enviar
     } catch (error) {
       console.error('Erro ao enviar contrato para cliente:', error);
       toast.error("Erro ao enviar contrato para o cliente.");
@@ -261,20 +294,16 @@ export const ContractsProvider: React.FC<{
   
   const assinarContrato = async (contractId: string, signatureUrl: string) => {
     try {
-      const contrato = contractsCrud.data.find(c => c.id === contractId);
+      const contrato = contracts.find(c => c.id === contractId);
       
       if (!contrato) {
         toast.error("Contrato não encontrado.");
         return;
       }
       
-      await atualizarContrato(contractId, {
-        status: 'signed',
-        signatureUrl,
-        signedAt: new Date().toISOString()
-      });
-      
+      await contractService.signContract(contractId, signatureUrl);
       toast.success("O contrato foi assinado com sucesso.");
+      await fetchContracts(); // Atualizar contratos após assinar
     } catch (error) {
       console.error('Erro ao assinar contrato:', error);
       toast.error("Erro ao assinar contrato.");
@@ -282,26 +311,25 @@ export const ContractsProvider: React.FC<{
     }
   };
   
-  // Função que controla o carregamento por página de forma otimizada
+  // Funções para controlar paginação
   const handleSetPage = useCallback((newPage: number) => {
     console.log(`ContractsContext: Alterando para página ${newPage}`);
-    if (newPage !== contractsCrud.page) {
-      contractsCrud.refresh(newPage, contractsCrud.limit);
+    if (newPage !== page) {
+      fetchContracts(newPage, limit);
     }
-  }, [contractsCrud]);
+  }, [fetchContracts, page, limit]);
 
-  // Função que controla a quantidade de itens por página
   const handleSetLimit = useCallback((newLimit: number) => {
     console.log(`ContractsContext: Alterando limite para ${newLimit}`);
-    if (newLimit !== contractsCrud.limit) {
-      contractsCrud.refresh(1, newLimit);
+    if (newLimit !== limit) {
+      fetchContracts(1, newLimit);
     }
-  }, [contractsCrud]);
+  }, [fetchContracts, limit]);
   
   return (
     <ContractsContext.Provider value={{
-      contracts: contractsCrud.data,
-      contractTemplates: templatesCrud.data,
+      contracts,
+      contractTemplates,
       addContractTemplate: adicionarModeloContrato,
       updateContractTemplate: atualizarModeloContrato,
       removeContractTemplate: excluirModeloContrato,
@@ -310,10 +338,10 @@ export const ContractsProvider: React.FC<{
       removeContract: excluirContrato,
       sendContractToClient: enviarContratoParaCliente,
       signContract: assinarContrato,
-      total: contractsCrud.total,
-      page: contractsCrud.page,
-      limit: contractsCrud.limit,
-      loading: contractsCrud.loading,
+      total,
+      page,
+      limit,
+      loading,
       setPage: handleSetPage,
       setLimit: handleSetLimit,
       refresh: forceRefresh
