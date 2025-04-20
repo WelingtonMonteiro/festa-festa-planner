@@ -13,6 +13,7 @@ import {
 import { toast } from 'sonner';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { Variable } from 'lucide-react';
 
 interface ContractEditorProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ interface ContractEditorProps {
   contract?: Contract;
   onSave: (content: string) => void;
   previewClient?: Client;
+  onEditVariables?: () => void;
 }
 
 const ContractEditor = ({ 
@@ -29,14 +31,15 @@ const ContractEditor = ({
   template, 
   contract, 
   onSave,
-  previewClient
+  previewClient,
+  onEditVariables
 }: ContractEditorProps) => {
   const [content, setContent] = useState<string>('');
   const [initialContent, setInitialContent] = useState<string>('');
   const [isInitializing, setIsInitializing] = useState<boolean>(true);
   const [processedContent, setProcessedContent] = useState<string>('');
   const editorRef = useRef<ReactQuill>(null);
-  
+
   // Use this effect to only set content when the dialog is opened or the template/contract changes
   useEffect(() => {
     if (isOpen) {
@@ -116,9 +119,22 @@ const ContractEditor = ({
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         <DialogHeader>
-          <DialogTitle>
-            {template ? `Editar Modelo: ${template.name}` : `Editar Contrato: ${contract?.title}`}
-          </DialogTitle>
+          <div className="flex justify-between items-center">
+            <DialogTitle>
+              {template ? `Editar Modelo: ${template.name}` : `Editar Contrato: ${contract?.title}`}
+            </DialogTitle>
+            {onEditVariables && template && (
+              <Button 
+                onClick={onEditVariables} 
+                variant="outline" 
+                size="sm" 
+                className="flex gap-2"
+              >
+                <Variable className="h-4 w-4" />
+                <span>Editar Variáveis</span>
+              </Button>
+            )}
+          </div>
           {previewClient && (
             <DialogDescription>
               Visualizando com dados de: <strong>{previewClient.nome}</strong>
@@ -246,3 +262,4 @@ const replaceVariables = (text: string, client: Client) => {
 };
 
 export default ContractEditor;
+

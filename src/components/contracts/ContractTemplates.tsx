@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
@@ -122,7 +123,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
   useEffect(() => {
     if (templateToEdit) {
       try {
-        const variables = templateToEdit.variables ? JSON.parse(templateToEdit.variables as string) : [];
+        const variables = templateToEdit.variables ? JSON.parse(templateToEdit.variables) : [];
         setCurrentVariables(variables);
       } catch (error) {
         console.error('Erro ao carregar variáveis:', error);
@@ -201,6 +202,10 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
       toast.success('Modelo salvo com sucesso');
     }
   }, [templateToEdit, updateContractTemplate]);
+
+  const handleOpenVariablesDialog = () => {
+    setIsVariableDialogOpen(true);
+  };
 
   return (
     <>
@@ -335,44 +340,13 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
               </DialogDescription>
             </DialogHeader>
             
-            <div className="flex justify-between items-center mb-4">
-              <div className="text-sm font-medium">Variáveis do Modelo</div>
-              <Button onClick={() => {
-                form.reset();
-                setEditingVariableIndex(null);
-                setIsVariableDialogOpen(true);
-              }} variant="outline" size="sm">
-                <Plus className="h-4 w-4 mr-2" /> Adicionar Variável
-              </Button>
-            </div>
-
-            <div className="mb-4 grid grid-cols-1 md:grid-cols-2 gap-2">
-              {currentVariables.map((variable, index) => (
-                <div key={index} className="flex items-center justify-between p-2 border rounded">
-                  <div>
-                    <Badge variant="secondary" className="mb-1">
-                      {`{${variable.name}}`}
-                    </Badge>
-                    <p className="text-sm text-muted-foreground">{variable.description}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEditVariable(index)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDeleteVariable(index)}>
-                      <Trash className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
             <ContractEditor
               isOpen={isEditDialogOpen}
               onOpenChange={setIsEditDialogOpen}
               template={templateToEdit}
               onSave={handleSaveTemplate}
               previewClient={previewClient}
+              onEditVariables={handleOpenVariablesDialog}
             />
           </DialogContent>
         </Dialog>
@@ -447,6 +421,32 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
               </DialogFooter>
             </form>
           </Form>
+          
+          {currentVariables.length > 0 && (
+            <div className="mt-6">
+              <h4 className="font-medium mb-2">Variáveis Existentes</h4>
+              <div className="space-y-2">
+                {currentVariables.map((variable, index) => (
+                  <div key={index} className="flex items-center justify-between p-2 border rounded">
+                    <div>
+                      <Badge variant="secondary" className="mb-1">
+                        {`{${variable.name}}`}
+                      </Badge>
+                      <p className="text-sm text-muted-foreground">{variable.description}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm" onClick={() => handleEditVariable(index)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDeleteVariable(index)}>
+                        <Trash className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>
