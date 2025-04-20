@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
@@ -38,6 +37,7 @@ import { Badge } from '../ui/badge';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { entityFields, EntityType } from '@/utils/contractEntityFields';
 
 interface ContractTemplatesProps {
   selectedTemplate: string | null;
@@ -49,6 +49,8 @@ const variableSchema = z.object({
   name: z.string().min(1, "Nome da variável é obrigatório"),
   description: z.string().min(1, "Descrição da variável é obrigatória"),
   defaultValue: z.string().optional(),
+  entity: z.string().optional(),
+  entityField: z.string().optional()
 });
 
 type VariableForm = z.infer<typeof variableSchema>;
@@ -367,12 +369,81 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
             <form onSubmit={form.handleSubmit(handleAddVariable)} className="space-y-4">
               <FormField
                 control={form.control}
+                name="entity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Entidade</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecione uma entidade" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="client">Cliente</SelectItem>
+                          <SelectItem value="kit">Kit</SelectItem>
+                          <SelectItem value="theme">Tema</SelectItem>
+                          <SelectItem value="event">Evento</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("entity") && (
+                <FormField
+                  control={form.control}
+                  name="entityField"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Campo da Entidade</FormLabel>
+                      <FormControl>
+                        <Select
+                          onValueChange={(value) => {
+                            field.onChange(value);
+                            const entity = form.getValues("entity") as EntityType;
+                            const selectedField = entityFields[entity].find(f => f.key === value);
+                            if (selectedField) {
+                              form.setValue("name", `${entity}_${value}`);
+                              form.setValue("description", `Campo ${selectedField.label.toLowerCase()} da entidade ${entity}`);
+                            }
+                          }}
+                          defaultValue={field.value}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecione um campo" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {form.watch("entity") && entityFields[form.watch("entity") as EntityType].map((field) => (
+                              <SelectItem key={field.key} value={field.key}>
+                                {field.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              <FormField
+                control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Nome da Variável</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: cliente_nome" {...field} />
+                      <Input 
+                        {...field} 
+                        disabled={!!form.watch("entityField")}
+                        placeholder="Ex: cliente_nome" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -386,7 +457,11 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
                   <FormItem>
                     <FormLabel>Descrição</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: Nome completo do cliente" {...field} />
+                      <Input 
+                        {...field} 
+                        disabled={!!form.watch("entityField")}
+                        placeholder="Ex: Nome completo do cliente" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -400,7 +475,11 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
                   <FormItem>
                     <FormLabel>Valor Padrão (opcional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ex: João da Silva" {...field} />
+                      <Input 
+                        {...field} 
+                        disabled={!!form.watch("entityField")}
+                        placeholder="Ex: João da Silva" 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
