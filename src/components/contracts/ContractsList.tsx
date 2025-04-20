@@ -221,12 +221,12 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
               <SelectValue placeholder="Todos os status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Todos os status</SelectItem>
-              <SelectItem value="draft">Rascunho</SelectItem>
-              <SelectItem value="sent">Enviado</SelectItem>
-              <SelectItem value="signed">Assinado</SelectItem>
-              <SelectItem value="expired">Expirado</SelectItem>
-              <SelectItem value="cancelled">Cancelado</SelectItem>
+              <SelectItem key="status-all" value="all">Todos os status</SelectItem>
+              <SelectItem key="status-draft" value="draft">Rascunho</SelectItem>
+              <SelectItem key="status-sent" value="sent">Enviado</SelectItem>
+              <SelectItem key="status-signed" value="signed">Assinado</SelectItem>
+              <SelectItem key="status-expired" value="expired">Expirado</SelectItem>
+              <SelectItem key="status-cancelled" value="cancelled">Cancelado</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -349,7 +349,7 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
                   <SelectValue placeholder="Selecione um modelo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Sem modelo</SelectItem>
+                  <SelectItem key="template-none" value="none">Sem modelo</SelectItem>
                   {contractTemplates.map((template) => (
                     <SelectItem key={template.id} value={template.id}>
                       {template.name}
