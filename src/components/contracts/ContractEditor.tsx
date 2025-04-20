@@ -170,7 +170,7 @@ const ContractEditor = ({
           <div className="flex flex-wrap gap-2 text-xs">
             {template?.variables ? 
               Object.entries(groupVariablesByEntity(parseTemplateVariables(template.variables))).map(([entity, variables]) => (
-                variables.length > 0 && (
+                Array.isArray(variables) && variables.length > 0 && (
                   <div key={entity} className="border rounded p-2">
                     <h4 className="font-medium mb-1 capitalize">{entity}</h4>
                     <div className="flex flex-wrap gap-1">
