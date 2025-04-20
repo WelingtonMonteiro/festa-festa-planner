@@ -21,6 +21,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
     newTemplateName,
     setNewTemplateName,
     filteredTemplates,
+    isCreatingTemplate,
     handleCreateTemplate,
     handleEditTemplate,
     handleDeleteTemplate,
@@ -59,7 +60,11 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
 
       <TemplatesList
         templates={filteredTemplates}
-        onEdit={handleEditTemplate}
+        onEdit={(template) => {
+          setTemplateToEdit(template);
+          setIsEditDialogOpen(true);
+          handleEditTemplate(template);
+        }}
         onCopy={handleCopyTemplate}
         onDelete={(id) => {
           setTemplateToDelete(id);
@@ -73,6 +78,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
         newTemplateName={newTemplateName}
         onNameChange={setNewTemplateName}
         onCreateTemplate={handleCreateTemplate}
+        isCreating={isCreatingTemplate}
       />
 
       <DeleteTemplateDialog
@@ -83,7 +89,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
 
       <EditTemplateDialog
         isOpen={isEditDialogOpen}
-        onOpenChange={closeEditDialog}
+        onOpenChange={setIsEditDialogOpen}
         template={templateToEdit}
         onSave={handleSaveTemplate}
         onEditVariables={() => setIsVariableDialogOpen(true)}
@@ -111,4 +117,3 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
 };
 
 export default ContractTemplates;
-

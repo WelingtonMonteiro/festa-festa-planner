@@ -21,9 +21,7 @@ const EditTemplateDialog = ({
   return (
     <Dialog 
       open={isOpen} 
-      onOpenChange={(open) => {
-        onOpenChange(open);
-      }}
+      onOpenChange={onOpenChange}
     >
       <DialogContent className="max-w-4xl h-[80vh] flex flex-col">
         {template && (
@@ -31,7 +29,10 @@ const EditTemplateDialog = ({
             isOpen={isOpen}
             onOpenChange={onOpenChange}
             template={template}
-            onSave={onSave}
+            onSave={(content) => {
+              onSave(content);
+              onOpenChange(false); // Fechar a modal após salvar
+            }}
             onEditVariables={onEditVariables}
           />
         )}

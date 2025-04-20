@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+
+import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { ContractTemplate } from '@/types';
 import { TemplateVariable } from '@/types/contracts';
@@ -16,90 +17,134 @@ export const useTemplateManagement = ({ onTemplateSelect }: UseTemplateManagemen
   const [templateToDelete, setTemplateToDelete] = useState<string | null>(null);
   const [currentVariables, setCurrentVariables] = useState<TemplateVariable[]>([]);
   const [editingVariableIndex, setEditingVariableIndex] = useState<number | null>(null);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
 
   const filteredTemplates = (contractTemplates || []).filter(template => 
     template && template.name && 
     template.name.toLowerCase().includes((searchQuery || '').toLowerCase())
   );
 
-  const handleCreateTemplate = useCallback(() => {
+  const handleCreateTemplate = useCallback(async () => {
     if (!newTemplateName.trim()) {
       toast.error('O nome do modelo não pode estar vazio');
       return;
     }
 
-    const templateData = {
-      name: newTemplateName.trim(),
-      content: `<h1>${newTemplateName}</h1><p>Insira aqui o conteúdo do contrato.</p>`
-    };
-    
-    addContractTemplate(templateData);
-    setNewTemplateName('');
-    
-    setTimeout(() => {
-      const newTemplate = contractTemplates.find(t => t.name === templateData.name);
-      if (newTemplate) {
+    setIsCreatingTemplate(true);
+
+    try {
+      const templateData = {
+        name: newTemplateName.trim(),
+        content: `<h1>${newTemplateName}</h1><p>Insira aqui o conteúdo do contrato.</p>`
+      };
+      
+      const newTemplate = await addContractTemplate(templateData);
+      setNewTemplateName('');
+      
+      // Selecionar o novo template após criação
+      if (newTemplate && newTemplate.id) {
         onTemplateSelect?.(newTemplate.id);
         setTemplateToEdit(newTemplate);
       }
-    }, 100);
-  }, [newTemplateName, addContractTemplate, onTemplateSelect, contractTemplates]);
+      
+      toast.success(`Modelo "${templateData.name}" criado com sucesso`);
+      return newTemplate;
+    } catch (error) {
+      console.error('Erro ao criar template:', error);
+      toast.error('Erro ao criar modelo de contrato');
+    } finally {
+      setIsCreatingTemplate(false);
+    }
+  }, [newTemplateName, addContractTemplate, onTemplateSelect]);
 
   const handleEditTemplate = useCallback((template: ContractTemplate) => {
     setTemplateToEdit(template);
+    
+    // Carregar variáveis do template
+    if (template.variables) {
+      try {
+        const parsedVariables = JSON.parse(template.variables);
+        setCurrentVariables(Array.isArray(parsedVariables) ? parsedVariables : []);
+      } catch (e) {
+        console.error('Erro ao processar variáveis do template:', e);
+        setCurrentVariables([]);
+      }
+    } else {
+      setCurrentVariables([]);
+    }
+    
     onTemplateSelect?.(template.id);
   }, [onTemplateSelect]);
 
-  const handleDeleteTemplate = useCallback(() => {
+  const handleDeleteTemplate = useCallback(async () => {
     if (templateToDelete) {
-      removeContractTemplate(templateToDelete);
-      setTemplateToDelete(null);
+      try {
+        await removeContractTemplate(templateToDelete);
+        setTemplateToDelete(null);
 
-      if (onTemplateSelect) {
-        onTemplateSelect(null);
+        if (onTemplateSelect) {
+          onTemplateSelect(null);
+        }
+      } catch (error) {
+        console.error('Erro ao excluir template:', error);
       }
     }
   }, [templateToDelete, removeContractTemplate, onTemplateSelect]);
 
-  const handleCopyTemplate = useCallback((template: ContractTemplate) => {
+  const handleCopyTemplate = useCallback(async (template: ContractTemplate) => {
     const copyData = {
       name: `${template.name} (Cópia)`,
-      content: template.content
+      content: template.content,
+      variables: template.variables
     };
     
-    addContractTemplate(copyData);
-    toast.success(`Modelo "${template.name}" copiado com sucesso`);
+    try {
+      await addContractTemplate(copyData);
+      toast.success(`Modelo "${template.name}" copiado com sucesso`);
+    } catch (error) {
+      console.error('Erro ao copiar template:', error);
+      toast.error('Erro ao copiar modelo');
+    }
   }, [addContractTemplate]);
 
-  const handleSaveTemplate = useCallback((content: string) => {
+  const handleSaveTemplate = useCallback(async (content: string) => {
     if (templateToEdit) {
-      updateContractTemplate(templateToEdit.id, { content });
-      setTemplateToEdit(null);
-      toast.success('Modelo salvo com sucesso');
+      try {
+        await updateContractTemplate(templateToEdit.id, { content });
+        toast.success('Modelo salvo com sucesso');
+        return true;
+      } catch (error) {
+        console.error('Erro ao salvar template:', error);
+        toast.error('Erro ao salvar modelo');
+        return false;
+      }
     }
+    return false;
   }, [templateToEdit, updateContractTemplate]);
 
   const handleAddVariable = useCallback((data: any) => {
-    if (editingVariableIndex !== null) {
-      const newVariables = [...currentVariables];
-      newVariables[editingVariableIndex] = data as TemplateVariable;
-      setCurrentVariables(newVariables);
-      if (templateToEdit) {
-        updateContractTemplate(templateToEdit.id, {
-          variables: JSON.stringify(newVariables)
-        });
+    if (!templateToEdit) return;
+
+    try {
+      let newVariables = [...currentVariables];
+      
+      if (editingVariableIndex !== null) {
+        newVariables[editingVariableIndex] = data as TemplateVariable;
+      } else {
+        newVariables = [...newVariables, data as TemplateVariable];
       }
-    } else {
-      const newVariables = [...currentVariables, data as TemplateVariable];
+      
       setCurrentVariables(newVariables);
-      if (templateToEdit) {
-        updateContractTemplate(templateToEdit.id, {
-          variables: JSON.stringify(newVariables)
-        });
-      }
+      updateContractTemplate(templateToEdit.id, {
+        variables: JSON.stringify(newVariables)
+      });
+      
+      setEditingVariableIndex(null);
+      toast.success(editingVariableIndex !== null ? 'Variável atualizada' : 'Variável adicionada');
+    } catch (error) {
+      console.error('Erro ao adicionar/atualizar variável:', error);
+      toast.error('Erro ao processar variável');
     }
-    setEditingVariableIndex(null);
-    toast.success(editingVariableIndex !== null ? 'Variável atualizada' : 'Variável adicionada');
   }, [currentVariables, templateToEdit, editingVariableIndex, updateContractTemplate]);
 
   return {
@@ -116,6 +161,7 @@ export const useTemplateManagement = ({ onTemplateSelect }: UseTemplateManagemen
     editingVariableIndex,
     setEditingVariableIndex,
     filteredTemplates,
+    isCreatingTemplate,
     handleCreateTemplate,
     handleEditTemplate,
     handleDeleteTemplate,

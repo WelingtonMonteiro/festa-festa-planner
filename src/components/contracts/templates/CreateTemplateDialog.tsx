@@ -9,6 +9,7 @@ interface CreateTemplateDialogProps {
   newTemplateName: string;
   onNameChange: (name: string) => void;
   onCreateTemplate: () => void;
+  isCreating?: boolean;
 }
 
 const CreateTemplateDialog = ({
@@ -17,7 +18,15 @@ const CreateTemplateDialog = ({
   newTemplateName,
   onNameChange,
   onCreateTemplate,
+  isCreating = false
 }: CreateTemplateDialogProps) => {
+  const handleCreate = async () => {
+    const result = await onCreateTemplate();
+    if (result) {
+      onOpenChange(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -31,10 +40,17 @@ const CreateTemplateDialog = ({
           placeholder="Nome do modelo de contrato"
           value={newTemplateName}
           onChange={(e) => onNameChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              handleCreate();
+            }
+          }}
         />
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>Cancelar</Button>
-          <Button onClick={onCreateTemplate}>Criar Modelo</Button>
+          <Button onClick={handleCreate} disabled={isCreating}>
+            {isCreating ? 'Criando...' : 'Criar Modelo'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
