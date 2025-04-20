@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Pagination, 
   PaginationContent, 
@@ -13,18 +12,22 @@ import {
 } from '@/components/ui/pagination';
 import ContractTemplates from '@/components/contracts/ContractTemplates';
 import ContractsList from '@/components/contracts/ContractsList';
-import ContractEditor from '@/components/contracts/ContractEditor';
 
 const Contracts = () => {
   const { contracts, contractTemplates, contractsTotal, contractsPage, contractsLimit, setContractsPage, setContractsLimit, refreshContracts } = useHandleContext();
   const [activeTab, setActiveTab] = useState<string>('templates');
   const [selectedContract, setSelectedContract] = useState<string | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
+  const [isInitialLoad, setIsInitialLoad] = useState<boolean>(true);
 
   useEffect(() => {
-    // Carregamos dados quando o componente montar
-    refreshContracts();
-  }, [refreshContracts]);  // Add refreshContracts to dependency array to prevent warnings
+    // Carregamos dados apenas na montagem inicial do componente
+    if (isInitialLoad) {
+      console.log('Contracts: Carregando dados iniciais');
+      refreshContracts();
+      setIsInitialLoad(false);
+    }
+  }, [refreshContracts, isInitialLoad]);  
 
   // Calculate total pages
   const totalPages = Math.max(1, Math.ceil((contractsTotal || 0) / (contractsLimit || 10)));
@@ -79,6 +82,14 @@ const Contracts = () => {
     return pages;
   };
 
+  // Handler para mudar de página
+  const handlePageChange = (pageNumber: number) => {
+    if (pageNumber !== contractsPage) {
+      console.log(`Contracts: Mudando para página ${pageNumber}`);
+      setContractsPage(pageNumber);
+    }
+  };
+
   return (
     <div className="container py-6">
       <div className="mb-6">
@@ -113,7 +124,7 @@ const Contracts = () => {
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious 
-                      onClick={() => contractsPage > 1 && setContractsPage(contractsPage - 1)}
+                      onClick={() => contractsPage > 1 && handlePageChange(contractsPage - 1)}
                       className={contractsPage <= 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                   </PaginationItem>
@@ -125,7 +136,7 @@ const Contracts = () => {
                       ) : (
                         <PaginationLink 
                           isActive={pageNumber === contractsPage}
-                          onClick={() => setContractsPage(pageNumber)}
+                          onClick={() => handlePageChange(pageNumber)}
                           className="cursor-pointer"
                         >
                           {pageNumber}
@@ -136,7 +147,7 @@ const Contracts = () => {
                   
                   <PaginationItem>
                     <PaginationNext 
-                      onClick={() => contractsPage < totalPages && setContractsPage(contractsPage + 1)}
+                      onClick={() => contractsPage < totalPages && handlePageChange(contractsPage + 1)}
                       className={contractsPage >= totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
                     />
                   </PaginationItem>

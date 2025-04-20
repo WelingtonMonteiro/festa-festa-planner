@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Contract, ContractTemplate, Message } from '../../types';
 import { toast } from 'sonner';
 import { useCrud } from '@/hooks/useCrud';
@@ -9,15 +9,15 @@ interface ContractsContextType {
   contracts: Contract[];
   contractTemplates: ContractTemplate[];
   
-  addContractTemplate: (template: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>) => ContractTemplate;
-  updateContractTemplate: (id: string, template: Partial<ContractTemplate>) => void;
-  removeContractTemplate: (id: string) => void;
+  addContractTemplate: (template: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>) => Promise<ContractTemplate>;
+  updateContractTemplate: (id: string, template: Partial<ContractTemplate>) => Promise<void>;
+  removeContractTemplate: (id: string) => Promise<void>;
   
-  addContract: (contract: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => Contract;
-  updateContract: (id: string, contract: Partial<Contract>) => void;
-  removeContract: (id: string) => void;
-  sendContractToClient: (contractId: string, clientId: string) => void;
-  signContract: (contractId: string, signatureUrl: string) => void;
+  addContract: (contract: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Contract>;
+  updateContract: (id: string, contract: Partial<Contract>) => Promise<void>;
+  removeContract: (id: string) => Promise<void>;
+  sendContractToClient: (contractId: string, clientId: string) => Promise<void>;
+  signContract: (contractId: string, signatureUrl: string) => Promise<void>;
   
   total: number;
   page: number;
@@ -25,7 +25,7 @@ interface ContractsContextType {
   loading: boolean;
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
-  refresh: () => void;
+  refresh: () => Promise<void>;
 }
 
 const ContractsContext = createContext<ContractsContextType | undefined>(undefined);
@@ -34,7 +34,7 @@ export const ContractsProvider: React.FC<{
   children: React.ReactNode,
   onAddMessage?: (message: Omit<Message, 'id' | 'datahora'>) => void 
 }> = ({ children, onAddMessage }) => {
-  // Use CRUD hook for contracts
+  // Use CRUD hook for contracts with a fixed API configuration
   const contractsCrud = useCrud<Contract>({
     type: StorageType.ApiRest,
     config: {
@@ -43,7 +43,7 @@ export const ContractsProvider: React.FC<{
     }
   });
 
-  // Use CRUD hook for templates
+  // Use CRUD hook for templates with a fixed API configuration
   const templatesCrud = useCrud<ContractTemplate>({
     type: StorageType.ApiRest,
     config: {
@@ -52,155 +52,224 @@ export const ContractsProvider: React.FC<{
     }
   });
   
+  // Memoize refresh function to prevent unnecessary rerenders
+  const refreshData = useCallback(async () => {
+    console.log('ContractsContext: Atualizando dados');
+    await Promise.all([
+      contractsCrud.refresh(),
+      templatesCrud.refresh()
+    ]);
+  }, [contractsCrud, templatesCrud]);
+
+  // Load data only once on initial mount
   useEffect(() => {
-    // Initialize data
-    contractsCrud.refresh();
-    templatesCrud.refresh();
-  }, []);
+    console.log('ContractsContext: Inicializando');
+    let isMounted = true;
+
+    const loadInitialData = async () => {
+      if (isMounted) {
+        await refreshData();
+      }
+    };
+
+    loadInitialData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [refreshData]);
   
-  const adicionarModeloContrato = (modelo: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>): ContractTemplate => {
+  const adicionarModeloContrato = async (modelo: Omit<ContractTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<ContractTemplate> => {
     const novoModelo: Omit<ContractTemplate, 'id'> = {
       ...modelo,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     
-    // Start creating the template and return a default template immediately
-    const defaultTemplate: ContractTemplate = {
-      ...novoModelo,
-      id: `pending-${Date.now()}`
-    } as ContractTemplate;
-    
-    // Create in the background
-    templatesCrud.create(novoModelo).then(resultado => {
+    try {
+      const resultado = await templatesCrud.create(novoModelo);
+      
       if (resultado) {
         toast.success(`${modelo.name} foi adicionado com sucesso.`);
+        return resultado;
       } else {
         toast.error('Erro ao adicionar modelo de contrato.');
+        throw new Error('Falha ao criar modelo de contrato');
       }
-    });
-    
-    // Return immediately for interface compatibility
-    return defaultTemplate;
+    } catch (error) {
+      console.error('Erro ao adicionar modelo de contrato:', error);
+      toast.error('Erro ao adicionar modelo de contrato.');
+      throw error;
+    }
   };
   
   const atualizarModeloContrato = async (id: string, modeloAtualizado: Partial<ContractTemplate>) => {
-    const updated = await templatesCrud.update(id, {
-      ...modeloAtualizado,
-      updatedAt: new Date().toISOString()
-    });
-    
-    if (updated) {
-      toast.success("O modelo de contrato foi atualizado com sucesso.");
-    } else {
+    try {
+      const updated = await templatesCrud.update(id, {
+        ...modeloAtualizado,
+        updatedAt: new Date().toISOString()
+      });
+      
+      if (updated) {
+        toast.success("O modelo de contrato foi atualizado com sucesso.");
+      } else {
+        toast.error("Erro ao atualizar modelo de contrato.");
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar modelo de contrato:', error);
       toast.error("Erro ao atualizar modelo de contrato.");
+      throw error;
     }
   };
   
   const excluirModeloContrato = async (id: string) => {
-    const modeloEmUso = contractsCrud.data.some(c => c.templateId === id);
-    if (modeloEmUso) {
-      toast.error("Este modelo está associado a contratos e não pode ser excluído.");
-      return;
-    }
-    
-    const modeloRemovido = templatesCrud.data.find(m => m.id === id);
-    const resultado = await templatesCrud.remove(id);
-    
-    if (resultado && modeloRemovido) {
-      toast.success(`${modeloRemovido.name} foi removido com sucesso.`);
-    } else {
+    try {
+      const modeloEmUso = contractsCrud.data.some(c => c.templateId === id);
+      if (modeloEmUso) {
+        toast.error("Este modelo está associado a contratos e não pode ser excluído.");
+        return;
+      }
+      
+      const modeloRemovido = templatesCrud.data.find(m => m.id === id);
+      const resultado = await templatesCrud.remove(id);
+      
+      if (resultado && modeloRemovido) {
+        toast.success(`${modeloRemovido.name} foi removido com sucesso.`);
+      } else {
+        toast.error("Erro ao remover modelo de contrato.");
+      }
+    } catch (error) {
+      console.error('Erro ao excluir modelo de contrato:', error);
       toast.error("Erro ao remover modelo de contrato.");
+      throw error;
     }
   };
   
-  const adicionarContrato = (contrato: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>): Contract => {
+  const adicionarContrato = async (contrato: Omit<Contract, 'id' | 'createdAt' | 'updatedAt'>): Promise<Contract> => {
     const novoContrato: Omit<Contract, 'id'> = {
       ...contrato,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
     
-    // Create a default contract to return immediately
-    const defaultContract: Contract = {
-      ...novoContrato,
-      id: `pending-${Date.now()}`
-    } as Contract;
-    
-    // Create in the background
-    contractsCrud.create(novoContrato).then(resultado => {
+    try {
+      const resultado = await contractsCrud.create(novoContrato);
+      
       if (resultado) {
         toast.success(`${contrato.title} foi adicionado com sucesso.`);
+        return resultado;
       } else {
         toast.error('Erro ao adicionar contrato.');
+        throw new Error('Falha ao criar contrato');
       }
-    });
-    
-    // Return immediately for interface compatibility
-    return defaultContract;
+    } catch (error) {
+      console.error('Erro ao adicionar contrato:', error);
+      toast.error('Erro ao adicionar contrato.');
+      throw error;
+    }
   };
   
   const atualizarContrato = async (id: string, contratoAtualizado: Partial<Contract>) => {
-    const updated = await contractsCrud.update(id, {
-      ...contratoAtualizado,
-      updatedAt: new Date().toISOString()
-    });
-    
-    if (updated) {
-      toast.success("O contrato foi atualizado com sucesso.");
-    } else {
+    try {
+      const updated = await contractsCrud.update(id, {
+        ...contratoAtualizado,
+        updatedAt: new Date().toISOString()
+      });
+      
+      if (updated) {
+        toast.success("O contrato foi atualizado com sucesso.");
+      } else {
+        toast.error("Erro ao atualizar contrato.");
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar contrato:', error);
       toast.error("Erro ao atualizar contrato.");
+      throw error;
     }
   };
   
   const excluirContrato = async (id: string) => {
-    const contratoRemovido = contractsCrud.data.find(c => c.id === id);
-    const resultado = await contractsCrud.remove(id);
-    
-    if (resultado && contratoRemovido) {
-      toast.success(`${contratoRemovido.title} foi removido com sucesso.`);
-    } else {
+    try {
+      const contratoRemovido = contractsCrud.data.find(c => c.id === id);
+      const resultado = await contractsCrud.remove(id);
+      
+      if (resultado && contratoRemovido) {
+        toast.success(`${contratoRemovido.title} foi removido com sucesso.`);
+      } else {
+        toast.error("Erro ao remover contrato.");
+      }
+    } catch (error) {
+      console.error('Erro ao excluir contrato:', error);
       toast.error("Erro ao remover contrato.");
+      throw error;
     }
   };
   
   const enviarContratoParaCliente = async (contractId: string, clientId: string) => {
-    const contrato = contractsCrud.data.find(c => c.id === contractId);
-    
-    if (!contrato) {
-      toast.error("Contrato não encontrado.");
-      return;
+    try {
+      const contrato = contractsCrud.data.find(c => c.id === contractId);
+      
+      if (!contrato) {
+        toast.error("Contrato não encontrado.");
+        return;
+      }
+      
+      if (onAddMessage) {
+        onAddMessage({
+          remetente: 'empresa',
+          clienteId: clientId,
+          conteudo: `Um novo contrato "${contrato.title}" foi enviado para você. Por favor, revise e assine.`,
+          lida: true
+        });
+      }
+      
+      await atualizarContrato(contractId, { status: 'sent' });
+      toast.success("O contrato foi enviado para o cliente com sucesso.");
+    } catch (error) {
+      console.error('Erro ao enviar contrato para cliente:', error);
+      toast.error("Erro ao enviar contrato para o cliente.");
+      throw error;
     }
-    
-    if (onAddMessage) {
-      onAddMessage({
-        remetente: 'empresa',
-        clienteId: clientId,
-        conteudo: `Um novo contrato "${contrato.title}" foi enviado para você. Por favor, revise e assine.`,
-        lida: true
-      });
-    }
-    
-    await atualizarContrato(contractId, { status: 'sent' });
-    toast.success("O contrato foi enviado para o cliente com sucesso.");
   };
   
   const assinarContrato = async (contractId: string, signatureUrl: string) => {
-    const contrato = contractsCrud.data.find(c => c.id === contractId);
-    
-    if (!contrato) {
-      toast.error("Contrato não encontrado.");
-      return;
+    try {
+      const contrato = contractsCrud.data.find(c => c.id === contractId);
+      
+      if (!contrato) {
+        toast.error("Contrato não encontrado.");
+        return;
+      }
+      
+      await atualizarContrato(contractId, {
+        status: 'signed',
+        signatureUrl,
+        signedAt: new Date().toISOString()
+      });
+      
+      toast.success("O contrato foi assinado com sucesso.");
+    } catch (error) {
+      console.error('Erro ao assinar contrato:', error);
+      toast.error("Erro ao assinar contrato.");
+      throw error;
     }
-    
-    await atualizarContrato(contractId, {
-      status: 'signed',
-      signatureUrl,
-      signedAt: new Date().toISOString()
-    });
-    
-    toast.success("O contrato foi assinado com sucesso.");
   };
+  
+  // Função que controla o carregamento por página de forma otimizada
+  const handleSetPage = useCallback((newPage: number) => {
+    console.log(`ContractsContext: Alterando para página ${newPage}`);
+    if (newPage !== contractsCrud.page) {
+      contractsCrud.refresh(newPage, contractsCrud.limit);
+    }
+  }, [contractsCrud]);
+
+  // Função que controla a quantidade de itens por página
+  const handleSetLimit = useCallback((newLimit: number) => {
+    console.log(`ContractsContext: Alterando limite para ${newLimit}`);
+    if (newLimit !== contractsCrud.limit) {
+      contractsCrud.refresh(1, newLimit);
+    }
+  }, [contractsCrud]);
   
   return (
     <ContractsContext.Provider value={{
@@ -218,9 +287,9 @@ export const ContractsProvider: React.FC<{
       page: contractsCrud.page,
       limit: contractsCrud.limit,
       loading: contractsCrud.loading,
-      setPage: (page) => contractsCrud.refresh(page, contractsCrud.limit),
-      setLimit: (limit) => contractsCrud.refresh(1, limit),
-      refresh: () => contractsCrud.refresh()
+      setPage: handleSetPage,
+      setLimit: handleSetLimit,
+      refresh: refreshData
     }}>
       {children}
     </ContractsContext.Provider>

@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useHandleContext } from '@/contexts/handleContext';
 import { Contract, ContractTemplate, Client } from '@/types';
@@ -58,7 +57,7 @@ const statusColors = {
 };
 
 const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListProps) => {
-  const { contracts, clients, contractTemplates, addContract, updateContract, removeContract, refresh } = useHandleContext();
+  const { contracts, clients, contractTemplates, addContract, updateContract, removeContract } = useHandleContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -72,10 +71,12 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
   const [contractToView, setContractToView] = useState<Contract | null>(null);
   const [contractToDelete, setContractToDelete] = useState<string | null>(null);
   const [filteredContracts, setFilteredContracts] = useState<Contract[]>([]);
+  const [shouldRefresh, setShouldRefresh] = useState(false);
 
   // Filter contracts whenever contracts array, search query, or status filter changes
   useEffect(() => {
     if (contracts) {
+      console.log('ContractsList: Filtrando contratos', contracts.length);
       const filtered = contracts.filter(contract => {
         const matchesSearch = contract.title.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesStatus = statusFilter === 'all' || contract.status === statusFilter;
@@ -84,13 +85,6 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       setFilteredContracts(filtered);
     }
   }, [contracts, searchQuery, statusFilter]);
-
-  // Apply search or filter, but only refresh data when needed
-  useEffect(() => {
-    if (searchQuery === '' && statusFilter === 'all') {
-      refresh(); // Only refresh when we're not filtering/searching
-    }
-  }, [searchQuery, statusFilter, refresh]);
 
   const handleCreateContract = useCallback(async () => {
     if (!newContractTitle.trim()) {
@@ -119,17 +113,23 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       templateId: newContractTemplate !== 'none' ? newContractTemplate : undefined
     };
 
-    const newContract = await addContract(contractData);
-    
-    setNewContractTitle('');
-    setNewContractClient('');
-    setNewContractTemplate('');
-    setIsCreateDialogOpen(false);
-    
-    if (newContract) {
-      setSelectedContract(newContract.id);
-      setContractToEdit(newContract);
-      setIsEditDialogOpen(true);
+    try {
+      const newContract = await addContract(contractData);
+      
+      setNewContractTitle('');
+      setNewContractClient('');
+      setNewContractTemplate('');
+      setIsCreateDialogOpen(false);
+      
+      if (newContract) {
+        setSelectedContract(newContract.id);
+        setContractToEdit(newContract);
+        setIsEditDialogOpen(true);
+        setShouldRefresh(true); // Marcar para atualizar após edição
+      }
+    } catch (error) {
+      console.error('Erro ao criar contrato:', error);
+      toast.error('Ocorreu um erro ao criar o contrato');
     }
   }, [newContractTitle, newContractClient, newContractTemplate, contractTemplates, addContract, setSelectedContract]);
 
@@ -147,12 +147,17 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
 
   const handleDeleteContract = useCallback(async () => {
     if (contractToDelete) {
-      await removeContract(contractToDelete);
-      setContractToDelete(null);
-      setIsDeleteDialogOpen(false);
+      try {
+        await removeContract(contractToDelete);
+        setContractToDelete(null);
+        setIsDeleteDialogOpen(false);
 
-      if (selectedContract === contractToDelete) {
-        setSelectedContract(null);
+        if (selectedContract === contractToDelete) {
+          setSelectedContract(null);
+        }
+      } catch (error) {
+        console.error('Erro ao excluir contrato:', error);
+        toast.error('Ocorreu um erro ao excluir o contrato');
       }
     }
   }, [contractToDelete, removeContract, selectedContract, setSelectedContract]);
@@ -165,16 +170,28 @@ const ContractsList = ({ selectedContract, setSelectedContract }: ContractsListP
       status: 'draft' as const
     };
 
-    await addContract(copyData);
-    toast.success(`Contrato "${contract.title}" copiado com sucesso`);
+    try {
+      await addContract(copyData);
+      toast.success(`Contrato "${contract.title}" copiado com sucesso`);
+      setShouldRefresh(true); // Marcar para atualizar após cópia
+    } catch (error) {
+      console.error('Erro ao copiar contrato:', error);
+      toast.error('Ocorreu um erro ao copiar o contrato');
+    }
   }, [addContract]);
 
   const handleSaveContract = useCallback(async (content: string) => {
     if (contractToEdit) {
-      await updateContract(contractToEdit.id, { content });
-      setIsEditDialogOpen(false);
-      setContractToEdit(null);
-      toast.success('Contrato salvo com sucesso');
+      try {
+        await updateContract(contractToEdit.id, { content });
+        setIsEditDialogOpen(false);
+        setContractToEdit(null);
+        toast.success('Contrato salvo com sucesso');
+        setShouldRefresh(true); // Marcar para atualizar após salvar
+      } catch (error) {
+        console.error('Erro ao salvar contrato:', error);
+        toast.error('Ocorreu um erro ao salvar o contrato');
+      }
     }
   }, [contractToEdit, updateContract]);
 
