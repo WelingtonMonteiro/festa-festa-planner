@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, Plus, MoreVertical, Eye, Edit, Copy, FileText, Trash, FileCheck } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { toast } from 'sonner';
 import ContractEditor from './ContractEditor';
@@ -101,6 +101,21 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
       setFilteredContracts(filtered);
     }
   }, [contracts, searchQuery, statusFilter]);
+
+  // Função auxiliar para formatar datas de forma segura
+  const formatDateSafely = (dateString: string | undefined): string => {
+    if (!dateString) return 'Data indisponível';
+    
+    try {
+      const date = new Date(dateString);
+      if (!isValid(date)) return 'Data inválida';
+      
+      return format(date, 'dd/MM/yyyy', { locale: ptBR });
+    } catch (error) {
+      console.error('Erro ao formatar data:', error, dateString);
+      return 'Data inválida';
+    }
+  };
 
   const handleCreateContract = useCallback(async () => {
     if (!newContractTitle.trim()) {
@@ -333,7 +348,7 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
                 </CardContent>
                 <CardFooter className="flex justify-between pt-2">
                   <span className="text-xs text-muted-foreground">
-                    Criado em: {format(new Date(contract.createdAt), 'dd/MM/yyyy', { locale: ptBR })}
+                    Criado em: {formatDateSafely(contract.createdAt)}
                   </span>
                   <Button variant="outline" size="sm" onClick={() => handleViewContract(contract)}>
                     <Eye className="mr-2 h-3 w-3" /> Visualizar
