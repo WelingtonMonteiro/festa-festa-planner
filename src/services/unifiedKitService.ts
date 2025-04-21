@@ -1,14 +1,27 @@
+
 import { kitService } from './kitService';
 import { kitApiService } from './apiServices/kitApiService';
 import { Kit } from '@/types';
 import { toast } from 'sonner';
 import { kitsMock } from '@/data/mockData';
 import { PaginatedResponse } from '@/types/crud';
+import { authService } from './authService';
 
 // Tipo para a fonte de dados
 export type DataSource = 'localStorage' | 'supabase' | 'apiRest';
 
 export const unifiedKitService = {
+  // Método auxiliar para obter cabeçalhos de autenticação
+  getAuthHeaders(): HeadersInit {
+    const token = authService.getToken();
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {
+      'Content-Type': 'application/json'
+    };
+  },
+
   async getAll(dataSource: DataSource, apiUrl?: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<Kit> | Kit[]> {
     try {
       switch (dataSource) {
@@ -21,7 +34,9 @@ export const unifiedKitService = {
             return { data: [], total: 0, page: 1, limit: 10 };
           }
           console.log(`Chamando kitApiService.getAll com página ${page} e limite ${limit}`);
-          return await kitApiService.getAll(apiUrl, page, limit);
+          const headers = this.getAuthHeaders();
+          console.log('Headers de autenticação:', headers);
+          return await kitApiService.getAll(apiUrl, page, limit, headers);
         
         case 'localStorage':
         default:
@@ -60,7 +75,8 @@ export const unifiedKitService = {
             toast.error('URL da API não configurada');
             return null;
           }
-          return await kitApiService.getById(apiUrl, id);
+          const headers = this.getAuthHeaders();
+          return await kitApiService.getById(apiUrl, id, headers);
           
         case 'localStorage':
         default:
@@ -93,7 +109,8 @@ export const unifiedKitService = {
             toast.error('URL da API não configurada');
             return null;
           }
-          return await kitApiService.create(apiUrl, kit);
+          const headers = this.getAuthHeaders();
+          return await kitApiService.create(apiUrl, kit, headers);
         
         case 'localStorage':
         default:
@@ -133,7 +150,8 @@ export const unifiedKitService = {
             toast.error('URL da API não configurada');
             return null;
           }
-          return await kitApiService.update(apiUrl, id, kitUpdate);
+          const headers = this.getAuthHeaders();
+          return await kitApiService.update(apiUrl, id, kitUpdate, headers);
         
         case 'localStorage':
         default:
@@ -172,7 +190,8 @@ export const unifiedKitService = {
             toast.error('URL da API não configurada');
             return false;
           }
-          return await kitApiService.delete(apiUrl, id);
+          const headers = this.getAuthHeaders();
+          return await kitApiService.delete(apiUrl, id, headers);
         
         case 'localStorage':
         default:

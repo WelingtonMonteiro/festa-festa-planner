@@ -1,3 +1,4 @@
+
 import { themService } from './themService';
 import { themApiService } from './apiServices/themApiService';
 import { Kit, Them } from '@/types';
@@ -5,8 +6,20 @@ import { toast } from 'sonner';
 import { temasMock } from '@/data/mockData';
 import { DataSource } from './unifiedKitService';
 import { PaginatedResponse } from '@/types/crud';
+import { authService } from './authService';
 
 export const unifiedThemService = {
+  // Método auxiliar para obter cabeçalhos de autenticação
+  getAuthHeaders(): HeadersInit {
+    const token = authService.getToken();
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {
+      'Content-Type': 'application/json'
+    };
+  },
+
   async getAll(
     dataSource: DataSource, 
     kits: Kit[], 
@@ -25,7 +38,9 @@ export const unifiedThemService = {
             return { data: [], total: 0, page: 1, limit: 10 };
           }
           console.log(`Chamando themApiService.getAll com página ${page} e limite ${limit}`);
-          return await themApiService.getAll(apiUrl, page, limit);
+          const headers = this.getAuthHeaders();
+          console.log('Headers de autenticação:', headers);
+          return await themApiService.getAll(apiUrl, page, limit, headers);
         
         case 'localStorage':
         default:
@@ -62,7 +77,8 @@ export const unifiedThemService = {
             toast.error('URL da API não configurada');
             return null;
           }
-          return await themApiService.getById(apiUrl, id);
+          const headers = this.getAuthHeaders();
+          return await themApiService.getById(apiUrl, id, headers);
           
         case 'localStorage':
         default:
@@ -96,7 +112,8 @@ export const unifiedThemService = {
             toast.error('URL da API não configurada');
             return null;
           }
-          return await themApiService.create(apiUrl, them);
+          const headers = this.getAuthHeaders();
+          return await themApiService.create(apiUrl, them, headers);
         
         case 'localStorage':
         default:
@@ -137,7 +154,8 @@ export const unifiedThemService = {
             toast.error('URL da API não configurada');
             return null;
           }
-          return await themApiService.update(apiUrl, id, themUpdate);
+          const headers = this.getAuthHeaders();
+          return await themApiService.update(apiUrl, id, themUpdate, headers);
         
         case 'localStorage':
         default:
@@ -176,7 +194,8 @@ export const unifiedThemService = {
             toast.error('URL da API não configurada');
             return false;
           }
-          return await themApiService.delete(apiUrl, id);
+          const headers = this.getAuthHeaders();
+          return await themApiService.delete(apiUrl, id, headers);
         
         case 'localStorage':
         default:
