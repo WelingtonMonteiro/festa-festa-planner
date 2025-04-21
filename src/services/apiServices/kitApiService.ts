@@ -1,22 +1,56 @@
-
 import { Kit } from "@/types";
 import { toast } from "sonner";
+import { PaginatedResponse } from "@/types/crud";
 
 export const kitApiService = {
-  async getAll(apiUrl: string): Promise<Kit[]> {
+  async getAll(apiUrl: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<Kit>> {
     try {
-      const response = await fetch(`${apiUrl}/kits`);
+      console.log(`Fazendo requisição GET para ${apiUrl}/kits com parâmetros: page=${page}&limit=${limit}`);
+      const response = await fetch(`${apiUrl}/kits?page=${page}&limit=${limit}`);
       
       if (!response.ok) {
         throw new Error(`Erro ao buscar kits: ${response.statusText}`);
       }
       
       const data = await response.json();
-      return data as Kit[];
+      console.log('Resposta da API kits:', data);
+      
+      // Verificar se a resposta já está no formato paginado
+      if (data && typeof data === 'object' && 'data' in data) {
+        // Processar IDs
+        const processedData = data.data.map((kit: any) => {
+          if (kit._id && !kit.id) {
+            return { ...kit, id: kit._id };
+          }
+          return kit;
+        });
+        
+        return {
+          data: processedData,
+          total: data.total || processedData.length,
+          page: data.page || page,
+          limit: data.limit || limit
+        };
+      }
+      
+      // Se não estiver no formato paginado, adaptar
+      const processedData = Array.isArray(data) ? data.map((kit: any) => {
+        if (kit._id && !kit.id) {
+          return { ...kit, id: kit._id };
+        }
+        return kit;
+      }) : [];
+      
+      return {
+        data: processedData,
+        total: processedData.length,
+        page,
+        limit
+      };
     } catch (error) {
       console.error('Falha ao buscar kits da API:', error);
       toast.error('Falha ao buscar kits da API');
-      return [];
+      return { data: [], total: 0, page, limit };
     }
   },
   

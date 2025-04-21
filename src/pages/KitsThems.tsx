@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,6 +15,7 @@ import { useStorage } from '@/contexts/storageContext';
 import { useApi } from '@/contexts/apiContext';
 import { unifiedKitService, DataSource } from '@/services/unifiedKitService';
 import { unifiedThemService } from '@/services/unifiedThemService';
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 
 const KitsThems = () => {
   const { addKit, addThems, updateKit, updateThems, removeKit, removeThems } = useHandleContext();
@@ -31,6 +33,12 @@ const KitsThems = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [localKits, setLocalKits] = useState<Kit[]>([]);
   const [localThems, setLocalThems] = useState<Them[]>([]);
+  
+  // Paginação
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [limit] = useState(10);
+  const [totalItems, setTotalItems] = useState(0);
 
   const getCurrentDataSource = (): DataSource => {
     if (apiType === 'rest' && apiUrl) {
@@ -44,25 +52,49 @@ const KitsThems = () => {
 
   const dataSource = getCurrentDataSource();
   
-  useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      try {
-        const loadedKits = await unifiedKitService.getAll(dataSource, apiUrl);
-        setLocalKits(loadedKits);
-        
-        const loadedThems = await unifiedThemService.getAll(dataSource, loadedKits, apiUrl);
-        setLocalThems(loadedThems);
-      } catch (error) {
-        console.error('Erro ao carregar dados:', error);
-        toast.error('Falha ao carregar kits e temas');
-      } finally {
-        setIsLoading(false);
+  const loadData = async (page = 1) => {
+    setIsLoading(true);
+    try {
+      console.log(`Carregando dados da página ${page} com limite ${limit}...`);
+      const kitResponse = await unifiedKitService.getAll(dataSource, apiUrl, page, limit);
+      
+      // Verificar se kitResponse é um objeto com estrutura de paginação
+      if (kitResponse && 'data' in kitResponse) {
+        setLocalKits(kitResponse.data);
+        setTotalPages(Math.ceil(kitResponse.total / kitResponse.limit));
+        setTotalItems(kitResponse.total);
+        console.log(`Total de kits: ${kitResponse.total}, Página: ${kitResponse.page}/${Math.ceil(kitResponse.total / kitResponse.limit)}`);
+      } else {
+        // Se não for paginado, trata como array simples
+        setLocalKits(Array.isArray(kitResponse) ? kitResponse : []);
+        console.log(`Kits carregados sem paginação: ${Array.isArray(kitResponse) ? kitResponse.length : 0}`);
       }
-    };
-    
-    loadData();
-  }, [dataSource, apiUrl]);
+      
+      const themResponse = await unifiedThemService.getAll(dataSource, localKits, apiUrl, page, limit);
+      
+      // Verificar se themResponse é um objeto com estrutura de paginação
+      if (themResponse && 'data' in themResponse) {
+        setLocalThems(themResponse.data);
+      } else {
+        setLocalThems(Array.isArray(themResponse) ? themResponse : []);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+      toast.error('Falha ao carregar kits e temas');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    loadData(currentPage);
+  }, [currentPage, dataSource, apiUrl]);
+
+  const handlePageChange = (page: number) => {
+    if (page !== currentPage) {
+      setCurrentPage(page);
+    }
+  };
 
   const resetKitForm = () => {
     setEditingKit(null);
@@ -88,7 +120,8 @@ const KitsThems = () => {
         );
         
         if (updatedKit) {
-          setLocalKits(localKits.map(k => k.id === editingKit.id ? updatedKit : k));
+          // Recarregar dados para obter a lista atualizada
+          loadData(currentPage);
           updateKit(editingKit.id, kitData);
           toast.success(`Kit atualizado com sucesso via ${dataSource}`);
         } else {
@@ -98,7 +131,8 @@ const KitsThems = () => {
         const newKit = await unifiedKitService.create(kitData, dataSource, apiUrl);
         
         if (newKit) {
-          setLocalKits([...localKits, newKit]);
+          // Recarregar dados para obter a lista atualizada
+          loadData(currentPage);
           addKit(newKit);
           toast.success(`Kit adicionado com sucesso via ${dataSource}`);
         } else {
@@ -132,7 +166,8 @@ const KitsThems = () => {
         );
         
         if (updatedThem) {
-          setLocalThems(localThems.map(t => t.id === editingThem.id ? updatedThem : t));
+          // Recarregar dados para obter a lista atualizada
+          loadData(currentPage);
           updateThems(editingThem.id, themData);
           toast.success(`Tema atualizado com sucesso via ${dataSource}`);
         } else {
@@ -142,7 +177,8 @@ const KitsThems = () => {
         const newThem = await unifiedThemService.create(themData, dataSource, localKits, apiUrl);
         
         if (newThem) {
-          setLocalThems([...localThems, newThem]);
+          // Recarregar dados para obter a lista atualizada
+          loadData(currentPage);
           addThems(newThem);
           toast.success(`Tema adicionado com sucesso via ${dataSource}`);
         } else {
@@ -192,7 +228,8 @@ const KitsThems = () => {
         const success = await unifiedKitService.delete(kitToDelete, dataSource, apiUrl);
         
         if (success) {
-          setLocalKits(localKits.filter(k => k.id !== kitToDelete));
+          // Recarregar dados para obter a lista atualizada
+          loadData(currentPage);
           removeKit(kitToDelete);
           toast.success(`Kit excluído com sucesso via ${dataSource}`);
         } else {
@@ -218,7 +255,8 @@ const KitsThems = () => {
         const success = await unifiedThemService.delete(themToDelete, dataSource, apiUrl);
         
         if (success) {
-          setLocalThems(localThems.filter(t => t.id !== themToDelete));
+          // Recarregar dados para obter a lista atualizada
+          loadData(currentPage);
           removeThems(themToDelete);
           toast.success(`Tema excluído com sucesso via ${dataSource}`);
         } else {
@@ -233,6 +271,74 @@ const KitsThems = () => {
         setThemToDelete(null);
       }
     }
+  };
+
+  // Renderização de links de paginação
+  const renderPaginationLinks = () => {
+    const links = [];
+    const maxDisplayedPages = 5;
+    
+    // Primeira página sempre visível
+    links.push(
+      <PaginationItem key="first">
+        <PaginationLink 
+          onClick={() => handlePageChange(1)} 
+          isActive={currentPage === 1}
+        >
+          1
+        </PaginationLink>
+      </PaginationItem>
+    );
+    
+    // Se tivermos mais de maxDisplayedPages páginas e estamos além da página 3
+    if (totalPages > maxDisplayedPages && currentPage > 3) {
+      links.push(
+        <PaginationItem key="ellipsis1">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Páginas intermediárias
+    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
+      if (i <= 1 || i >= totalPages) continue; // Skip 1 and totalPages as they're always shown
+      
+      links.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            onClick={() => handlePageChange(i)} 
+            isActive={currentPage === i}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    // Se tivermos mais de maxDisplayedPages páginas e estamos antes da antepenúltima página
+    if (totalPages > maxDisplayedPages && currentPage < totalPages - 2) {
+      links.push(
+        <PaginationItem key="ellipsis2">
+          <PaginationEllipsis />
+        </PaginationItem>
+      );
+    }
+    
+    // Última página sempre visível (se tivermos mais de 1 página)
+    if (totalPages > 1) {
+      links.push(
+        <PaginationItem key="last">
+          <PaginationLink 
+            onClick={() => handlePageChange(totalPages)} 
+            isActive={currentPage === totalPages}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    return links;
   };
 
   return (
@@ -260,7 +366,34 @@ const KitsThems = () => {
             }} 
             onEditKit={handleEditKit}
             onDeleteKit={handleDeleteKitClick}
+            isLoading={isLoading}
           />
+          
+          {totalPages > 1 && (
+            <div className="mt-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
+                      aria-disabled={currentPage === 1}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  
+                  {renderPaginationLinks()}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} 
+                      aria-disabled={currentPage === totalPages}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </TabsContent>
         
         <TabsContent value="temas">
@@ -272,7 +405,34 @@ const KitsThems = () => {
             }}
             onEditThem={handleEditTema}
             onDeleteThem={handleDeleteThemClick}
+            isLoading={isLoading}
           />
+          
+          {totalPages > 1 && (
+            <div className="mt-6">
+              <Pagination>
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))} 
+                      aria-disabled={currentPage === 1}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                  
+                  {renderPaginationLinks()}
+                  
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} 
+                      aria-disabled={currentPage === totalPages}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : ""}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
+            </div>
+          )}
         </TabsContent>
       </Tabs>
       

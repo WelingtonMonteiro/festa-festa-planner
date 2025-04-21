@@ -11,14 +11,17 @@ interface ThemCardProps {
 }
 
 const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
+  // Use id ou _id (para compatibilidade com MongoDB)
+  const themeId = theme.id || theme._id;
+  
   const calcROI = (them: Them) => {
-    const receitaTotal = them.vezes_alugado * (them.kits.reduce((sum, kit) => sum + kit.preco, 0) / (them.kits.length || 1));
+    const receitaTotal = them.vezes_alugado * (them.kits?.reduce((sum, kit) => sum + (kit.preco || 0), 0) / (them.kits?.length || 1));
     const roi = them.valorGasto > 0 ? ((receitaTotal / them.valorGasto) - 1) * 100 : 0;
     return roi.toFixed(2);
   };
   
   return (
-    <Card key={theme.id}>
+    <Card key={themeId}>
       <CardHeader className="relative">
         {theme.imagens && theme.imagens.length > 0 && theme.imagens[0] !== '' && (
           <div className="absolute inset-0 rounded-t-lg overflow-hidden">
@@ -32,7 +35,7 @@ const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
         )}
         <CardTitle className="relative z-10">{theme.nome}</CardTitle>
         <CardDescription className="relative z-10">
-          Investimento: R$ {theme.valorGasto.toLocaleString('pt-BR')}
+          Investimento: R$ {(theme.valorGasto || 0).toLocaleString('pt-BR')}
         </CardDescription>
         <div className="absolute right-4 top-4 flex space-x-2 z-10">
           <Button 
@@ -45,7 +48,7 @@ const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={() => onDelete(theme.id)}
+            onClick={() => onDelete(themeId)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -56,12 +59,11 @@ const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
         <div className="mb-3">
           <h4 className="text-sm font-medium mb-2">Kits disponíveis:</h4>
           <div className="flex flex-wrap gap-2">
-            {theme.kits && theme.kits.map(kit => (
-              <div key={kit.id} className="bg-muted rounded-full px-3 py-1 text-xs">
+            {theme.kits && theme.kits.length > 0 ? theme.kits.map(kit => (
+              <div key={kit.id || kit._id} className="bg-muted rounded-full px-3 py-1 text-xs">
                 {kit.nome || 'Kit sem nome'}
               </div>
-            ))}
-            {(!theme.kits || theme.kits.length === 0) && (
+            )) : (
               <div className="text-xs text-muted-foreground">Nenhum kit disponível</div>
             )}
           </div>
@@ -69,7 +71,7 @@ const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="bg-muted rounded p-2">
             <div className="font-medium">Alugado</div>
-            <div>{theme.vezes_alugado} {theme.vezes_alugado === 1 ? 'vez' : 'vezes'}</div>
+            <div>{theme.vezes_alugado || 0} {(theme.vezes_alugado || 0) === 1 ? 'vez' : 'vezes'}</div>
           </div>
           <div className="bg-muted rounded p-2">
             <div className="font-medium">ROI</div>

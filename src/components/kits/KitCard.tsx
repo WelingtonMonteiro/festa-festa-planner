@@ -11,8 +11,11 @@ interface KitCardProps {
 }
 
 const KitCard = ({ kit, onEdit, onDelete }: KitCardProps) => {
+  // Use id ou _id (para compatibilidade com MongoDB)
+  const kitId = kit.id || kit._id;
+  
   return (
-    <Card key={kit.id}>
+    <Card key={kitId}>
       <CardHeader className="relative">
         {kit.imagens && kit.imagens.length > 0 && kit.imagens[0] !== '' && (
           <div className="absolute inset-0 rounded-t-lg overflow-hidden">
@@ -39,7 +42,7 @@ const KitCard = ({ kit, onEdit, onDelete }: KitCardProps) => {
           <Button 
             variant="outline" 
             size="icon" 
-            onClick={() => onDelete(kit.id)}
+            onClick={() => onDelete(kitId)}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -50,7 +53,7 @@ const KitCard = ({ kit, onEdit, onDelete }: KitCardProps) => {
         <div>
           <h4 className="text-sm font-medium mb-2">Itens inclusos:</h4>
           <ul className="list-disc list-inside space-y-1 text-sm">
-            {kit.itens.map((item, index) => (
+            {kit.itens && kit.itens.map((item, index) => (
               <li key={index}>{item}</li>
             ))}
           </ul>

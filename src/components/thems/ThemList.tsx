@@ -4,15 +4,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PlusCircle, Tag } from 'lucide-react';
 import { Them } from '@/types';
 import ThemCard from './ThemCard';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ThemListProps {
   themes: Them[];
   onAddThem: () => void;
   onEditThem: (them: Them) => void;
   onDeleteThem: (id: string) => void;
+  isLoading?: boolean;
 }
 
-const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem }: ThemListProps) => {
+const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem, isLoading = false }: ThemListProps) => {
   // Ensure themes is an array and not null or undefined
   const safeThemes = Array.isArray(themes) ? themes : [];
   
@@ -22,6 +24,7 @@ const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem }: ThemListProps
         <Button 
           onClick={onAddThem}
           className="bg-festa-primary hover:bg-festa-primary/90"
+          disabled={isLoading}
         >
           <PlusCircle className="mr-2 h-4 w-4" />
           Novo Tema
@@ -29,16 +32,29 @@ const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem }: ThemListProps
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {safeThemes.map(theme => (
-          <ThemCard 
-            key={theme.id} 
-            theme={theme} 
-            onEdit={onEditThem} 
-            onDelete={onDeleteThem} 
-          />
-        ))}
-        
-        {safeThemes.length === 0 && (
+        {isLoading ? (
+          // Mostrar skeletons durante carregamento
+          Array.from({ length: 3 }).map((_, index) => (
+            <Card key={`skeleton-${index}`}>
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <Skeleton className="h-20 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-1" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardContent>
+            </Card>
+          ))
+        ) : safeThemes.length > 0 ? (
+          safeThemes.map(theme => (
+            <ThemCard 
+              key={theme.id || theme._id} 
+              theme={theme} 
+              onEdit={onEditThem} 
+              onDelete={onDeleteThem} 
+            />
+          ))
+        ) : (
           <div className="col-span-full">
             <Card>
               <CardContent className="flex flex-col items-center justify-center p-8">

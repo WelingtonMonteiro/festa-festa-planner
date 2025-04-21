@@ -1,22 +1,56 @@
-
 import { Them } from "@/types";
 import { toast } from "sonner";
+import { PaginatedResponse } from "@/types/crud";
 
 export const themApiService = {
-  async getAll(apiUrl: string): Promise<Them[]> {
+  async getAll(apiUrl: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<Them>> {
     try {
-      const response = await fetch(`${apiUrl}/thems`);
+      console.log(`Fazendo requisição GET para ${apiUrl}/thems com parâmetros: page=${page}&limit=${limit}`);
+      const response = await fetch(`${apiUrl}/thems?page=${page}&limit=${limit}`);
       
       if (!response.ok) {
         throw new Error(`Erro ao buscar temas: ${response.statusText}`);
       }
       
       const data = await response.json();
-      return data as Them[];
+      console.log('Resposta da API temas:', data);
+      
+      // Verificar se a resposta já está no formato paginado
+      if (data && typeof data === 'object' && 'data' in data) {
+        // Processar IDs
+        const processedData = data.data.map((them: any) => {
+          if (them._id && !them.id) {
+            return { ...them, id: them._id };
+          }
+          return them;
+        });
+        
+        return {
+          data: processedData,
+          total: data.total || processedData.length,
+          page: data.page || page,
+          limit: data.limit || limit
+        };
+      }
+      
+      // Se não estiver no formato paginado, adaptar
+      const processedData = Array.isArray(data) ? data.map((them: any) => {
+        if (them._id && !them.id) {
+          return { ...them, id: them._id };
+        }
+        return them;
+      }) : [];
+      
+      return {
+        data: processedData,
+        total: processedData.length,
+        page,
+        limit
+      };
     } catch (error) {
       console.error('Falha ao buscar temas da API:', error);
       toast.error('Falha ao buscar temas da API');
-      return [];
+      return { data: [], total: 0, page, limit };
     }
   },
   

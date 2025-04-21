@@ -1,37 +1,50 @@
-
 import { kitService } from './kitService';
 import { kitApiService } from './apiServices/kitApiService';
 import { Kit } from '@/types';
 import { toast } from 'sonner';
 import { kitsMock } from '@/data/mockData';
+import { PaginatedResponse } from '@/types/crud';
 
 // Tipo para a fonte de dados
 export type DataSource = 'localStorage' | 'supabase' | 'apiRest';
 
 export const unifiedKitService = {
-  async getAll(dataSource: DataSource, apiUrl?: string): Promise<Kit[]> {
+  async getAll(dataSource: DataSource, apiUrl?: string, page: number = 1, limit: number = 10): Promise<PaginatedResponse<Kit> | Kit[]> {
     try {
       switch (dataSource) {
         case 'supabase':
-          return await kitService.getAll();
+          return await kitService.getAll(page, limit);
         
         case 'apiRest':
           if (!apiUrl) {
             toast.error('URL da API não configurada');
-            return [];
+            return { data: [], total: 0, page: 1, limit: 10 };
           }
-          return await kitApiService.getAll(apiUrl);
+          console.log(`Chamando kitApiService.getAll com página ${page} e limite ${limit}`);
+          return await kitApiService.getAll(apiUrl, page, limit);
         
         case 'localStorage':
         default:
           // Carregar do localStorage ou usar mock data
           const kitData = localStorage.getItem('kits');
-          return kitData ? JSON.parse(kitData) : kitsMock;
+          const kits = kitData ? JSON.parse(kitData) : kitsMock;
+          
+          // Implementar paginação manual para localStorage
+          const startIndex = (page - 1) * limit;
+          const endIndex = page * limit;
+          const paginatedKits = kits.slice(startIndex, endIndex);
+          
+          return {
+            data: paginatedKits,
+            total: kits.length,
+            page,
+            limit
+          };
       }
     } catch (error) {
       console.error(`Erro ao buscar kits de ${dataSource}:`, error);
       toast.error(`Falha ao carregar kits de ${dataSource}`);
-      return [];
+      return { data: [], total: 0, page, limit };
     }
   },
 

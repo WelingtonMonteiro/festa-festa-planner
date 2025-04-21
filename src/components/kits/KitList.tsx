@@ -4,21 +4,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Package, PlusCircle } from 'lucide-react';
 import { Kit } from '@/types';
 import KitCard from './KitCard';
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface KitListProps {
   kits: Kit[];
   onAddKit: () => void;
   onEditKit: (kit: Kit) => void;
   onDeleteKit: (id: string) => void;
+  isLoading?: boolean;
 }
 
-const KitList = ({ kits, onAddKit, onEditKit, onDeleteKit }: KitListProps) => {
+const KitList = ({ kits, onAddKit, onEditKit, onDeleteKit, isLoading = false }: KitListProps) => {
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
         <Button 
           onClick={onAddKit}
           className="bg-festa-primary hover:bg-festa-primary/90"
+          disabled={isLoading}
         >
           <PlusCircle className="mr-2 h-4 w-4" />
           Novo Kit
@@ -26,10 +29,23 @@ const KitList = ({ kits, onAddKit, onEditKit, onDeleteKit }: KitListProps) => {
       </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {kits && kits.length > 0 ? (
+        {isLoading ? (
+          // Mostrar skeletons durante carregamento
+          Array.from({ length: 3 }).map((_, index) => (
+            <Card key={`skeleton-${index}`}>
+              <CardContent className="p-4">
+                <Skeleton className="h-6 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2 mb-4" />
+                <Skeleton className="h-20 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-1" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardContent>
+            </Card>
+          ))
+        ) : kits && kits.length > 0 ? (
           kits.map(kit => (
             <KitCard 
-              key={kit.id} 
+              key={kit.id || kit._id} 
               kit={kit} 
               onEdit={onEditKit} 
               onDelete={onDeleteKit} 

@@ -1,35 +1,54 @@
-
 import { themService } from './themService';
 import { themApiService } from './apiServices/themApiService';
 import { Kit, Them } from '@/types';
 import { toast } from 'sonner';
 import { temasMock } from '@/data/mockData';
 import { DataSource } from './unifiedKitService';
+import { PaginatedResponse } from '@/types/crud';
 
 export const unifiedThemService = {
-  async getAll(dataSource: DataSource, kits: Kit[], apiUrl?: string): Promise<Them[]> {
+  async getAll(
+    dataSource: DataSource, 
+    kits: Kit[], 
+    apiUrl?: string, 
+    page: number = 1, 
+    limit: number = 10
+  ): Promise<PaginatedResponse<Them> | Them[]> {
     try {
       switch (dataSource) {
         case 'supabase':
-          return await themService.getAll(kits);
+          return await themService.getAll(kits, page, limit);
         
         case 'apiRest':
           if (!apiUrl) {
             toast.error('URL da API não configurada');
-            return [];
+            return { data: [], total: 0, page: 1, limit: 10 };
           }
-          return await themApiService.getAll(apiUrl);
+          console.log(`Chamando themApiService.getAll com página ${page} e limite ${limit}`);
+          return await themApiService.getAll(apiUrl, page, limit);
         
         case 'localStorage':
         default:
           // Carregar do localStorage ou usar mock data
           const themData = localStorage.getItem('temas');
-          return themData ? JSON.parse(themData) : temasMock;
+          const themes = themData ? JSON.parse(themData) : temasMock;
+          
+          // Implementar paginação manual para localStorage
+          const startIndex = (page - 1) * limit;
+          const endIndex = page * limit;
+          const paginatedThemes = themes.slice(startIndex, endIndex);
+          
+          return {
+            data: paginatedThemes,
+            total: themes.length,
+            page,
+            limit
+          };
       }
     } catch (error) {
       console.error(`Erro ao buscar temas de ${dataSource}:`, error);
       toast.error(`Falha ao carregar temas de ${dataSource}`);
-      return [];
+      return { data: [], total: 0, page, limit };
     }
   },
 
