@@ -24,6 +24,7 @@ import LeadKanban from "@/components/leads/LeadKanban";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useCrud } from "@/hooks/useCrud";
+import { StorageType } from "@/types/crud";
 
 export type LeadStatus = 'novo' | 'contato' | 'negociando' | 'convertido' | 'perdido';
 
@@ -75,8 +76,9 @@ const getStatusIcon = (status: LeadStatus) => {
   }
 };
 
+// Corrigido: usando a enumeração StorageType em vez de string
 const crudConfig = {
-  type: "apiRest", // Altere para "supabase" se sua tabela for no supabase
+  type: StorageType.ApiRest, // Usa a enumeração correta
   config: { endpoint: "leads" }
 };
 

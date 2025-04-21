@@ -10,7 +10,7 @@ export const useLeadService = (): CrudOperations<Leads> => {
   const { apiUrl } = useApi();
   // Adaptar para a tabela/leads no backend/supabase/api
   const crudService = createCrudService<Leads>(factory, {
-    type: StorageType.ApiRest, // Troque para StorageType.Supabase se sua tabela for no supabase
+    type: StorageType.ApiRest, // Usando a enumeração correta
     config: { 
       apiUrl: apiUrl || '',
       endpoint: 'leads' // O resource do backend deve ser 'leads'
