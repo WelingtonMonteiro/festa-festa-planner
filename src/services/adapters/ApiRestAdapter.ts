@@ -1,6 +1,6 @@
-
 import { ApiRestAdapterConfig, StorageAdapter, PaginatedResponse } from "@/types/crud";
 import { toast } from "sonner";
+import { authService } from "@/services/authService";
 
 export class ApiRestAdapter<T extends Record<string, any>> implements StorageAdapter<T> {
   private apiUrl: string;
@@ -14,16 +14,26 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
     console.log(`ApiRestAdapter inicializado com baseUrl: ${this.baseUrl}`);
   }
 
-  // Função auxiliar para normalizar IDs (_id -> id) para compatibilidade
+  private getAuthHeaders(): HeadersInit {
+    const token = authService.getToken();
+    const headers: HeadersInit = {
+      'Content-Type': 'application/json',
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return headers;
+  }
+
   private normalizeId(item: any): any {
     if (!item) return item;
     
-    // Se for um array, normaliza cada item
     if (Array.isArray(item)) {
       return item.map(i => this.normalizeId(i));
     }
     
-    // Se for um objeto único
     if (item._id && !item.id) {
       const normalized = { ...item, id: item._id };
       console.log(`ID normalizado de _id para id: ${item._id}`);
@@ -33,7 +43,6 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
     return item;
   }
 
-  // Função para obter o ID real (id ou _id) de um objeto
   private getActualId(item: any, id: string): string {
     if (item && item._id) {
       console.log(`Usando _id (${item._id}) em vez de id (${id})`);
@@ -45,24 +54,26 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
 
   async getAll(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
     try {
-      // Add query parameters for pagination
       const url = new URL(this.baseUrl);
       url.searchParams.append('page', page.toString());
       url.searchParams.append('limit', limit.toString());
       
       console.log(`Fazendo requisição GET para ${url.toString()}`);
-      const response = await fetch(url.toString());
+      const response = await fetch(url.toString(), {
+        headers: this.getAuthHeaders()
+      });
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
+        }
         throw new Error(`Erro ao buscar dados: ${response.statusText}`);
       }
       
       const data = await response.json();
       console.log(`Dados recebidos da API:`, data);
       
-      // Check if the response is already in PaginatedResponse format
       if (data && typeof data === 'object' && 'data' in data) {
-        // The API already returns paginated data
         const normalizedData = this.normalizeId(data.data);
         return {
           data: normalizedData,
@@ -72,7 +83,6 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
         };
       }
       
-      // Normalize and return data in paginated format
       const normalizedData = this.normalizeId(data);
       return {
         data: normalizedData,
@@ -95,17 +105,20 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
   async getById(id: string): Promise<T | null> {
     try {
       console.log(`Fazendo requisição GET para ${this.baseUrl}/${id}`);
-      const response = await fetch(`${this.baseUrl}/${id}`);
+      const response = await fetch(`${this.baseUrl}/${id}`, {
+        headers: this.getAuthHeaders()
+      });
       
       if (!response.ok) {
-        if (response.status === 404) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
+        } else if (response.status === 404) {
           return null;
         }
         throw new Error(`Erro ao buscar item: ${response.statusText}`);
       }
       
       const data = await response.json();
-      // Normaliza _id para id
       const normalizedData = this.normalizeId(data);
       return normalizedData as T;
     } catch (error) {
@@ -120,18 +133,18 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
       console.log(`Fazendo requisição POST para ${this.baseUrl}`, item);
       const response = await fetch(this.baseUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(item),
       });
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
+        }
         throw new Error(`Erro ao criar item: ${response.statusText}`);
       }
       
       const data = await response.json();
-      // Normaliza _id para id
       const normalizedData = this.normalizeId(data);
       return normalizedData as T;
     } catch (error) {
@@ -145,10 +158,11 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
     try {
       console.log(`Fazendo requisição PUT para ${this.baseUrl}/${id}`, item);
       
-      // Primeiro obtém o objeto atual para obter o ID real (_id ou id)
       let currentItem = null;
       try {
-        const currentResponse = await fetch(`${this.baseUrl}/${id}`);
+        const currentResponse = await fetch(`${this.baseUrl}/${id}`, {
+          headers: this.getAuthHeaders()
+        });
         if (currentResponse.ok) {
           currentItem = await currentResponse.json();
         }
@@ -156,23 +170,22 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
         console.warn(`Não foi possível obter o item atual para verificar _id:`, e);
       }
       
-      // Usa o ID atual (_id) se disponível
       const actualId = currentItem ? this.getActualId(currentItem, id) : id;
       
       const response = await fetch(`${this.baseUrl}/${actualId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: this.getAuthHeaders(),
         body: JSON.stringify(item),
       });
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
+        }
         throw new Error(`Erro ao atualizar item: ${response.statusText}`);
       }
       
       const data = await response.json();
-      // Normaliza _id para id
       const normalizedData = this.normalizeId(data);
       return normalizedData as T;
     } catch (error) {
@@ -186,10 +199,11 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
     try {
       console.log(`Fazendo requisição DELETE para ${this.baseUrl}/${id}`);
       
-      // Primeiro obtém o objeto atual para obter o ID real (_id ou id)
       let currentItem = null;
       try {
-        const currentResponse = await fetch(`${this.baseUrl}/${id}`);
+        const currentResponse = await fetch(`${this.baseUrl}/${id}`, {
+          headers: this.getAuthHeaders()
+        });
         if (currentResponse.ok) {
           currentItem = await currentResponse.json();
         }
@@ -197,14 +211,17 @@ export class ApiRestAdapter<T extends Record<string, any>> implements StorageAda
         console.warn(`Não foi possível obter o item atual para verificar _id:`, e);
       }
       
-      // Usa o ID atual (_id) se disponível
       const actualId = currentItem ? this.getActualId(currentItem, id) : id;
       
       const response = await fetch(`${this.baseUrl}/${actualId}`, {
         method: 'DELETE',
+        headers: this.getAuthHeaders()
       });
       
       if (!response.ok) {
+        if (response.status === 401 || response.status === 403) {
+          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
+        }
         throw new Error(`Erro ao excluir item: ${response.statusText}`);
       }
       

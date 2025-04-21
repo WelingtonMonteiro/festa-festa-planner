@@ -1,69 +1,66 @@
 
 import { Routes, Route } from 'react-router-dom';
-import { Toaster } from "sonner";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import MainLayout from '@/components/layout/MainLayout';
-import Dashboard from '@/pages/Dashboard';
-import Clients from '@/pages/Clients.tsx';
-import ClientDetails from '@/pages/ClientDetails.tsx';
-import CalendarPage from '@/pages/CalendarPage.tsx';
-import Eventos from '@/pages/Eventos';
-import KitsThems from '@/pages/KitsThems.tsx';
-import Financial from '@/pages/Financial.tsx';
-import Messages from '@/pages/Messages';
-import Statistics from '@/pages/Statistics.tsx';
-import Reports from '@/pages/Reports';
-import Configurations from '@/pages/Configurations.tsx';
-import NotFound from '@/pages/NotFound';
-import Notifications from '@/pages/Notifications';
-import Lead from '@/pages/Leads.tsx';
-import Landing from '@/pages/Landing';
-import ClientsManagement from '@/pages/ClientsManagement.tsx';
-import Contracts from '@/pages/Contracts';
-import AdminSettings from '@/pages/AdminSettings';
-import PlansManagement from '@/pages/admin/PlansManagement';
-import { ThemeProvider } from '@/hooks/use-theme';
-import { StorageProvider } from '@/contexts/storageContext';
-import { ApiProvider } from '@/contexts/apiContext';
-import { FestaProvider } from '@/contexts/handleContext';
-
-// Criando uma instância do QueryClient
-const queryClient = new QueryClient();
+import Dashboard from './pages/Dashboard';
+import Clients from './pages/Clients';
+import ClientDetails from './pages/ClientDetails';
+import MainLayout from './components/layout/MainLayout';
+import Eventos from './pages/Eventos';
+import NotFound from './pages/NotFound';
+import Index from './pages/Index';
+import Messages from './pages/Messages';
+import Statistics from './pages/Statistics';
+import KitsThems from './pages/KitsThems';
+import Financial from './pages/Financial';
+import CalendarPage from './pages/CalendarPage';
+import Notifications from './pages/Notifications';
+import './App.css';
+import Leads from './pages/Leads';
+import ClientsManagement from './pages/ClientsManagement';
+import Reports from './pages/Reports';
+import Configurations from './pages/Configurations';
+import AdminSettings from './pages/AdminSettings';
+import Contracts from './pages/Contracts';
+import PlansManagement from './pages/admin/PlansManagement';
+import { Toaster } from './components/ui/sonner';
+import { ApiProvider } from './contexts/apiContext';
+import { AuthProvider } from './contexts/authContext';
+import LoginPage from './pages/Auth/LoginPage';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import Landing from './pages/Landing';
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <StorageProvider>
-          <ApiProvider>
-            <FestaProvider>
-              <Toaster position="top-center" richColors />
-              <Routes>
-                <Route path="/" element={<Landing />} />
-                <Route path="/dashboard" element={<MainLayout><Dashboard /></MainLayout>} />
-                <Route path="/clients" element={<MainLayout><Clients /></MainLayout>} />
-                <Route path="/client/:id" element={<MainLayout><ClientDetails /></MainLayout>} />
-                <Route path="/client-management" element={<MainLayout><ClientsManagement /></MainLayout>} />
-                <Route path="/calendar" element={<MainLayout><CalendarPage /></MainLayout>} />
-                <Route path="/events" element={<MainLayout><Eventos /></MainLayout>} />
-                <Route path="/kits-themes" element={<MainLayout><KitsThems /></MainLayout>} />
-                <Route path="/financial" element={<MainLayout><Financial /></MainLayout>} />
-                <Route path="/messages" element={<MainLayout><Messages /></MainLayout>} />
-                <Route path="/statistics" element={<MainLayout><Statistics /></MainLayout>} />
-                <Route path="/reports" element={<MainLayout><Reports /></MainLayout>} />
-                <Route path="/settings" element={<MainLayout><Configurations /></MainLayout>} />
-                <Route path="/notifications" element={<MainLayout><Notifications /></MainLayout>} />
-                <Route path="/leads" element={<MainLayout><Lead /></MainLayout>} />
-                <Route path="/contracts" element={<MainLayout><Contracts /></MainLayout>} />
-                <Route path="/admin/settings" element={<MainLayout><AdminSettings /></MainLayout>} />
-                <Route path="/admin/plans" element={<MainLayout><PlansManagement /></MainLayout>} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </FestaProvider>
-          </ApiProvider>
-        </StorageProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ApiProvider>
+      <AuthProvider>
+        <Toaster position="top-right" richColors />
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/admin" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+            <Route index element={<Dashboard />} />
+            <Route path="clientes">
+              <Route index element={<Clients />} />
+              <Route path=":id" element={<ClientDetails />} />
+              <Route path="gerenciamento" element={<ClientsManagement />} />
+            </Route>
+            <Route path="eventos" element={<Eventos />} />
+            <Route path="mensagens" element={<Messages />} />
+            <Route path="estatisticas" element={<Statistics />} />
+            <Route path="kits-temas" element={<KitsThems />} />
+            <Route path="financeiro" element={<Financial />} />
+            <Route path="calendario" element={<CalendarPage />} />
+            <Route path="notificacoes" element={<Notifications />} />
+            <Route path="leads" element={<Leads />} />
+            <Route path="relatorios" element={<Reports />} />
+            <Route path="configuracoes" element={<Configurations />} />
+            <Route path="contratos" element={<Contracts />} />
+            <Route path="admin-settings" element={<AdminSettings />} />
+            <Route path="planos" element={<PlansManagement />} />
+          </Route>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </AuthProvider>
+    </ApiProvider>
   );
 }
 

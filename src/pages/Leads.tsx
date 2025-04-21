@@ -76,7 +76,7 @@ const getStatusIcon = (status: LeadStatus) => {
 };
 
 const crudConfig = {
-  type: StorageType.ApiRest,
+  type: StorageType.ApiRest as StorageType.ApiRest,
   config: { endpoint: "leads" }
 };
 
