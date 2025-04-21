@@ -12,8 +12,9 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
     this.idField = config.idField || 'id';
   }
 
-  async getAll(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
+  async getAll(page: number = 1, limit: number = 10, headers?: HeadersInit): Promise<PaginatedResponse<T>> {
     try {
+      // Headers não são usados no localStorage, mas mantidos na assinatura para compatibilidade
       const dataStr = localStorage.getItem(this.storageKey);
       let allItems: T[] = [];
       
@@ -45,8 +46,9 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
     }
   }
 
-  async getById(id: string): Promise<T | null> {
+  async getById(id: string, headers?: HeadersInit): Promise<T | null> {
     try {
+      // Headers não são usados no localStorage, mas mantidos na assinatura para compatibilidade
       const response = await this.getAll();
       return response.data.find(item => (item as any)[this.idField] === id) || null;
     } catch (error) {
@@ -55,8 +57,9 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
     }
   }
 
-  async create(item: Omit<T, 'id'>): Promise<T | null> {
+  async create(item: Omit<T, 'id'>, headers?: HeadersInit): Promise<T | null> {
     try {
+      // Headers não são usados no localStorage, mas mantidos na assinatura para compatibilidade
       const response = await this.getAll();
       const items = response.data;
       const newItem = {
@@ -74,8 +77,9 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
     }
   }
 
-  async update(id: string, item: Partial<T>): Promise<T | null> {
+  async update(id: string, item: Partial<T>, headers?: HeadersInit): Promise<T | null> {
     try {
+      // Headers não são usados no localStorage, mas mantidos na assinatura para compatibilidade
       const response = await this.getAll();
       const items = response.data;
       let updated: T | null = null;
@@ -104,8 +108,9 @@ export class LocalStorageAdapter<T extends { id?: string }> implements StorageAd
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, headers?: HeadersInit): Promise<boolean> {
     try {
+      // Headers não são usados no localStorage, mas mantidos na assinatura para compatibilidade
       const response = await this.getAll();
       const items = response.data;
       const filteredItems = items.filter(item => (item as any)[this.idField] !== id);

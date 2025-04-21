@@ -61,7 +61,11 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
             : adaptedConfig.config.endpoint;
             
         console.log(`Criando LocalStorageAdapter com chave: ${storageKey}`);
-        return new LocalStorageAdapter<T>({ storageKey });
+        return new LocalStorageAdapter<T>({ 
+          storageKey,
+          mockData: [],
+          idField: 'id'
+        });
         
       case StorageType.Supabase:
         const tableName = adaptedConfig.type === StorageType.Supabase 
@@ -76,11 +80,17 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
       case StorageType.ApiRest:
         if (!this.apiUrl) {
           console.warn('URL da API não configurada, usando localStorage como fallback');
-          return new LocalStorageAdapter<T>({ storageKey: adaptedConfig.type === StorageType.LocalStorage 
+          const fallbackStorageKey = adaptedConfig.type === StorageType.LocalStorage 
             ? adaptedConfig.config.storageKey 
             : adaptedConfig.type === StorageType.Supabase 
               ? adaptedConfig.config.tableName 
-              : adaptedConfig.config.endpoint });
+              : adaptedConfig.config.endpoint;
+            
+          return new LocalStorageAdapter<T>({ 
+            storageKey: fallbackStorageKey,
+            mockData: [],
+            idField: 'id'
+          });
         }
         
         const endpoint = adaptedConfig.type === StorageType.ApiRest 
