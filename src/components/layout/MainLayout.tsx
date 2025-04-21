@@ -3,9 +3,10 @@ import { ReactNode, useState } from 'react';
 import { cn } from '@/lib/utils';
 import Sidebar from './Sidebar';
 import Header from './Header';
+import { Outlet } from 'react-router-dom';
 
 interface MainLayoutProps {
-  children: ReactNode;
+  children?: ReactNode;
   className?: string;
 }
 
@@ -23,7 +24,7 @@ const MainLayout = ({ children, className }: MainLayoutProps) => {
       <div className="flex flex-1 flex-col transition-all duration-300">
         <Header />
         <main className={cn("flex-1 overflow-y-auto p-6", className)}>
-          {children}
+          {children || <Outlet />}
         </main>
       </div>
     </div>

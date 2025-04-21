@@ -35,27 +35,33 @@ function App() {
         <Toaster position="top-right" richColors />
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/admin" element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
-            <Route index element={<Dashboard />} />
-            <Route path="clientes">
-              <Route index element={<Clients />} />
-              <Route path=":id" element={<ClientDetails />} />
-              <Route path="gerenciamento" element={<ClientsManagement />} />
-            </Route>
-            <Route path="eventos" element={<Eventos />} />
-            <Route path="mensagens" element={<Messages />} />
-            <Route path="estatisticas" element={<Statistics />} />
-            <Route path="kits-temas" element={<KitsThems />} />
-            <Route path="financeiro" element={<Financial />} />
-            <Route path="calendario" element={<CalendarPage />} />
-            <Route path="notificacoes" element={<Notifications />} />
-            <Route path="leads" element={<Leads />} />
-            <Route path="relatorios" element={<Reports />} />
-            <Route path="configuracoes" element={<Configurations />} />
-            <Route path="contratos" element={<Contracts />} />
-            <Route path="admin-settings" element={<AdminSettings />} />
-            <Route path="planos" element={<PlansManagement />} />
-          </Route>
+          <Route path="/admin" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Routes>
+                  <Route index element={<Dashboard />} />
+                  <Route path="clientes">
+                    <Route index element={<Clients />} />
+                    <Route path=":id" element={<ClientDetails />} />
+                    <Route path="gerenciamento" element={<ClientsManagement />} />
+                  </Route>
+                  <Route path="eventos" element={<Eventos />} />
+                  <Route path="mensagens" element={<Messages />} />
+                  <Route path="estatisticas" element={<Statistics />} />
+                  <Route path="kits-temas" element={<KitsThems />} />
+                  <Route path="financeiro" element={<Financial />} />
+                  <Route path="calendario" element={<CalendarPage />} />
+                  <Route path="notificacoes" element={<Notifications />} />
+                  <Route path="leads" element={<Leads />} />
+                  <Route path="relatorios" element={<Reports />} />
+                  <Route path="configuracoes" element={<Configurations />} />
+                  <Route path="contratos" element={<Contracts />} />
+                  <Route path="admin-settings" element={<AdminSettings />} />
+                  <Route path="planos" element={<PlansManagement />} />
+                </Routes>
+              </MainLayout>
+            </ProtectedRoute>
+          } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

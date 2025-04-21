@@ -13,7 +13,7 @@ export const useLeadService = (): CrudOperations<Leads> => {
   const crudService = createCrudService<Leads>(factory, {
     type: StorageType.ApiRest,
     config: { 
-      apiUrl: apiUrl || '',
+      apiUrl: apiUrl || 'http://localhost:3000',
       endpoint: 'leads' // O resource do backend deve ser 'leads'
     }
   });

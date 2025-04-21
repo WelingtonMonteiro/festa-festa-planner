@@ -24,6 +24,7 @@ import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import { useToast } from "@/hooks/use-toast";
 import { useCrud } from "@/hooks/useCrud";
 import { StorageType } from "@/types/crud";
+import { useApi } from "@/contexts/apiContext";
 
 export type LeadStatus = 'novo' | 'contato' | 'negociando' | 'convertido' | 'perdido';
 
@@ -75,12 +76,17 @@ const getStatusIcon = (status: LeadStatus) => {
   }
 };
 
-const crudConfig = {
-  type: StorageType.ApiRest as StorageType.ApiRest,
-  config: { endpoint: "leads" }
-};
-
 const LeadPage = () => {
+  const { apiUrl } = useApi();
+  
+  const crudConfig = {
+    type: StorageType.ApiRest as StorageType.ApiRest,
+    config: { 
+      apiUrl: apiUrl || 'http://localhost:3000',
+      endpoint: "leads" 
+    }
+  };
+
   const { data: leads, loading, create, update, remove, refresh } = useCrud<Leads>(crudConfig, []);
   const [filteredLeads, setFilteredLeads] = useState<Leads[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
