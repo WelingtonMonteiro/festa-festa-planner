@@ -45,7 +45,7 @@ const KitList = ({ kits, onAddKit, onEditKit, onDeleteKit, isLoading = false }: 
         ) : kits && kits.length > 0 ? (
           kits.map(kit => (
             <KitCard 
-              key={kit.id || kit._id} 
+              key={kit.id || (kit._id as string)} 
               kit={kit} 
               onEdit={onEditKit} 
               onDelete={onDeleteKit} 

@@ -1,4 +1,3 @@
-
 export interface Client {
   id: string;
   nome: string;
@@ -11,6 +10,7 @@ export interface Client {
 
 export interface Kit {
   id: string;
+  _id?: string; // Adicionando _id como opcional para compatibilidade com MongoDB
   nome: string;
   descricao: string;
   itens: string[];
@@ -21,6 +21,7 @@ export interface Kit {
 
 export interface Them {
   id: string;
+  _id?: string; // Adicionando _id como opcional para compatibilidade com MongoDB
   nome: string;
   descricao: string;
   imagens: string[];

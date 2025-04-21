@@ -11,8 +11,8 @@ interface KitCardProps {
 }
 
 const KitCard = ({ kit, onEdit, onDelete }: KitCardProps) => {
-  // Use id ou _id (para compatibilidade com MongoDB)
-  const kitId = kit.id || kit._id;
+  // Usar id, com fallback para _id se existir
+  const kitId = kit.id || (kit._id as string);
   
   return (
     <Card key={kitId}>

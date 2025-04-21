@@ -17,7 +17,7 @@ export const unifiedThemService = {
     try {
       switch (dataSource) {
         case 'supabase':
-          return await themService.getAll(kits, page, limit);
+          return await themService.getAll(kits);
         
         case 'apiRest':
           if (!apiUrl) {
@@ -29,11 +29,9 @@ export const unifiedThemService = {
         
         case 'localStorage':
         default:
-          // Carregar do localStorage ou usar mock data
           const themData = localStorage.getItem('temas');
           const themes = themData ? JSON.parse(themData) : temasMock;
           
-          // Implementar paginação manual para localStorage
           const startIndex = (page - 1) * limit;
           const endIndex = page * limit;
           const paginatedThemes = themes.slice(startIndex, endIndex);

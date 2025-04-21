@@ -13,7 +13,7 @@ export const unifiedKitService = {
     try {
       switch (dataSource) {
         case 'supabase':
-          return await kitService.getAll(page, limit);
+          return await kitService.getAll();
         
         case 'apiRest':
           if (!apiUrl) {

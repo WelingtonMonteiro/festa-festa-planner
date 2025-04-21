@@ -48,7 +48,7 @@ const ThemList = ({ themes, onAddThem, onEditThem, onDeleteThem, isLoading = fal
         ) : safeThemes.length > 0 ? (
           safeThemes.map(theme => (
             <ThemCard 
-              key={theme.id || theme._id} 
+              key={theme.id || (theme._id as string)} 
               theme={theme} 
               onEdit={onEditThem} 
               onDelete={onDeleteThem} 

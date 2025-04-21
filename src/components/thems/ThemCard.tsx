@@ -11,8 +11,8 @@ interface ThemCardProps {
 }
 
 const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
-  // Use id ou _id (para compatibilidade com MongoDB)
-  const themeId = theme.id || theme._id;
+  // Usar id, com fallback para _id se existir
+  const themeId = theme.id || (theme._id as string);
   
   const calcROI = (them: Them) => {
     const receitaTotal = them.vezes_alugado * (them.kits?.reduce((sum, kit) => sum + (kit.preco || 0), 0) / (them.kits?.length || 1));
@@ -60,7 +60,7 @@ const ThemCard = ({ theme, onEdit, onDelete }: ThemCardProps) => {
           <h4 className="text-sm font-medium mb-2">Kits disponíveis:</h4>
           <div className="flex flex-wrap gap-2">
             {theme.kits && theme.kits.length > 0 ? theme.kits.map(kit => (
-              <div key={kit.id || kit._id} className="bg-muted rounded-full px-3 py-1 text-xs">
+              <div key={kit.id || (kit._id as string)} className="bg-muted rounded-full px-3 py-1 text-xs">
                 {kit.nome || 'Kit sem nome'}
               </div>
             )) : (

@@ -75,9 +75,8 @@ const getStatusIcon = (status: LeadStatus) => {
   }
 };
 
-// Corrigido: usando a enumeração StorageType em vez de string
 const crudConfig = {
-  type: StorageType.ApiRest, // Usa a enumeração correta
+  type: StorageType.ApiRest,
   config: { endpoint: "leads" }
 };
 
@@ -90,7 +89,6 @@ const LeadPage = () => {
   const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
   const { toast } = useToast();
 
-  // Filtro local usando leads carregados (mantém sincronizado com os dados reais)
   const filterLeads = (search: string, tab: string, filters: any = null) => {
     let filtered = [...leads];
     if (search) {
@@ -130,7 +128,6 @@ const LeadPage = () => {
     setFilteredLeads(filtered);
   };
 
-  // Atualiza filtro ao alterar leads
   useMemo(() => { filterLeads(searchTerm, activeTab); }, [leads, searchTerm, activeTab]);
 
   const handleSearch = (value: string) => {
