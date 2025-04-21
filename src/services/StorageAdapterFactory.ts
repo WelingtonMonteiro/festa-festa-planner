@@ -90,10 +90,7 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
             : adaptedConfig.config.storageKey;
             
         console.log(`Criando ApiRestAdapter com URL: ${this.apiUrl} e endpoint: ${endpoint}`);
-        return new ApiRestAdapter<T>({
-          apiUrl: this.apiUrl,
-          endpoint
-        });
+        return new ApiRestAdapter<T>(this.apiUrl, endpoint);
     }
   }
 }

@@ -29,7 +29,13 @@ export interface CrudOperations<T> {
 }
 
 // Interface base para adaptadores de armazenamento
-export interface StorageAdapter<T> extends CrudOperations<T> { }
+export interface StorageAdapter<T> {
+  getAll: (page?: number, limit?: number, headers?: HeadersInit) => Promise<PaginatedResponse<T>>;
+  getById: (id: string, headers?: HeadersInit) => Promise<T | null>;
+  create: (item: Omit<T, 'id'>, headers?: HeadersInit) => Promise<T | null>;
+  update: (id: string, item: Partial<T>, headers?: HeadersInit) => Promise<T | null>;
+  delete: (id: string, headers?: HeadersInit) => Promise<boolean>;
+}
 
 // Interface para provedores com metadado de origem
 export interface StorageProvider<T> extends StorageAdapter<T> {
