@@ -8,6 +8,7 @@ import { useApi } from "@/contexts/apiContext";
 export const useLeadService = (): CrudOperations<Leads> => {
   const factory = useStorageAdapterFactory();
   const { apiUrl } = useApi();
+  
   // Adaptar para a tabela/leads no backend/supabase/api
   const crudService = createCrudService<Leads>(factory, {
     type: StorageType.ApiRest,
