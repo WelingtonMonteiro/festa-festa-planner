@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Table, TableBody, TableCell, TableHead, 
@@ -7,44 +7,32 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 import { 
   Search, XCircle, Phone, Mail, Calendar,
   AlertTriangle, SquareX, MessageSquare
 } from "lucide-react";
 
-// Dados mockados para clients que cancelaram pagamentos
-const canceledClients = [
-  {
-    id: "c1",
-    nome: "Pedro Oliveira",
-    telefone: "(11) 95432-1098",
-    email: "pedro@example.com",
-    valorCancelado: 2500,
-    dataCancelamento: "2023-04-05",
-    motivo: "Problemas financeiros"
-  },
-  {
-    id: "c2",
-    nome: "Carla Santos",
-    telefone: "(11) 91234-5678",
-    email: "carla@example.com",
-    valorCancelado: 1800,
-    dataCancelamento: "2023-04-10",
-    motivo: "Insatisfeito com o serviço"
-  }
-];
-
+// Utilize dados do CRUD real
 const CanceledClients = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  
+  const { clients } = useHandleContext();
+
+  // Filtro: clientes com histórico com evento cancelado
+  const canceledClients = useMemo(() => 
+    clients.filter(client =>
+      client.historico?.some(event => event.status === 'cancelado')
+    ), [clients]
+  );
+
   const filteredClients = canceledClients.filter(
     client =>
       client.nome.toLowerCase().includes(search.toLowerCase()) ||
       client.telefone.includes(search) ||
-      client.email.toLowerCase().includes(search.toLowerCase())
+      (client.email && client.email.toLowerCase().includes(search.toLowerCase()))
   );
-  
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -77,8 +65,15 @@ const CanceledClients = () => {
           </TableHeader>
           <TableBody>
             {filteredClients.map((cliente) => {
-              const cancellationDate = new Date(cliente.dataCancelamento);
-              
+              // Último evento cancelado
+              const lastCanceled = cliente.historico
+                ?.filter(ev => ev.status === 'cancelado')
+                .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())[0];
+
+              const cancellationDate = lastCanceled ? new Date(lastCanceled.data) : null;
+              const motivo = lastCanceled?.motivo || "Não informado";
+              const valorCancelado = lastCanceled?.valorTotal || 0;
+
               return (
                 <TableRow key={cliente.id}>
                   <TableCell className="font-medium">{cliente.nome}</TableCell>
@@ -88,25 +83,29 @@ const CanceledClients = () => {
                         <Phone className="mr-2 h-3 w-3" />
                         {cliente.telefone}
                       </div>
-                      <div className="flex items-center text-sm">
-                        <Mail className="mr-2 h-3 w-3" />
-                        {cliente.email}
-                      </div>
+                      {cliente.email && (
+                        <div className="flex items-center text-sm">
+                          <Mail className="mr-2 h-3 w-3" />
+                          {cliente.email}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="font-semibold">
-                    R$ {cliente.valorCancelado.toLocaleString('pt-BR')}
+                    R$ {valorCancelado.toLocaleString('pt-BR')}
                   </TableCell>
                   <TableCell>
-                    <div className="flex items-center">
-                      <Calendar className="mr-1 h-4 w-4 text-muted-foreground" />
-                      {cancellationDate.toLocaleDateString('pt-BR')}
-                    </div>
+                    {cancellationDate && (
+                      <div className="flex items-center">
+                        <Calendar className="mr-1 h-4 w-4 text-muted-foreground" />
+                        {cancellationDate.toLocaleDateString('pt-BR')}
+                      </div>
+                    )}
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <AlertTriangle className="mr-1 h-4 w-4 text-yellow-500" />
-                      {cliente.motivo}
+                      {motivo}
                     </div>
                   </TableCell>
                   <TableCell className="text-right">

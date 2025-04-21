@@ -1,4 +1,3 @@
-
 import { Contract, ContractTemplate } from "@/types";
 import { CrudOperations, StorageType } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
@@ -51,19 +50,17 @@ export const useContractService = (): ContractService => {
   const sendToClient = async (contractId: string, clientId: string): Promise<Contract | null> => {
     const contract = await crudService.getById(contractId);
     if (!contract) return null;
-    
+
     return crudService.update(contractId, {
       clientId,
-      status: 'sent',
-      sentAt: new Date().toISOString()
+      status: 'sent'
     });
   };
 
   const signContract = async (contractId: string, signatureUrl: string): Promise<Contract | null> => {
     return crudService.update(contractId, {
       status: 'signed',
-      signatureUrl,
-      signedAt: new Date().toISOString()
+      signatureUrl
     });
   };
 
@@ -98,13 +95,13 @@ export const useContractTemplateService = (): ContractTemplateService => {
   const duplicateTemplate = async (templateId: string): Promise<ContractTemplate | null> => {
     const template = await crudService.getById(templateId);
     if (!template) return null;
-    
+
     const { id, createdAt, updatedAt, ...templateData } = template;
     const newTemplate = {
       ...templateData,
-      name: `${template.name} (Cópia)`,
-    };
-    
+      name: `${template.name} (Cópia)`
+    } as Omit<ContractTemplate, "id">;
+
     return crudService.create(newTemplate);
   };
 

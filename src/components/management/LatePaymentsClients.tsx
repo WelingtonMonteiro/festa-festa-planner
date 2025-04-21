@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Table, TableBody, TableCell, TableHead, 
@@ -9,52 +9,43 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { 
   Search, AlertCircle, Phone, Mail, Calendar,
-  CircleDollarSign, BadgeAlert
+  CircleDollarSign, BadgeAlert, MessageSquare
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 
-// Dados mockados para pagamentos atrasados
-const latePaymentsClients = [
-  {
-    id: "c1",
-    nome: "Maria Silva",
-    telefone: "(11) 98765-4321",
-    email: "maria@example.com",
-    valorAtrasado: 1500,
-    diasAtraso: 15,
-    dataVencimento: "2023-03-25"
-  },
-  {
-    id: "c2",
-    nome: "João Pereira",
-    telefone: "(11) 97777-8888",
-    email: "joao@example.com",
-    valorAtrasado: 800,
-    diasAtraso: 8,
-    dataVencimento: "2023-04-02"
-  },
-  {
-    id: "c3",
-    nome: "Ana Santos",
-    telefone: "(11) 96543-2109",
-    email: "ana@example.com",
-    valorAtrasado: 2200,
-    diasAtraso: 30,
-    dataVencimento: "2023-03-10"
-  }
-];
-
+// Usar dados do CRUD real
 const ClientesPagamentosAtrasados = () => {
   const [busca, setBusca] = useState("");
   const navigate = useNavigate();
-  
+  const { clients } = useHandleContext();
+
+  // Clientes com pelo menos um evento com valorRestante > 0 (pagamento atrasado)
+  const latePaymentsClients = useMemo(() =>
+    clients.filter(client =>
+      client.historico?.some(event => event.valorRestante > 0)
+    ), [clients]
+  );
+
   const clientesFiltrados = latePaymentsClients.filter(
     cliente =>
       cliente.nome.toLowerCase().includes(busca.toLowerCase()) ||
       cliente.telefone.includes(busca) ||
-      cliente.email.toLowerCase().includes(busca.toLowerCase())
+      (cliente.email && cliente.email.toLowerCase().includes(busca.toLowerCase()))
   );
-  
+
+  // Calcular valor total atrasado e dias de atraso (exemplo básico)
+  const getResumoAtraso = (cliente) => {
+    const atrasos = cliente.historico?.filter(e => e.valorRestante > 0) || [];
+    const valorAtrasado = atrasos.reduce((acc, ev) => acc + (ev.valorRestante || 0), 0);
+    // Buscar data mais antiga de vencimento em atraso para calcular dias de atraso
+    const hoje = new Date();
+    const datasVencimento = atrasos.map(ev => new Date(ev.dataVencimento || ev.data));
+    const dataVencimentoMaisAntiga = datasVencimento.length ? datasVencimento.sort((a, b) => a.getTime() - b.getTime())[0] : hoje;
+    const diffDias = Math.round((hoje.getTime() - dataVencimentoMaisAntiga.getTime()) / (1000 * 60 * 60 * 24));
+    return { valorAtrasado, diasAtraso: diffDias, dataVencimento: dataVencimentoMaisAntiga };
+  };
+
   // Função para determinar a severidade do atraso
   const getSeveridadeBadge = (diasAtraso: number) => {
     if (diasAtraso > 20) {
@@ -65,7 +56,7 @@ const ClientesPagamentosAtrasados = () => {
       return <Badge variant="outline" className="text-yellow-500 border-yellow-500">Atenção</Badge>;
     }
   };
-  
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -99,8 +90,7 @@ const ClientesPagamentosAtrasados = () => {
           </TableHeader>
           <TableBody>
             {clientesFiltrados.map((cliente) => {
-              const dataVencimento = new Date(cliente.dataVencimento);
-              
+              const resumo = getResumoAtraso(cliente);
               return (
                 <TableRow key={cliente.id}>
                   <TableCell className="font-medium">{cliente.nome}</TableCell>
@@ -110,31 +100,33 @@ const ClientesPagamentosAtrasados = () => {
                         <Phone className="mr-2 h-3 w-3" />
                         {cliente.telefone}
                       </div>
-                      <div className="flex items-center text-sm">
-                        <Mail className="mr-2 h-3 w-3" />
-                        {cliente.email}
-                      </div>
+                      {cliente.email && (
+                        <div className="flex items-center text-sm">
+                          <Mail className="mr-2 h-3 w-3" />
+                          {cliente.email}
+                        </div>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="text-red-500 font-semibold">
                     <div className="flex items-center">
                       <CircleDollarSign className="mr-1 h-4 w-4" />
-                      R$ {cliente.valorAtrasado.toLocaleString('pt-BR')}
+                      R$ {resumo.valorAtrasado.toLocaleString('pt-BR')}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <Calendar className="mr-1 h-4 w-4 text-muted-foreground" />
-                      {dataVencimento.toLocaleDateString('pt-BR')}
+                      {resumo.dataVencimento?.toLocaleDateString('pt-BR')}
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center">
                       <BadgeAlert className="mr-1 h-4 w-4 text-red-500" />
-                      {cliente.diasAtraso} dias
+                      {resumo.diasAtraso} dias
                     </div>
                   </TableCell>
-                  <TableCell>{getSeveridadeBadge(cliente.diasAtraso)}</TableCell>
+                  <TableCell>{getSeveridadeBadge(resumo.diasAtraso)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-2">
                       <Button 
@@ -148,6 +140,7 @@ const ClientesPagamentosAtrasados = () => {
                         variant="default" 
                         size="sm"
                       >
+                        <MessageSquare className="mr-1 h-3 w-3" />
                         Notificar
                       </Button>
                     </div>

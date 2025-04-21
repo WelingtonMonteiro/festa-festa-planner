@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { 
   Table, TableBody, TableCell, TableHead, 
@@ -10,83 +10,66 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { 
   Search, Clock, Phone, Mail, Calendar,
-  ClockIcon, MessageSquare, ChevronDown
+  ClockIcon, MessageSquare
 } from "lucide-react";
+import { useHandleContext } from "@/contexts/handleContext.tsx";
 
-// Dados mockados para últimos acessos
-const clientsAccess = [
-  {
-    id: "c1",
-    nome: "Maria Silva",
-    telefone: "(11) 98765-4321",
-    email: "maria@example.com",
-    ultimoAcesso: "2023-04-11T14:30:00",
-    diasSemAcesso: 0
-  },
-  {
-    id: "c2",
-    nome: "João Pereira",
-    telefone: "(11) 97777-8888",
-    email: "joao@example.com",
-    ultimoAcesso: "2023-04-08T09:15:00",
-    diasSemAcesso: 3
-  },
-  {
-    id: "c3",
-    nome: "Ana Santos",
-    telefone: "(11) 96543-2109",
-    email: "ana@example.com",
-    ultimoAcesso: "2023-04-01T16:45:00",
-    diasSemAcesso: 10
-  },
-  {
-    id: "c4",
-    nome: "Carlos Mendes",
-    telefone: "(11) 92345-6789",
-    email: "carlos@example.com",
-    ultimoAcesso: "2023-03-15T11:20:00",
-    diasSemAcesso: 27
-  },
-  {
-    id: "c5",
-    nome: "Lucia Ferreira",
-    telefone: "(11) 99876-5432",
-    email: "lucia@example.com",
-    ultimoAcesso: "2023-02-20T10:00:00",
-    diasSemAcesso: 50
-  }
-];
-
+// Dados reais do contexto
 const LastedAccessClients = () => {
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
-  
-  const filteredClients = clientsAccess.filter(
+  const { clients } = useHandleContext();
+
+  // Extrair último acesso do historico
+  const clientsWithAccess = useMemo(() => clients.map(client => {
+    const lastEvent = client.historico && client.historico.length
+      ? client.historico.slice().sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())[0]
+      : null;
+    const ultimoAcesso = lastEvent ? lastEvent.data : null;
+    const diasSemAcesso = ultimoAcesso
+      ? Math.round((Date.now() - new Date(ultimoAcesso).getTime())/(1000*60*60*24))
+      : null;
+    return {
+      ...client,
+      ultimoAcesso,
+      diasSemAcesso: diasSemAcesso ?? "--"
+    };
+  }).sort((a, b) => {
+    // Mais recentes primeiro
+    if (!a.ultimoAcesso && !b.ultimoAcesso) return 0;
+    if (!a.ultimoAcesso) return 1;
+    if (!b.ultimoAcesso) return -1;
+    return new Date(b.ultimoAcesso).getTime() - new Date(a.ultimoAcesso).getTime();
+  }), [clients]);
+
+  const filteredClients = clientsWithAccess.filter(
     client =>
       client.nome.toLowerCase().includes(search.toLowerCase()) ||
       client.telefone.includes(search) ||
-      client.email.toLowerCase().includes(search.toLowerCase())
+      (client.email && client.email.toLowerCase().includes(search.toLowerCase()))
   );
-  
-  // Função para formatar a data e hora
+
+  // Função para formatar data
   const formatDateHour = (dataString: string) => {
     const data = new Date(dataString);
     return data.toLocaleString('pt-BR');
   };
-  
+
   // Função para determinar o status de inatividade
   const getInactiveStatus = (dias: number) => {
     if (dias === 0) {
       return <Badge className="bg-green-500">Hoje</Badge>;
-    } else if (dias < 7) {
+    } else if (dias > 0 && dias < 7) {
       return <Badge variant="outline" className="text-green-600 border-green-600">Recente</Badge>;
-    } else if (dias < 30) {
+    } else if (dias >= 7 && dias < 30) {
       return <Badge variant="outline" className="text-yellow-600 border-yellow-600">Inativo</Badge>;
-    } else {
+    } else if (dias >= 30) {
       return <Badge variant="destructive">Muito Inativo</Badge>;
+    } else {
+      return <Badge variant="outline">Sem acesso</Badge>;
     }
   };
-  
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -127,25 +110,27 @@ const LastedAccessClients = () => {
                       <Phone className="mr-2 h-3 w-3" />
                       {cliente.telefone}
                     </div>
-                    <div className="flex items-center text-sm">
-                      <Mail className="mr-2 h-3 w-3" />
-                      {cliente.email}
-                    </div>
+                    {cliente.email && (
+                      <div className="flex items-center text-sm">
+                        <Mail className="mr-2 h-3 w-3" />
+                        {cliente.email}
+                      </div>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center">
                     <Calendar className="mr-1 h-4 w-4 text-muted-foreground" />
-                    {formatDateHour(cliente.ultimoAcesso)}
+                    {cliente.ultimoAcesso ? formatDateHour(cliente.ultimoAcesso) : "--"}
                   </div>
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center">
                     <ClockIcon className="mr-1 h-4 w-4 text-muted-foreground" />
-                    {cliente.diasSemAcesso} {cliente.diasSemAcesso === 1 ? 'dia' : 'dias'}
+                    {typeof cliente.diasSemAcesso === "number" ? `${cliente.diasSemAcesso} ${cliente.diasSemAcesso === 1 ? 'dia' : 'dias'}` : "--"}
                   </div>
                 </TableCell>
-                <TableCell>{getInactiveStatus(cliente.diasSemAcesso)}</TableCell>
+                <TableCell>{typeof cliente.diasSemAcesso === "number" ? getInactiveStatus(cliente.diasSemAcesso) : <Badge variant="outline">Sem acesso</Badge>}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end space-x-2">
                     <Button 
@@ -155,7 +140,7 @@ const LastedAccessClients = () => {
                     >
                       Detalhes
                     </Button>
-                    {cliente.diasSemAcesso > 7 && (
+                    {typeof cliente.diasSemAcesso === "number" && cliente.diasSemAcesso > 7 && (
                       <Button 
                         variant="secondary" 
                         size="sm"

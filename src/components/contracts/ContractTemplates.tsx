@@ -87,7 +87,7 @@ const ContractTemplates = ({ selectedTemplate, setSelectedTemplate, isActive = f
       <DeleteTemplateDialog
         isOpen={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
-        onDeleteTemplate={handleDeleteTemplate}
+        onDeleteTemplate={async () => { await handleDeleteTemplate(); }}
         templateName={templateToDeleteName}
       />
 

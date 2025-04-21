@@ -20,7 +20,7 @@ const InactiveClients = () => {
   const navigate = useNavigate();
   
   const inactiveClients = clients.filter(client => client.ativo === false);
-  
+
   const filteredClients = inactiveClients.filter(
     client =>
       client.nome.toLowerCase().includes(search.toLowerCase()) ||
