@@ -23,6 +23,18 @@ const Header = () => {
 
   const formattedDate = format(currentDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR });
 
+  const getCurrentDataSource = (): DataSource => {
+    if (apiType === 'rest' && apiUrl) {
+      return 'apiRest';
+    } else if (storageType === 'supabase') {
+      return 'supabase';
+    } else {
+      return 'localStorage';
+    }
+  };
+
+  const dataSource = getCurrentDataSource();
+
   useEffect(() => {
     const timer = setInterval(() => setCurrentDate(new Date()), 60000);
     return () => clearInterval(timer);
@@ -87,16 +99,6 @@ const Header = () => {
 
   const navigateToNotifications = () => {
     navigate('/notifications');
-  };
-
-  const getCurrentDataSource = (): DataSource => {
-    if (apiType === 'rest' && apiUrl) {
-      return 'apiRest';
-    } else if (storageType === 'supabase') {
-      return 'supabase';
-    } else {
-      return 'localStorage';
-    }
   };
 
   const StorageModeIndicator = () => {
