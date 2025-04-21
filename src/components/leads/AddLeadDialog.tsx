@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Leads, LeadStatus } from "@/pages/Leads.tsx";
 import { Button } from "@/components/ui/button";
@@ -31,10 +30,9 @@ const AddLeadDialog = ({ open, onOpenChange, onAddLead }: AddLeadDialogProps) =>
   const [valorOrcamento, setValorOrcamento] = useState("");
   const [observacoes, setObservacoes] = useState("");
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    onAddLead({
+    await onAddLead({
       nome,
       email,
       telefone,
@@ -44,8 +42,6 @@ const AddLeadDialog = ({ open, onOpenChange, onAddLead }: AddLeadDialogProps) =>
       valorOrcamento: valorOrcamento ? parseFloat(valorOrcamento) : undefined,
       observacoes: observacoes || undefined,
     });
-    
-    // Reset form
     resetForm();
     onOpenChange(false);
   };

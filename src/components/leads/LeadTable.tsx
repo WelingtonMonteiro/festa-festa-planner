@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Edit, Trash2, MoreVertical, Calendar, CheckCheck, PhoneOutgoing } from "lucide-react";
 import { format } from "date-fns";
@@ -42,13 +41,17 @@ interface LeadTableProps {
   onStatusChange: (leadId: string, newStatus: LeadStatus) => void;
   getStatusColor: (status: LeadStatus) => string;
   getStatusIcon: (status: LeadStatus) => JSX.Element | null;
+  onDelete?: (leadId: string) => Promise<any>;
+  onRefresh?: () => void;
 }
 
 const LeadTable = ({ 
   leads, 
   onStatusChange,
   getStatusColor,
-  getStatusIcon
+  getStatusIcon,
+  onDelete,
+  onRefresh
 }: LeadTableProps) => {
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [leadToDelete, setLeadToDelete] = useState<string | null>(null);
@@ -59,13 +62,15 @@ const LeadTable = ({
     setDeleteConfirmOpen(true);
   };
 
-  const handleDelete = () => {
-    if (leadToDelete) {
+  const handleDelete = async () => {
+    if (leadToDelete && onDelete) {
+      await onDelete(leadToDelete);
       toast({
         title: "Leads excluído",
         description: "O lead foi removido com sucesso"
       });
       setDeleteConfirmOpen(false);
+      if (onRefresh) onRefresh();
     }
   };
 
@@ -77,7 +82,6 @@ const LeadTable = ({
     }).format(value);
   };
 
-  // For empty state
   if (leads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16">

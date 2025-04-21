@@ -1,4 +1,5 @@
-import { useState } from "react";
+
+import { useState, useMemo } from "react";
 import { 
   UserPlus, 
   Filter, 
@@ -22,6 +23,7 @@ import LeadTable from "@/components/leads/LeadTable";
 import LeadKanban from "@/components/leads/LeadKanban";
 import AddLeadDialog from "@/components/leads/AddLeadDialog";
 import { useToast } from "@/hooks/use-toast";
+import { useCrud } from "@/hooks/useCrud";
 
 export type LeadStatus = 'novo' | 'contato' | 'negociando' | 'convertido' | 'perdido';
 
@@ -38,71 +40,6 @@ export interface Leads {
   dataCriacao: Date;
   dataUltimoContato?: Date;
 }
-
-const mockLeads: Leads[] = [
-  {
-    id: '1',
-    nome: 'Maria Silva',
-    email: 'maria@example.com',
-    telefone: '(11) 98765-4321',
-    tipoFesta: 'Aniversário Infantil',
-    dataInteresse: new Date(2023, 6, 15),
-    status: 'novo',
-    valorOrcamento: 2500,
-    observacoes: 'Interessada em pacote completo com decoração',
-    dataCriacao: new Date(2023, 5, 10),
-    dataUltimoContato: new Date(2023, 5, 10)
-  },
-  {
-    id: '2',
-    nome: 'João Pereira',
-    email: 'joao@example.com',
-    telefone: '(11) 91234-5678',
-    tipoFesta: 'Casamento',
-    dataInteresse: new Date(2023, 8, 22),
-    status: 'contato',
-    valorOrcamento: 8000,
-    dataCriacao: new Date(2023, 5, 15),
-    dataUltimoContato: new Date(2023, 5, 20)
-  },
-  {
-    id: '3',
-    nome: 'Ana Rodrigues',
-    email: 'ana@example.com',
-    telefone: '(11) 95555-9999',
-    tipoFesta: 'Formatura',
-    dataInteresse: new Date(2023, 11, 5),
-    status: 'negociando',
-    valorOrcamento: 5000,
-    observacoes: 'Negociando valores e serviços',
-    dataCriacao: new Date(2023, 4, 25),
-    dataUltimoContato: new Date(2023, 6, 1)
-  },
-  {
-    id: '4',
-    nome: 'Paulo Oliveira',
-    email: 'paulo@example.com',
-    telefone: '(11) 97777-8888',
-    tipoFesta: 'Aniversário Adulto',
-    status: 'convertido',
-    valorOrcamento: 3200,
-    dataCriacao: new Date(2023, 3, 10),
-    dataUltimoContato: new Date(2023, 4, 5)
-  },
-  {
-    id: '5',
-    nome: 'Carla Santos',
-    email: 'carla@example.com',
-    telefone: '(11) 96666-3333',
-    tipoFesta: 'Corporativo',
-    dataInteresse: new Date(2023, 7, 30),
-    status: 'perdido',
-    valorOrcamento: 10000,
-    observacoes: 'Cliente escolheu outro fornecedor',
-    dataCriacao: new Date(2023, 3, 5),
-    dataUltimoContato: new Date(2023, 3, 20)
-  }
-];
 
 const getStatusColor = (status: LeadStatus) => {
   switch (status) {
@@ -138,50 +75,50 @@ const getStatusIcon = (status: LeadStatus) => {
   }
 };
 
+const crudConfig = {
+  type: "apiRest", // Altere para "supabase" se sua tabela for no supabase
+  config: { endpoint: "leads" }
+};
+
 const LeadPage = () => {
-  const [leads, setLeads] = useState<Leads[]>(mockLeads);
-  const [filteredLeads, setFilteredLeads] = useState<Leads[]>(mockLeads);
+  const { data: leads, loading, create, update, remove, refresh } = useCrud<Leads>(crudConfig, []);
+  const [filteredLeads, setFilteredLeads] = useState<Leads[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddLeadOpen, setIsAddLeadOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"table" | "kanban">("table");
   const { toast } = useToast();
 
+  // Filtro local usando leads carregados (mantém sincronizado com os dados reais)
   const filterLeads = (search: string, tab: string, filters: any = null) => {
     let filtered = [...leads];
-    
     if (search) {
       filtered = filtered.filter(lead => 
-        lead.nome.toLowerCase().includes(search.toLowerCase()) ||
-        lead.email.toLowerCase().includes(search.toLowerCase()) ||
-        lead.telefone.includes(search) ||
-        lead.tipoFesta.toLowerCase().includes(search.toLowerCase())
+        lead.nome?.toLowerCase().includes(search.toLowerCase()) ||
+        lead.email?.toLowerCase().includes(search.toLowerCase()) ||
+        lead.telefone?.includes(search) ||
+        lead.tipoFesta?.toLowerCase().includes(search.toLowerCase())
       );
     }
-    
     if (tab !== "todos") {
       filtered = filtered.filter(lead => lead.status === tab);
     }
-    
     if (filters) {
       if (filters.dataInicio && filters.dataFim) {
         filtered = filtered.filter(lead => {
-          const leadDate = lead.dataCriacao;
-          return leadDate >= filters.dataInicio && leadDate <= filters.dataFim;
+          const leadDate = lead.dataCriacao ? new Date(lead.dataCriacao) : null;
+          return leadDate && leadDate >= filters.dataInicio && leadDate <= filters.dataFim;
         });
       }
-      
       if (filters.tipoFesta && filters.tipoFesta !== "todos") {
         filtered = filtered.filter(lead => lead.tipoFesta === filters.tipoFesta);
       }
-      
       if (filters.valorMinimo !== undefined) {
         filtered = filtered.filter(lead => 
           lead.valorOrcamento !== undefined && 
           lead.valorOrcamento >= filters.valorMinimo
         );
       }
-      
       if (filters.valorMaximo !== undefined) {
         filtered = filtered.filter(lead => 
           lead.valorOrcamento !== undefined && 
@@ -189,9 +126,11 @@ const LeadPage = () => {
         );
       }
     }
-    
     setFilteredLeads(filtered);
   };
+
+  // Atualiza filtro ao alterar leads
+  useMemo(() => { filterLeads(searchTerm, activeTab); }, [leads, searchTerm, activeTab]);
 
   const handleSearch = (value: string) => {
     setSearchTerm(value);
@@ -207,31 +146,21 @@ const LeadPage = () => {
     filterLeads(searchTerm, activeTab, filters);
   };
 
-  const handleStatusChange = (leadId: string, newStatus: LeadStatus) => {
-    const updatedLeads = leads.map(lead => 
-      lead.id === leadId ? { ...lead, status: newStatus, dataUltimoContato: new Date() } : lead
-    );
-    
-    setLeads(updatedLeads);
+  const handleStatusChange = async (leadId: string, newStatus: LeadStatus) => {
+    await update(leadId, { status: newStatus, dataUltimoContato: new Date() });
     filterLeads(searchTerm, activeTab);
-    
     toast({
       title: "Status atualizado",
       description: `Lead atualizado para ${newStatus}`,
     });
   };
 
-  const handleAddLead = (newLead: Omit<Leads, 'id' | 'dataCriacao'>) => {
-    const lead: Leads = {
+  const handleAddLead = async (newLead: Omit<Leads, 'id' | 'dataCriacao'>) => {
+    await create({
       ...newLead,
-      id: (leads.length + 1).toString(),
       dataCriacao: new Date(),
-    };
-    
-    const updatedLeads = [...leads, lead];
-    setLeads(updatedLeads);
+    });
     filterLeads(searchTerm, activeTab);
-    
     toast({
       title: "Leads adicionado",
       description: "Novo lead foi adicionado com sucesso",
@@ -340,6 +269,8 @@ const LeadPage = () => {
                   onStatusChange={handleStatusChange}
                   getStatusColor={getStatusColor}
                   getStatusIcon={getStatusIcon}
+                  onDelete={remove}
+                  onRefresh={refresh}
                 />
               </TabsContent>
             </Tabs>
