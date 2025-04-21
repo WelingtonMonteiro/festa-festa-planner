@@ -1,5 +1,5 @@
 
-import { Leads } from "@/pages/Leads";
+import { Leads } from "@/types/leads";
 import { CrudOperations, StorageType } from "@/types/crud";
 import { createCrudService } from "@/services/CrudService";
 import { useStorageAdapterFactory } from "@/services/StorageAdapterFactory";
