@@ -71,7 +71,7 @@ const CanceledClients = () => {
                 .sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime())[0];
 
               const cancellationDate = lastCanceled ? new Date(lastCanceled.data) : null;
-              const motivo = lastCanceled?.motivo || "Não informado";
+              const motivo = lastCanceled?.observacoes || "Não informado";
               const valorCancelado = lastCanceled?.valorTotal || 0;
 
               return (
