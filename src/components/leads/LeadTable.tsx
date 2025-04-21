@@ -1,8 +1,9 @@
+
 import { useState } from "react";
 import { Edit, Trash2, MoreVertical, Calendar, CheckCheck, PhoneOutgoing } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { Leads, LeadStatus } from "@/pages/Leads.tsx";
+import { Leads, LeadStatus } from "@/types/leads";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 

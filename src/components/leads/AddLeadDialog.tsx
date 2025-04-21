@@ -1,5 +1,6 @@
+
 import { useState } from "react";
-import { Leads, LeadStatus } from "@/pages/Leads.tsx";
+import { Leads, LeadStatus } from "@/types/leads";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
