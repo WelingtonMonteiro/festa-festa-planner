@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/authContext";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -16,11 +16,12 @@ const LoginPage = () => {
   const { login, isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
-  // Se já estiver autenticado, redirecione para o dashboard
-  if (isAuthenticated) {
-    navigate("/admin");
-    return null;
-  }
+  // Usando useEffect para o redirecionamento
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,7 +30,7 @@ const LoginPage = () => {
     try {
       const success = await login({ username, password });
       if (success) {
-        navigate("/admin");
+        navigate("/dashboard");
       }
     } finally {
       setLoading(false);
