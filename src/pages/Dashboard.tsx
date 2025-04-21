@@ -39,14 +39,14 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="flex flex-wrap gap-2">
           <Button 
-            onClick={() => navigate('/calendar')}
+            onClick={() => navigate('/calendario')}
             className="bg-festa-primary hover:bg-festa-primary/90"
           >
             <Calendar className="mr-2 h-4 w-4" />
             Agendar Evento
           </Button>
           <Button 
-            onClick={() => navigate('/client-management')}
+            onClick={() => navigate('/clientes/gerenciamento')}
             variant="outline"
           >
             <Users className="mr-2 h-4 w-4" />
@@ -139,7 +139,7 @@ const Dashboard = () => {
                   <Button 
                     variant="outline" 
                     className="w-full" 
-                    onClick={() => navigate('/calendar')}
+                    onClick={() => navigate('/calendario')}
                   >
                     Ver todos os eventos
                   </Button>
@@ -150,7 +150,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum evento agendado
                 </p>
-                <Button variant="link" onClick={() => navigate('/calendar')}>
+                <Button variant="link" onClick={() => navigate('/calendario')}>
                   Agendar um evento
                 </Button>
               </div>
@@ -183,7 +183,7 @@ const Dashboard = () => {
                 <Button 
                   variant="outline" 
                   className="w-full" 
-                  onClick={() => navigate('/kits-themes')}
+                  onClick={() => navigate('/kits-temas')}
                 >
                   Gerenciar temas
                 </Button>
@@ -193,7 +193,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum tema registrado
                 </p>
-                <Button variant="link" onClick={() => navigate('/kits-themes')}>
+                <Button variant="link" onClick={() => navigate('/kits-temas')}>
                   Adicionar temas
                 </Button>
               </div>
@@ -232,7 +232,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum evento para hoje
                 </p>
-                <Button variant="link" onClick={() => navigate('/calendar')}>
+                <Button variant="link" onClick={() => navigate('/calendario')}>
                   Ver calendário
                 </Button>
               </div>

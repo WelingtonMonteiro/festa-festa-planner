@@ -35,34 +35,129 @@ function App() {
         <Toaster position="top-right" richColors />
         <Routes>
           <Route path="/" element={<Landing />} />
-          <Route path="/admin" element={
+          <Route path="/login" element={<LoginPage />} />
+          
+          {/* Rotas protegidas com layout principal */}
+          <Route path="/dashboard" element={
             <ProtectedRoute>
               <MainLayout>
-                <Routes>
-                  <Route index element={<Dashboard />} />
-                  <Route path="clientes">
-                    <Route index element={<Clients />} />
-                    <Route path=":id" element={<ClientDetails />} />
-                    <Route path="gerenciamento" element={<ClientsManagement />} />
-                  </Route>
-                  <Route path="eventos" element={<Eventos />} />
-                  <Route path="mensagens" element={<Messages />} />
-                  <Route path="estatisticas" element={<Statistics />} />
-                  <Route path="kits-temas" element={<KitsThems />} />
-                  <Route path="financeiro" element={<Financial />} />
-                  <Route path="calendario" element={<CalendarPage />} />
-                  <Route path="notificacoes" element={<Notifications />} />
-                  <Route path="leads" element={<Leads />} />
-                  <Route path="relatorios" element={<Reports />} />
-                  <Route path="configuracoes" element={<Configurations />} />
-                  <Route path="contratos" element={<Contracts />} />
-                  <Route path="admin-settings" element={<AdminSettings />} />
-                  <Route path="planos" element={<PlansManagement />} />
-                </Routes>
+                <Dashboard />
               </MainLayout>
             </ProtectedRoute>
           } />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/clientes" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Clients />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/clientes/:id" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ClientDetails />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/clientes/gerenciamento" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ClientsManagement />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/eventos" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Eventos />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/mensagens" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Messages />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/estatisticas" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Statistics />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/kits-temas" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <KitsThems />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/financeiro" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Financial />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/calendario" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <CalendarPage />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/notificacoes" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Notifications />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/leads" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Leads />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/relatorios" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Reports />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/configuracoes" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Configurations />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/contratos" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Contracts />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/admin-settings" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <AdminSettings />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          <Route path="/planos" element={
+            <ProtectedRoute>
+              <MainLayout>
+                <PlansManagement />
+              </MainLayout>
+            </ProtectedRoute>
+          } />
+          
           <Route path="*" element={<NotFound />} />
         </Routes>
       </AuthProvider>

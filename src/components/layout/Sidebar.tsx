@@ -59,17 +59,17 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <PartyPopper className="h-5 w-5" /> 
     },
     { 
-      path: '/calendar', 
+      path: '/calendario', 
       name: 'Calendário', 
       icon: <Calendar className="h-5 w-5" /> 
     },
     { 
-      path: '/events', 
+      path: '/eventos', 
       name: 'Eventos', 
       icon: <CalendarRange className="h-5 w-5" /> 
     },
     { 
-      path: '/clients', 
+      path: '/clientes', 
       name: 'Clientes', 
       icon: <Users className="h-5 w-5" /> 
     },
@@ -79,44 +79,44 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <UserPlus className="h-5 w-5" /> 
     },
     { 
-      path: '/kits-themes', 
+      path: '/kits-temas', 
       name: 'Kits & Temas', 
       icon: <Package className="h-5 w-5" /> 
     },
     { 
-      path: '/contracts', 
+      path: '/contratos', 
       name: 'Contratos', 
       icon: <ScrollText className="h-5 w-5" /> 
     },
     { 
-      path: '/financial', 
+      path: '/financeiro', 
       name: 'Financeiro', 
       icon: <DollarSign className="h-5 w-5" /> 
     },
     { 
-      path: '/notifications', 
+      path: '/notificacoes', 
       name: 'Notificações', 
       icon: <Bell className="h-5 w-5" />,
       badge: unreadNotifications > 0 ? unreadNotifications : undefined
     },
     { 
-      path: '/messages', 
+      path: '/mensagens', 
       name: 'Mensagens', 
       icon: <MessageCircle className="h-5 w-5" />,
       badge: unreadCount > 0 ? unreadCount : undefined
     },
     { 
-      path: '/statistics', 
+      path: '/estatisticas', 
       name: 'Estatísticas', 
       icon: <BarChart2 className="h-5 w-5" /> 
     },
     { 
-      path: '/reports', 
+      path: '/relatorios', 
       name: 'Relatórios', 
       icon: <FileText className="h-5 w-5" /> 
     },
     { 
-      path: '/settings', 
+      path: '/configuracoes', 
       name: 'Configurações', 
       icon: <Settings className="h-5 w-5" /> 
     }
@@ -125,12 +125,12 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
   // Itens do menu de administrador
   const adminItems = [
     {
-      path: '/admin/settings',
+      path: '/admin-settings',
       name: 'Configurações',
       icon: <Settings className="h-5 w-5" />
     },
     {
-      path: '/admin/plans',
+      path: '/planos',
       name: 'Planos',
       icon: <CreditCard className="h-5 w-5" />
     }
