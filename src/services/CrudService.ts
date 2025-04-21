@@ -1,5 +1,6 @@
 
 import { CrudOperations, StorageAdapter, StorageAdapterConfig, StorageAdapterFactory, PaginatedResponse } from "@/types/crud";
+import { authService } from './authService';
 
 /**
  * Serviço CRUD genérico que utiliza o adaptador de armazenamento adequado
@@ -17,40 +18,79 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
     console.log(`CrudService criado com adaptador tipo: ${this.adapterType}`);
   }
 
+  private getAuthHeaders(): HeadersInit {
+    const token = authService.getToken();
+    return token ? {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    } : {
+      'Content-Type': 'application/json'
+    };
+  }
+
   async getAll(page?: number, limit?: number): Promise<PaginatedResponse<T>> {
     console.log(`CrudService.getAll(page: ${page}, limit: ${limit}) chamado com adaptador: ${this.adapterType}`);
+    
+    if (this.adapterType === 'apiRest') {
+      const headers = this.getAuthHeaders();
+      return this.adapter.getAll(page, limit, headers);
+    }
+    
     return this.adapter.getAll(page, limit);
   }
 
   async getById(id: string): Promise<T | null> {
     console.log(`CrudService.getById(${id}) chamado com adaptador: ${this.adapterType}`);
+    
+    if (this.adapterType === 'apiRest') {
+      const headers = this.getAuthHeaders();
+      return this.adapter.getById(id, headers);
+    }
+    
     return this.adapter.getById(id);
   }
 
   async create(item: Omit<T, 'id'>): Promise<T | null> {
     console.log(`CrudService.create() chamado com adaptador: ${this.adapterType}`, item);
+    
+    if (this.adapterType === 'apiRest') {
+      const headers = this.getAuthHeaders();
+      return this.adapter.create(item, headers);
+    }
+    
     return this.adapter.create(item);
   }
 
   async update(id: string, item: Partial<T>): Promise<T | null> {
     console.log(`CrudService.update(${id}) chamado com adaptador: ${this.adapterType}`, item);
+    
+    if (this.adapterType === 'apiRest') {
+      const headers = this.getAuthHeaders();
+      return this.adapter.update(id, item, headers);
+    }
+    
     return this.adapter.update(id, item);
   }
 
   async delete(id: string): Promise<boolean> {
     console.log(`CrudService.delete(${id}) chamado com adaptador: ${this.adapterType}`);
+    
+    if (this.adapterType === 'apiRest') {
+      const headers = this.getAuthHeaders();
+      return this.adapter.delete(id, headers);
+    }
+    
     return this.adapter.delete(id);
   }
 }
 
-// Factory function para criar serviços CRUD
+// Factory function to create CRUD services
 export const createCrudService = <T extends Record<string, any>>(
   factory: StorageAdapterFactory,
   config: StorageAdapterConfig
 ): CrudOperations<T> => {
   const service = new CrudService<T>(factory, config);
   
-  // Retornar os métodos do serviço explicitamente para garantir que eles sejam acessíveis
   return {
     getAll: (page?: number, limit?: number) => service.getAll(page, limit),
     getById: (id: string) => service.getById(id),

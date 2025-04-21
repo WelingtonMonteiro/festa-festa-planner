@@ -1,235 +1,97 @@
-import { ApiRestAdapterConfig, StorageAdapter, PaginatedResponse } from "@/types/crud";
-import { toast } from "sonner";
-import { authService } from "@/services/authService";
+
+import { StorageAdapter } from '@/types/crud';
+import { toast } from 'sonner';
 
 export class ApiRestAdapter<T extends Record<string, any>> implements StorageAdapter<T> {
-  private apiUrl: string;
-  private endpoint: string;
-  private baseUrl: string;
+  constructor(
+    private apiUrl: string,
+    private endpoint: string
+  ) {}
 
-  constructor(config: ApiRestAdapterConfig) {
-    this.apiUrl = config.apiUrl;
-    this.endpoint = config.endpoint;
-    this.baseUrl = `${this.apiUrl}/${this.endpoint}`;
-    console.log(`ApiRestAdapter inicializado com baseUrl: ${this.baseUrl}`);
+  private async handleResponse(response: Response) {
+    if (!response.ok) {
+      if (response.status === 401) {
+        toast.error('Sessão expirada. Por favor, faça login novamente.');
+        // You might want to trigger a logout here
+      }
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
   }
 
-  private getAuthHeaders(): HeadersInit {
-    const token = authService.getToken();
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-    
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-    
-    return headers;
-  }
-
-  private normalizeId(item: any): any {
-    if (!item) return item;
-    
-    if (Array.isArray(item)) {
-      return item.map(i => this.normalizeId(i));
-    }
-    
-    if (item._id && !item.id) {
-      const normalized = { ...item, id: item._id };
-      console.log(`ID normalizado de _id para id: ${item._id}`);
-      return normalized;
-    }
-    
-    return item;
-  }
-
-  private getActualId(item: any, id: string): string {
-    if (item && item._id) {
-      console.log(`Usando _id (${item._id}) em vez de id (${id})`);
-      return item._id;
-    }
-    console.log(`Usando id padrão: ${id}`);
-    return id;
-  }
-
-  async getAll(page: number = 1, limit: number = 10): Promise<PaginatedResponse<T>> {
+  async getAll(page: number = 1, limit: number = 10, headers?: HeadersInit) {
     try {
-      const url = new URL(this.baseUrl);
-      url.searchParams.append('page', page.toString());
-      url.searchParams.append('limit', limit.toString());
-      
-      console.log(`Fazendo requisição GET para ${url.toString()}`);
-      const response = await fetch(url.toString(), {
-        headers: this.getAuthHeaders()
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
-        }
-        throw new Error(`Erro ao buscar dados: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      console.log(`Dados recebidos da API:`, data);
-      
-      if (data && typeof data === 'object' && 'data' in data) {
-        const normalizedData = this.normalizeId(data.data);
-        return {
-          data: normalizedData,
-          total: data.total || normalizedData.length,
-          page: data.page || page,
-          limit: data.limit || limit
-        };
-      }
-      
-      const normalizedData = this.normalizeId(data);
-      return {
-        data: normalizedData,
-        total: normalizedData.length,
-        page,
-        limit
-      };
+      const response = await fetch(
+        `${this.apiUrl}/${this.endpoint}?page=${page}&limit=${limit}`,
+        { headers }
+      );
+      return this.handleResponse(response);
     } catch (error) {
-      console.error(`Falha ao buscar dados da API (${this.endpoint}):`, error);
-      toast.error(`Falha ao carregar dados de ${this.endpoint}`);
-      return {
-        data: [],
-        total: 0,
-        page,
-        limit
-      };
+      console.error('Error fetching data:', error);
+      throw error;
     }
   }
 
-  async getById(id: string): Promise<T | null> {
+  async getById(id: string, headers?: HeadersInit) {
     try {
-      console.log(`Fazendo requisição GET para ${this.baseUrl}/${id}`);
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        headers: this.getAuthHeaders()
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
-        } else if (response.status === 404) {
-          return null;
-        }
-        throw new Error(`Erro ao buscar item: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      const normalizedData = this.normalizeId(data);
-      return normalizedData as T;
+      const response = await fetch(
+        `${this.apiUrl}/${this.endpoint}/${id}`,
+        { headers }
+      );
+      return this.handleResponse(response);
     } catch (error) {
-      console.error(`Falha ao buscar item da API (${this.endpoint}):`, error);
-      toast.error(`Falha ao buscar dado de ${this.endpoint}`);
-      return null;
+      console.error('Error fetching item:', error);
+      throw error;
     }
   }
 
-  async create(item: Omit<T, 'id'>): Promise<T | null> {
+  async create(item: Omit<T, 'id'>, headers?: HeadersInit) {
     try {
-      console.log(`Fazendo requisição POST para ${this.baseUrl}`, item);
-      const response = await fetch(this.baseUrl, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(item),
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
+      const response = await fetch(
+        `${this.apiUrl}/${this.endpoint}`,
+        {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(item)
         }
-        throw new Error(`Erro ao criar item: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      const normalizedData = this.normalizeId(data);
-      return normalizedData as T;
+      );
+      return this.handleResponse(response);
     } catch (error) {
-      console.error(`Falha ao criar item na API (${this.endpoint}):`, error);
-      toast.error(`Falha ao criar item em ${this.endpoint}`);
-      return null;
+      console.error('Error creating item:', error);
+      throw error;
     }
   }
 
-  async update(id: string, item: Partial<T>): Promise<T | null> {
+  async update(id: string, item: Partial<T>, headers?: HeadersInit) {
     try {
-      console.log(`Fazendo requisição PUT para ${this.baseUrl}/${id}`, item);
-      
-      let currentItem = null;
-      try {
-        const currentResponse = await fetch(`${this.baseUrl}/${id}`, {
-          headers: this.getAuthHeaders()
-        });
-        if (currentResponse.ok) {
-          currentItem = await currentResponse.json();
+      const response = await fetch(
+        `${this.apiUrl}/${this.endpoint}/${id}`,
+        {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(item)
         }
-      } catch (e) {
-        console.warn(`Não foi possível obter o item atual para verificar _id:`, e);
-      }
-      
-      const actualId = currentItem ? this.getActualId(currentItem, id) : id;
-      
-      const response = await fetch(`${this.baseUrl}/${actualId}`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(item),
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
-        }
-        throw new Error(`Erro ao atualizar item: ${response.statusText}`);
-      }
-      
-      const data = await response.json();
-      const normalizedData = this.normalizeId(data);
-      return normalizedData as T;
+      );
+      return this.handleResponse(response);
     } catch (error) {
-      console.error(`Falha ao atualizar item na API (${this.endpoint}):`, error);
-      toast.error(`Falha ao atualizar item em ${this.endpoint}`);
-      return null;
+      console.error('Error updating item:', error);
+      throw error;
     }
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, headers?: HeadersInit) {
     try {
-      console.log(`Fazendo requisição DELETE para ${this.baseUrl}/${id}`);
-      
-      let currentItem = null;
-      try {
-        const currentResponse = await fetch(`${this.baseUrl}/${id}`, {
-          headers: this.getAuthHeaders()
-        });
-        if (currentResponse.ok) {
-          currentItem = await currentResponse.json();
+      const response = await fetch(
+        `${this.apiUrl}/${this.endpoint}/${id}`,
+        {
+          method: 'DELETE',
+          headers
         }
-      } catch (e) {
-        console.warn(`Não foi possível obter o item atual para verificar _id:`, e);
-      }
-      
-      const actualId = currentItem ? this.getActualId(currentItem, id) : id;
-      
-      const response = await fetch(`${this.baseUrl}/${actualId}`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders()
-      });
-      
-      if (!response.ok) {
-        if (response.status === 401 || response.status === 403) {
-          toast.error("Sessão expirada ou não autorizada. Faça login novamente.");
-        }
-        throw new Error(`Erro ao excluir item: ${response.statusText}`);
-      }
-      
-      return true;
+      );
+      return this.handleResponse(response).then(() => true);
     } catch (error) {
-      console.error(`Falha ao excluir item da API (${this.endpoint}):`, error);
-      toast.error(`Falha ao remover item de ${this.endpoint}`);
-      return false;
+      console.error('Error deleting item:', error);
+      throw error;
     }
   }
 }
