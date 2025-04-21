@@ -41,7 +41,7 @@ const LoginPage = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-2 items-center text-center">
           <div className="mx-auto mb-4">
-            <FestanaLogo size={80} />
+            <FestanaLogo size="lg" />
           </div>
           <CardTitle className="text-2xl">Bem-vindo(a)</CardTitle>
           <CardDescription>
