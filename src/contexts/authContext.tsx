@@ -2,8 +2,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { LoginCredentials, AuthContextType } from '@/types/auth';
 import { authService } from '@/services/authService';
+import { useNavigate } from 'react-router-dom';
 
-// Criando o contexto com um valor padrão
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   token: null,
@@ -16,18 +16,43 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any | null>(null);
+  const navigate = useNavigate();
 
-  // Verificar token ao inicializar
+  // Verificar token ao inicializar e monitorar validade
   useEffect(() => {
-    const storedToken = authService.getToken();
-    const storedUser = authService.getUser();
+    const checkToken = () => {
+      const storedToken = authService.getToken();
+      const storedUser = authService.getUser();
+      
+      if (storedToken) {
+        // Verificar se o token está expirado
+        try {
+          const tokenData = JSON.parse(atob(storedToken.split('.')[1]));
+          const expirationTime = tokenData.exp * 1000; // Converter para milissegundos
+          
+          if (Date.now() >= expirationTime) {
+            // Token expirado, fazer logout
+            console.log('Token expirado, fazendo logout...');
+            logout();
+            return;
+          }
+          
+          setToken(storedToken);
+          setUser(storedUser);
+          setIsAuthenticated(true);
+        } catch (error) {
+          console.error('Erro ao validar token:', error);
+          logout();
+        }
+      }
+    };
+
+    checkToken();
     
-    if (storedToken) {
-      setToken(storedToken);
-      setUser(storedUser);
-      setIsAuthenticated(true);
-      console.log('Token encontrado no localStorage, usuário autenticado.');
-    }
+    // Verificar o token a cada minuto
+    const intervalId = setInterval(checkToken, 60000);
+    
+    return () => clearInterval(intervalId);
   }, []);
 
   const login = async (credentials: LoginCredentials): Promise<boolean> => {
@@ -47,6 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setToken(null);
     setUser(null);
     setIsAuthenticated(false);
+    navigate('/login');
   };
 
   const value = {

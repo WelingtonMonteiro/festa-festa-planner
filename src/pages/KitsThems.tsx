@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -87,7 +86,41 @@ const KitsThems = () => {
   };
   
   useEffect(() => {
-    loadData(currentPage);
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        console.log('Iniciando carregamento de dados...');
+        console.log('Data source:', dataSource);
+        console.log('API URL:', apiUrl);
+        
+        const kitResponse = await unifiedKitService.getAll(dataSource, apiUrl, currentPage, limit);
+        console.log('Resposta dos kits:', kitResponse);
+        
+        if (kitResponse && 'data' in kitResponse) {
+          setLocalKits(kitResponse.data);
+          setTotalPages(Math.ceil(kitResponse.total / kitResponse.limit));
+          setTotalItems(kitResponse.total);
+        } else {
+          setLocalKits(Array.isArray(kitResponse) ? kitResponse : []);
+        }
+        
+        const themResponse = await unifiedThemService.getAll(dataSource, localKits, apiUrl, currentPage, limit);
+        console.log('Resposta dos temas:', themResponse);
+        
+        if (themResponse && 'data' in themResponse) {
+          setLocalThems(themResponse.data);
+        } else {
+          setLocalThems(Array.isArray(themResponse) ? themResponse : []);
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        toast.error('Falha ao carregar kits e temas');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
   }, [currentPage, dataSource, apiUrl]);
 
   const handlePageChange = (page: number) => {

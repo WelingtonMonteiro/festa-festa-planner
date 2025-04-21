@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Bell, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,9 +7,10 @@ import StorageToggle from '@/components/layout/StorageToggle';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
-import {DataSource} from "@/services/unifiedKitService.ts";
-import {useStorage} from "@/contexts/storageContext.tsx";
-import {useApi} from "@/contexts/apiContext.tsx";
+import { DataSource } from "@/services/unifiedKitService.ts";
+import { useStorage } from "@/contexts/storageContext.tsx";
+import { useApi } from "@/contexts/apiContext.tsx";
+import { useAuth } from '@/contexts/authContext';
 
 const Header = () => {
   const { storageType } = useStorage();
@@ -19,26 +19,22 @@ const Header = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [notifications, setNotifications] = useState<{ id: string, title: string, message: string }[]>([]);
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
-  // Formatar data atual
   const formattedDate = format(currentDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: ptBR });
 
-  // Atualizar data a cada minuto
   useEffect(() => {
     const timer = setInterval(() => setCurrentDate(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
-  // Gerar notificações
   useEffect(() => {
     const newNotifications = [];
 
-    // Verificar events próximos (nos próximos 3 dias)
     const today = new Date();
     const threeDaysLater = new Date();
     threeDaysLater.setDate(today.getDate() + 3);
 
-    // Filtrar eventos válidos - verificando se o evento e o cliente existem antes de acessar propriedades
     const nextEvents = events?.filter(evento => {
       if (!evento || !evento.data) return false;
 
@@ -47,7 +43,6 @@ const Header = () => {
     }) || [];
 
     nextEvents.forEach(evento => {
-      // Verificar se o cliente existe antes de acessar a propriedade nome
       const clientName = evento.cliente && evento.cliente.nome ? evento.cliente.nome : 'Cliente não definido';
 
       newNotifications.push({
@@ -57,7 +52,6 @@ const Header = () => {
       });
     });
 
-    // Adicionar mensagens não lidas
     const unreadMessages = messages?.filter(m => !m.lida && m.remetente === 'cliente') || [];
     if (unreadMessages.length > 0) {
       newNotifications.push({
@@ -69,11 +63,9 @@ const Header = () => {
 
     setNotifications(newNotifications);
 
-    // Salvar notificações no localStorage
     const storageNotifications = localStorage.getItem('notificacoes');
     let notificationsToSave = storageNotifications ? JSON.parse(storageNotifications) : [];
 
-    // Adicionar novas notificações do sistema se não existirem já
     newNotifications.forEach(notification => {
       const existsInStorage = notificationsToSave.some((n: any) => n.id === notification.id);
       if (!existsInStorage) {
@@ -93,10 +85,10 @@ const Header = () => {
     localStorage.setItem('notificacoes', JSON.stringify(notificationsToSave));
   }, [events, messages]);
 
-  // Redirecionar para a página de notificações
   const navigateToNotifications = () => {
     navigate('/notifications');
   };
+
   const getCurrentDataSource = (): DataSource => {
     if (apiType === 'rest' && apiUrl) {
       return 'apiRest';
@@ -106,7 +98,6 @@ const Header = () => {
       return 'localStorage';
     }
   };
-  const dataSource = getCurrentDataSource();
 
   const StorageModeIndicator = () => {
     let label = 'Local Storage';
@@ -125,6 +116,11 @@ const Header = () => {
     );
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
       <header className="sticky top-0 z-30 flex h-16 items-center justify-end bg-sidebar px-6 shadow-sm text-sidebar-foreground">
         <div className="mr-auto">
@@ -136,7 +132,6 @@ const Header = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Notificações */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -144,8 +139,6 @@ const Header = () => {
                   size="icon"
                   className="relative"
                   onClick={(e) => {
-                    // Se clicar direto no ícone ou no badge, navega para notificações
-                    // Se clicar fora (no botão em geral), abre o dropdown
                     if ((e.target as HTMLElement).tagName === 'svg' ||
                         (e.target as HTMLElement).tagName === 'path' ||
                         (e.target as HTMLElement).classList.contains('absolute')) {
@@ -195,7 +188,6 @@ const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Perfil do usuário */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -203,13 +195,15 @@ const Header = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigate('/settings?tab=conta')}>
+              <DropdownMenuItem onClick={() => navigate('/configuracoes?tab=conta')}>
                 Meu Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate('/settings')}>
+              <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
                 Configurações
               </DropdownMenuItem>
-              <DropdownMenuItem>Sair</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout}>
+                Sair
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
