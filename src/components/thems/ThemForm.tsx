@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -116,7 +117,7 @@ const ThemForm = ({ onSubmit, onCancel, initialData, isEditing, kits, isLoading 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-2">
           {themForm.imagens.map((img, index) =>
             img !== '' ? (
-              <div key={index} className="relative rounded-md overflow-hidden border h-24">
+              <div key={`image-${index}`} className="relative rounded-md overflow-hidden border h-24">
                 <img 
                   src={img} 
                   alt={`Imagem ${index + 1}`}
@@ -155,7 +156,7 @@ const ThemForm = ({ onSubmit, onCancel, initialData, isEditing, kits, isLoading 
         <Label>Kits Disponíveis</Label>
         <div className="grid grid-cols-2 gap-2">
           {kits.map(kit => (
-            <div key={kit.id} className="flex items-center space-x-2">
+            <div key={`kit-${kit.id}`} className="flex items-center space-x-2">
               <Button
                 type="button"
                 variant={themForm.kitsIds.includes(kit.id) ? "default" : "outline"}
