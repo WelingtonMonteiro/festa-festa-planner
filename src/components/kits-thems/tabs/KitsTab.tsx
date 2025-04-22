@@ -1,4 +1,3 @@
-
 import { TabsContent } from '@/components/ui/tabs';
 import KitList from '@/components/kits/KitList';
 import { DataPagination } from '@/components/common/DataPagination';
@@ -15,6 +14,7 @@ interface KitsTabProps {
   onPageChange: (page: number) => void;
   paginationLinks: any[];
   isActive?: boolean;
+  forceRender?: boolean;
 }
 
 const KitsTab = ({
@@ -27,10 +27,13 @@ const KitsTab = ({
   totalPages,
   onPageChange,
   paginationLinks,
-  isActive = true
+  isActive = true,
+  forceRender = false
 }: KitsTabProps) => {
+  const contentStyle = forceRender ? { display: isActive ? 'block' : 'none' } : {};
+  
   return (
-    <TabsContent value="kits" className={isActive ? 'block' : 'hidden'}>
+    <TabsContent value="kits" className={isActive ? 'block' : 'hidden'} style={contentStyle}>
       <KitList 
         kits={kits} 
         onAddKit={onAddKit}

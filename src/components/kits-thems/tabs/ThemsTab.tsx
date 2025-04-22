@@ -1,4 +1,3 @@
-
 import { TabsContent } from '@/components/ui/tabs';
 import ThemList from '@/components/thems/ThemList';
 import { DataPagination } from '@/components/common/DataPagination';
@@ -15,6 +14,7 @@ interface ThemsTabProps {
   onPageChange: (page: number) => void;
   paginationLinks: any[];
   isActive?: boolean;
+  forceRender?: boolean;
 }
 
 const ThemsTab = ({
@@ -27,10 +27,13 @@ const ThemsTab = ({
   totalPages,
   onPageChange,
   paginationLinks,
-  isActive = true
+  isActive = true,
+  forceRender = false
 }: ThemsTabProps) => {
+  const contentStyle = forceRender ? { display: isActive ? 'block' : 'none' } : {};
+  
   return (
-    <TabsContent value="temas" className={isActive ? 'block' : 'hidden'}>
+    <TabsContent value="temas" className={isActive ? 'block' : 'hidden'} style={contentStyle}>
       <ThemList 
         themes={themes}
         onAddThem={onAddThem}
