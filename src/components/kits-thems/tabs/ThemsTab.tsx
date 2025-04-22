@@ -14,6 +14,7 @@ interface ThemsTabProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   paginationLinks: any[];
+  isActive?: boolean;
 }
 
 const ThemsTab = ({
@@ -25,10 +26,11 @@ const ThemsTab = ({
   currentPage,
   totalPages,
   onPageChange,
-  paginationLinks
+  paginationLinks,
+  isActive = true
 }: ThemsTabProps) => {
   return (
-    <TabsContent value="temas">
+    <TabsContent value="temas" className={isActive ? 'block' : 'hidden'}>
       <ThemList 
         themes={themes}
         onAddThem={onAddThem}

@@ -2,6 +2,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import KitForm from '@/components/kits/KitForm';
 import { Kit } from '@/types';
+import { useState } from 'react';
 
 interface KitDialogProps {
   open: boolean;
@@ -10,6 +11,8 @@ interface KitDialogProps {
   onCancel: () => void;
   editingKit: Kit | null;
   isLoading: boolean;
+  title?: string;
+  description?: string;
 }
 
 const KitDialog = ({
@@ -18,24 +21,40 @@ const KitDialog = ({
   onSubmit,
   onCancel,
   editingKit,
-  isLoading
+  isLoading,
+  title,
+  description
 }: KitDialogProps) => {
+  const [submitting, setSubmitting] = useState(false);
+  
+  const handleSubmit = async (kitData: Omit<Kit, 'id' | 'vezes_alugado'>) => {
+    setSubmitting(true);
+    try {
+      await onSubmit(kitData);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+  
+  const dialogTitle = title || (editingKit ? 'Editar Kit' : 'Adicionar Novo Kit');
+  const dialogDescription = description || `Preencha os dados para ${editingKit ? 'editar' : 'adicionar'} um kit.`;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>{editingKit ? 'Editar Kit' : 'Adicionar Novo Kit'}</DialogTitle>
+          <DialogTitle>{dialogTitle}</DialogTitle>
           <DialogDescription>
-            Preencha os dados para {editingKit ? 'editar' : 'adicionar'} um kit.
+            {dialogDescription}
           </DialogDescription>
         </DialogHeader>
         
         <KitForm 
-          onSubmit={onSubmit}
+          onSubmit={handleSubmit}
           onCancel={onCancel}
           initialData={editingKit}
           isEditing={!!editingKit}
-          isLoading={isLoading}
+          isLoading={isLoading || submitting}
         />
       </DialogContent>
     </Dialog>

@@ -14,6 +14,7 @@ interface KitsTabProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   paginationLinks: any[];
+  isActive?: boolean;
 }
 
 const KitsTab = ({
@@ -25,10 +26,11 @@ const KitsTab = ({
   currentPage,
   totalPages,
   onPageChange,
-  paginationLinks
+  paginationLinks,
+  isActive = true
 }: KitsTabProps) => {
   return (
-    <TabsContent value="kits">
+    <TabsContent value="kits" className={isActive ? 'block' : 'hidden'}>
       <KitList 
         kits={kits} 
         onAddKit={onAddKit}
