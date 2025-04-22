@@ -12,6 +12,10 @@ import { DataPagination } from '@/components/common/DataPagination';
 import { useDialogManager } from '@/hooks/useDialogManager';
 import { useKitsThemsData } from '@/hooks/useKitsThemsData';
 import { usePagination } from '@/hooks/usePagination';
+import { Kit, Them } from '@/types';
+import { unifiedThemService } from '@/services/unifiedThemService';
+import { useApi } from '@/contexts/apiContext';
+import { useStorage } from '@/contexts/storageContext';
 
 const KitsThems = () => {
   const {
@@ -25,6 +29,20 @@ const KitsThems = () => {
     editingThem, setEditingThem,
     resetKitForm, resetThemForm
   } = useDialogManager();
+
+  const { apiType, apiUrl } = useApi();
+  const { storageType } = useStorage();
+
+  const getCurrentDataSource = () => {
+    if (apiType === 'rest' && apiUrl) {
+      return 'apiRest';
+    } else if (storageType === 'supabase') {
+      return 'supabase';
+    }
+    return 'localStorage';
+  };
+
+  const dataSource = getCurrentDataSource();
 
   const {
     isLoading,
