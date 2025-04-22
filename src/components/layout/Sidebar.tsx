@@ -6,7 +6,7 @@ import {
   PartyPopper, 
   Calendar, 
   Users, 
-  Package, 
+  Box,
   MessageCircle, 
   BarChart2, 
   Settings,
@@ -79,9 +79,9 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       icon: <UserPlus className="h-5 w-5" /> 
     },
     { 
-      path: '/kits-temas', 
-      name: 'Kits & Temas', 
-      icon: <Package className="h-5 w-5" /> 
+      path: '/products', 
+      name: 'Produtos', 
+      icon: <Box className="h-5 w-5" /> 
     },
     { 
       path: '/contratos', 
