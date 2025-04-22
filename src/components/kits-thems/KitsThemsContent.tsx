@@ -1,10 +1,9 @@
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Tag } from 'lucide-react';
-import KitList from '@/components/kits/KitList';
-import ThemList from '@/components/thems/ThemList';
-import { DataPagination } from '@/components/common/DataPagination';
+import { Tabs } from '@/components/ui/tabs';
 import { Kit, Them } from '@/types';
+import TabsHeader from './tabs/TabsHeader';
+import KitsTab from './tabs/KitsTab';
+import ThemsTab from './tabs/ThemsTab';
 
 interface KitsThemsContentProps {
   localKits: Kit[];
@@ -44,46 +43,31 @@ const KitsThemsContent = ({
       </div>
       
       <Tabs defaultValue="kits" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 mb-4">
-          <TabsTrigger value="kits" className="flex items-center">
-            <Package className="mr-2 h-4 w-4" /> Kits
-          </TabsTrigger>
-          <TabsTrigger value="temas" className="flex items-center">
-            <Tag className="mr-2 h-4 w-4" /> Temas
-          </TabsTrigger>
-        </TabsList>
+        <TabsHeader />
         
-        <TabsContent value="kits">
-          <KitList 
-            kits={localKits} 
-            onAddKit={onAddKit}
-            onEditKit={onEditKit}
-            onDeleteKit={onDeleteKit}
-            isLoading={isLoading}
-          />
-          <DataPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            paginationLinks={renderPaginationLinks()}
-          />
-        </TabsContent>
+        <KitsTab 
+          kits={localKits}
+          onAddKit={onAddKit}
+          onEditKit={onEditKit}
+          onDeleteKit={onDeleteKit}
+          isLoading={isLoading}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          paginationLinks={renderPaginationLinks()}
+        />
         
-        <TabsContent value="temas">
-          <ThemList 
-            themes={localThems}
-            onAddThem={onAddThem}
-            onEditThem={onEditThem}
-            onDeleteThem={onDeleteThem}
-            isLoading={isLoading}
-          />
-          <DataPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-            paginationLinks={renderPaginationLinks()}
-          />
-        </TabsContent>
+        <ThemsTab 
+          themes={localThems}
+          onAddThem={onAddThem}
+          onEditThem={onEditThem}
+          onDeleteThem={onDeleteThem}
+          isLoading={isLoading}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          paginationLinks={renderPaginationLinks()}
+        />
       </Tabs>
     </div>
   );

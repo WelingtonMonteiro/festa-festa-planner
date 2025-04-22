@@ -1,8 +1,7 @@
 
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import DeleteConfirmDialog from '@/components/kits-thems/DeleteConfirmDialog';
-import KitForm from '@/components/kits/KitForm';
-import ThemForm from '@/components/thems/ThemForm';
+import KitDialog from './dialogs/KitDialog';
+import ThemDialog from './dialogs/ThemDialog';
 import { Kit, Them } from '@/types';
 
 interface KitsThemsDialogsProps {
@@ -48,50 +47,30 @@ const KitsThemsDialogs = ({
 }: KitsThemsDialogsProps) => {
   return (
     <>
-      <Dialog open={kitDialogOpen} onOpenChange={setKitDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingKit ? 'Editar Kit' : 'Adicionar Novo Kit'}</DialogTitle>
-            <DialogDescription>
-              Preencha os dados para {editingKit ? 'editar' : 'adicionar'} um kit.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <KitForm 
-            onSubmit={onKitSubmit}
-            onCancel={() => {
-              setKitDialogOpen(false);
-              resetKitForm();
-            }}
-            initialData={editingKit}
-            isEditing={!!editingKit}
-            isLoading={isLoading}
-          />
-        </DialogContent>
-      </Dialog>
+      <KitDialog 
+        open={kitDialogOpen}
+        onOpenChange={setKitDialogOpen}
+        onSubmit={onKitSubmit}
+        onCancel={() => {
+          setKitDialogOpen(false);
+          resetKitForm();
+        }}
+        editingKit={editingKit}
+        isLoading={isLoading}
+      />
       
-      <Dialog open={themDialogOpen} onOpenChange={setThemDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>{editingThem ? 'Editar Tema' : 'Adicionar Novo Tema'}</DialogTitle>
-            <DialogDescription>
-              Preencha os dados para {editingThem ? 'editar' : 'adicionar'} um tema.
-            </DialogDescription>
-          </DialogHeader>
-          
-          <ThemForm 
-            onSubmit={onThemSubmit}
-            onCancel={() => {
-              setThemDialogOpen(false);
-              resetThemForm();
-            }}
-            initialData={editingThem}
-            isEditing={!!editingThem}
-            kits={localKits}
-            isLoading={isLoading}
-          />
-        </DialogContent>
-      </Dialog>
+      <ThemDialog 
+        open={themDialogOpen}
+        onOpenChange={setThemDialogOpen}
+        onSubmit={onThemSubmit}
+        onCancel={() => {
+          setThemDialogOpen(false);
+          resetThemForm();
+        }}
+        editingThem={editingThem}
+        kits={localKits}
+        isLoading={isLoading}
+      />
 
       <DeleteConfirmDialog 
         open={deleteKitDialogOpen}
