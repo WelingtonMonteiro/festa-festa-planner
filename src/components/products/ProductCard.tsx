@@ -13,7 +13,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
-  // Use product.id directly
+  // Produto sempre tem ID padrão string
   const productId = product.id;
 
   const getTypeIcon = (type: string) => {
@@ -33,6 +33,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
       return '0.00';
     }
     const kits = Array.isArray(product.metadata?.kits) ? product.metadata.kits : [];
+    // Receita média dos kits do tema
     const averagePrice = kits.length > 0
       ? kits.reduce((sum: number, kit: any) => sum + (kit.preco || 0), 0) / kits.length
       : 0;
@@ -73,9 +74,9 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
         </div>
 
         <CardDescription className="relative z-10">
-          {product.type === 'kit' && product.price && `Valor: R$ ${product.price.toLocaleString('pt-BR')}`}
+          {product.type === 'kit' && product.price && `Valor: ${formatCurrency(product.price)}`}
           {product.type === 'theme' && product.metadata?.valorGasto &&
-            `Investimento: R$ ${(product.metadata.valorGasto).toLocaleString('pt-BR')}`}
+            `Investimento: ${formatCurrency(product.metadata.valorGasto)}`}
         </CardDescription>
 
         <div className="absolute right-4 top-4 flex space-x-2 z-10">
@@ -98,8 +99,8 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
       <CardContent>
         <div className="text-sm text-muted-foreground mb-3">{product.description}</div>
 
-        {/* Itens do kit agora ficam em metadata se existirem */}
-        {product.type === 'kit' && product.metadata?.items && product.metadata.items.length > 0 && (
+        {/* Itens do kit em metadata */}
+        {product.type === 'kit' && Array.isArray(product.metadata?.items) && product.metadata.items.length > 0 && (
           <div className="mb-3">
             <h4 className="text-sm font-medium mb-2">Itens:</h4>
             <div className="flex flex-wrap gap-2">
@@ -112,7 +113,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
           </div>
         )}
 
-        {/* Kits relacionados (apenas para theme, como estava) */}
+        {/* Kits relacionados (somente themes) */}
         {product.type === 'theme' && product.metadata?.kits && (
           <div className="mb-3">
             <h4 className="text-sm font-medium mb-2">Kits disponíveis:</h4>
@@ -134,7 +135,6 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
             <div>{getRentCount(product)} {getRentCount(product) === 1 ? 'vez' : 'vezes'}</div>
           </div>
 
-          {/* ROI só para temas */}
           {product.type === 'theme' && (
             <div className="bg-muted rounded p-2">
               <div className="font-medium">ROI</div>
