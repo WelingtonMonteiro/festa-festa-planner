@@ -35,18 +35,28 @@ export const ProductsProvider = ({ children }: { children: ReactNode }) => {
     return StorageType.LocalStorage;
   };
 
-  const productService = new CrudService<Product>(factory, {
-    type: getCurrentStorageType(),
-    config: { 
-      tableName: 'products',
-      apiUrl: apiUrl || '',
-      endpoint: 'products',
-      storageKey: 'products'
-    }
-  });
+  // Corrigir o tipo do config usado no CrudService
+  const productService = new CrudService<Product>(
+    factory,
+    getCurrentStorageType() === StorageType.ApiRest
+      ? {
+          type: StorageType.ApiRest,
+          config: { apiUrl: apiUrl || '', endpoint: 'products' }
+        }
+      : getCurrentStorageType() === StorageType.Supabase
+      ? {
+          type: StorageType.Supabase,
+          config: { tableName: 'products' }
+        }
+      : {
+          type: StorageType.LocalStorage,
+          config: { storageKey: 'products' }
+        }
+  );
 
   useEffect(() => {
     refreshProducts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storageType, apiType, apiUrl]);
 
   const refreshProducts = async () => {
