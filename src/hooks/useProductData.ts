@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Product, kitToProduct, themeToProduct } from '@/types/product';
+import { Product } from '@/types/product';
 import { useStorage } from '@/contexts/storageContext';
 import { useApi } from '@/contexts/apiContext';
 import { DataSource } from '@/services/unifiedKitService';
@@ -70,7 +70,7 @@ export const useProductData = () => {
     }
   };
 
-  const handleProductSubmit = async (productData: Omit<Product, 'id' | 'rentCount'>) => {
+  const handleProductSubmit = async (productData: Omit<Product, 'id'>) => {
     setIsLoading(true);
     try {
       if (productData) {

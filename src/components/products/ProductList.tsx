@@ -1,4 +1,3 @@
-
 import ProductCard from './ProductCard';
 import { Button } from '@/components/ui/button';
 import { Package, Plus, Loader2 } from 'lucide-react';
@@ -57,7 +56,7 @@ const ProductList = ({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProducts.map((product) => (
             <ProductCard
-              key={product.id || product._id}
+              key={product.id}
               product={product}
               onEdit={onEditProduct}
               onDelete={onDeleteProduct}

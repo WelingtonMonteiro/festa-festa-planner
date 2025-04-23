@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DialogFooter } from '@/components/ui/dialog';
@@ -29,15 +28,15 @@ const ProductForm = ({
   productType
 }: ProductFormProps) => {
   const [type, setType] = useState<string>(initialData?.type || productType || 'kit');
-  
+
   const [kitForm, setKitForm] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
     price: initialData?.price?.toString() || '',
-    items: initialData?.items || [''],
+    items: (initialData?.metadata?.items ?? ['']) as string[],
     images: initialData?.images || ['']
   });
-  
+
   const [themeForm, setThemeForm] = useState({
     name: initialData?.name || '',
     description: initialData?.description || '',
@@ -45,18 +44,16 @@ const ProductForm = ({
     images: initialData?.images || [''],
     kitsIds: initialData?.metadata?.kitsIds || []
   });
-  
-  // Update form when initial data changes
+
   useEffect(() => {
     if (initialData) {
       setType(initialData.type);
-      
       if (initialData.type === 'kit') {
         setKitForm({
           name: initialData.name || '',
           description: initialData.description || '',
           price: initialData.price?.toString() || '',
-          items: initialData.items || [''],
+          items: (initialData.metadata?.items ?? ['']) as string[],
           images: initialData.images || ['']
         });
       } else if (initialData.type === 'theme') {
@@ -70,43 +67,40 @@ const ProductForm = ({
       }
     }
   }, [initialData]);
-  
-  // Kit form handlers
+
   const handleKitChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setKitForm({ ...kitForm, [name]: value });
   };
-  
+
   const handleKitItemChange = (index: number, value: string) => {
     const newItems = [...kitForm.items];
     newItems[index] = value;
     setKitForm({ ...kitForm, items: newItems });
   };
-  
+
   const addKitItem = () => {
     setKitForm({ ...kitForm, items: [...kitForm.items, ''] });
   };
-  
+
   const removeKitItem = (index: number) => {
     const newItems = kitForm.items.filter((_, i) => i !== index);
     setKitForm({ ...kitForm, items: newItems.length ? newItems : [''] });
   };
-  
-  // Theme form handlers
+
   const handleThemeChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setThemeForm({ ...themeForm, [name]: value });
   };
-  
+
   const handleKitToggle = (kitId: string) => {
     const newKitsIds = themeForm.kitsIds.includes(kitId)
       ? themeForm.kitsIds.filter(id => id !== kitId)
       : [...themeForm.kitsIds, kitId];
-    
+
     setThemeForm({ ...themeForm, kitsIds: newKitsIds });
   };
-  
-  // Shared image handlers
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
@@ -129,7 +123,7 @@ const ProductForm = ({
       reader.readAsDataURL(file);
     }
   };
-  
+
   const removeImage = (index: number) => {
     if (type === 'kit') {
       const newImages = kitForm.images.filter((_, i) => i !== index);
@@ -139,23 +133,24 @@ const ProductForm = ({
       setThemeForm({ ...themeForm, images: newImages.length ? newImages : [''] });
     }
   };
-  
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (type === 'kit') {
       const productData: Omit<Product, 'id'> = {
         name: kitForm.name,
         description: kitForm.description,
         type: 'kit',
         price: parseFloat(kitForm.price) || 0,
-        items: kitForm.items.filter(item => item.trim() !== ''),
-        images: kitForm.images.filter(img => img !== '')
+        images: kitForm.images.filter(img => img !== ''),
+        metadata: {
+          items: kitForm.items.filter(item => item.trim() !== '')
+        }
       };
       onSubmit(productData);
     } else {
       const selectedKits = availableKits.filter(kit => themeForm.kitsIds.includes(kit.id));
-      
       const productData: Omit<Product, 'id'> = {
         name: themeForm.name,
         description: themeForm.description,
@@ -170,7 +165,7 @@ const ProductForm = ({
       onSubmit(productData);
     }
   };
-  
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       {!productType && (
