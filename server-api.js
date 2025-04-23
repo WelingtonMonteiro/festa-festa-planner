@@ -52,7 +52,7 @@ app.post('/login', async (req, res) => {
     const { username, password } = req.body;
     
     // Verificação simples - em produção, verificaria contra o banco de dados
-    if (username === 'admin' && password === '123456') {
+    if (username === 'admin@festadecoracoes.com' && password === '123456') {
         const user = { id: 1, username };
         const token = jwt.sign(user, JWT_SECRET, { expiresIn: TOKEN_EXPIRATION });
         

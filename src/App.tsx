@@ -50,42 +50,42 @@ function App() {
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/clientes" element={
+              <Route path="/clients" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Clients />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/clientes/:id" element={
+              <Route path="/clients/:id" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <ClientDetails />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/clientes/gerenciamento" element={
+              <Route path="/clients/management" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <ClientsManagement />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/eventos" element={
+              <Route path="/events" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Eventos />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/mensagens" element={
+              <Route path="/messages" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Messages />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/estatisticas" element={
+              <Route path="/statistics" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Statistics />
@@ -106,21 +106,21 @@ function App() {
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/financeiro" element={
+              <Route path="/financial" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Financial />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/calendario" element={
+              <Route path="/calendar" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <CalendarPage />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/notificacoes" element={
+              <Route path="/notifications" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Notifications />
@@ -134,21 +134,21 @@ function App() {
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/relatorios" element={
+              <Route path="/reports" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Reports />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/configuracoes" element={
+              <Route path="/settings" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Configurations />
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/contratos" element={
+              <Route path="/contracts" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <Contracts />
@@ -162,7 +162,7 @@ function App() {
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/planos" element={
+              <Route path="/plans" element={
                 <ProtectedRoute>
                   <MainLayout>
                     <PlansManagement />

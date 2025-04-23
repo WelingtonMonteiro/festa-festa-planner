@@ -32,9 +32,7 @@ const PlansManagement = () => {
   const loadPlans = async () => {
     setIsLoading(true);
     try {
-      console.log("Carregando planos com serviço:", planService);
       const response = await planService.getAll(page, limit);
-      console.log("Planos carregados:", response);
       setPlans(response.data);
       setTotal(response.total);
     } catch (error) {
@@ -53,11 +51,8 @@ const PlansManagement = () => {
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
-      
-      console.log("Criando plano:", plan);
       const newPlan = await planService.create(plan);
-      console.log("Plano criado:", newPlan);
-      
+
       if (newPlan) {
         toast.success('Plano criado com sucesso');
         setIsCreating(false);
@@ -83,10 +78,8 @@ const PlansManagement = () => {
       };
       
       const planId = editingPlan.id || editingPlan._id;
-      console.log("Atualizando plano:", planId, plan);
       const updatedPlan = await planService.update(planId, plan);
-      console.log("Plano atualizado:", updatedPlan);
-      
+
       if (updatedPlan) {
         toast.success('Plano atualizado com sucesso');
         setEditingPlan(null);
@@ -100,22 +93,18 @@ const PlansManagement = () => {
   
   const handleTogglePlanStatus = async (id: string, isActive: boolean) => {
     if (!id) {
-      console.error('ID do plano não fornecido para alteração de status');
       toast.error('Falha ao identificar o plano');
       return;
     }
     
     try {
-      console.log("Alterando status do plano:", id, isActive);
       const result = await planService.togglePlanStatus(id, isActive);
-      console.log("Status do plano alterado:", result);
-      
+
       if (result) {
         toast.success(`Plano ${isActive ? 'ativado' : 'desativado'} com sucesso`);
         loadPlans();
       }
     } catch (error) {
-      console.error('Error toggling plan status:', error);
       toast.error(`Falha ao ${isActive ? 'ativar' : 'desativar'} plano`);
     }
   };
@@ -128,10 +117,8 @@ const PlansManagement = () => {
     }
     
     try {
-      console.log("Arquivando plano:", id);
       const result = await planService.archivePlan(id);
-      console.log("Plano arquivado:", result);
-      
+
       if (result) {
         toast.success('Plano arquivado com sucesso');
         loadPlans();

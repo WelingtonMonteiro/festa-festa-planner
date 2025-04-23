@@ -79,10 +79,8 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
   // Carregar clientes quando o componente for montado
   useEffect(() => {
     if (clients && clients.length > 0) {
-      console.log('Clientes carregados:', clients.length);
       setAvailableClients(clients);
     } else {
-      console.log('Nenhum cliente carregado ou array de clientes vazio');
       refresh();
     }
   }, [clients, refresh]);
@@ -232,7 +230,6 @@ const ContractsList = ({ selectedContract, setSelectedContract, isActive = false
 
   // Log para depuração
   useEffect(() => {
-    console.log('Clientes disponíveis no ContractsList:', availableClients.length);
     if (availableClients.length === 0 && clients.length > 0) {
       setAvailableClients(clients);
     }

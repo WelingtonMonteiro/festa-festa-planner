@@ -61,7 +61,6 @@ const NewClientDialog = ({
   
   // Atualizar os valores do formulário quando o clienteParaEditar mudar
   useEffect(() => {
-    console.log("clienteParaEditar mudou:", editClient);
     if (editClient) {
       form.reset({
         nome: editClient.nome,

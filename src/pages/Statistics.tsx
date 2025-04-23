@@ -43,7 +43,7 @@ const Statistics = () => {
   // Calcular retorno sobre investimento (ROI) dos temas
   const calcularROITemas = () => {
     return thems.map(tema => {
-      const receitaTotal = tema.vezes_alugado * (tema.kits.reduce((sum, kit) => sum + kit.preco, 0) / tema.kits.length);
+      const receitaTotal = tema.vezes_alugado * (tema?.kits?.reduce((sum, kit) => sum + kit?.preco, 0) / tema?.kits?.length);
       const roi = tema.valorGasto > 0 ? ((receitaTotal / tema.valorGasto) - 1) * 100 : 0;
       
       return {

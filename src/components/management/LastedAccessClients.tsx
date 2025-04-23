@@ -136,7 +136,7 @@ const LastedAccessClients = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      onClick={() => navigate(`/client/${cliente.id}`)}
+                      onClick={() => navigate(`/clients/${cliente.id}`)}
                     >
                       Detalhes
                     </Button>

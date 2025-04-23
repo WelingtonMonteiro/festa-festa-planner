@@ -166,7 +166,7 @@ const Notifications = () => {
                   className="mt-2"
                   onClick={() => {
                     setIsModalOpen(false);
-                    window.location.href = `/eventos?id=${selectedNotification.eventId}`;
+                    window.location.href = `/events?id=${selectedNotification.eventId}`;
                   }}
                 >
                   View Event

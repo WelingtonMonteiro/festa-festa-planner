@@ -19,10 +19,10 @@ const UserMenu = ({ onLogout }: UserMenuProps) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => navigate('/configuracoes?tab=conta')}>
+        <DropdownMenuItem onClick={() => navigate('/settings?tab=conta')}>
           Meu Perfil
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => navigate('/configuracoes')}>
+        <DropdownMenuItem onClick={() => navigate('/settings')}>
           Configurações
         </DropdownMenuItem>
         <DropdownMenuItem onClick={onLogout}>

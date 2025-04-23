@@ -39,14 +39,14 @@ const Dashboard = () => {
         <h1 className="text-3xl font-bold">Dashboard</h1>
         <div className="flex flex-wrap gap-2">
           <Button 
-            onClick={() => navigate('/calendario')}
+            onClick={() => navigate('/calendar')}
             className="bg-festa-primary hover:bg-festa-primary/90"
           >
             <Calendar className="mr-2 h-4 w-4" />
             Agendar Evento
           </Button>
           <Button 
-            onClick={() => navigate('/clientes/gerenciamento')}
+            onClick={() => navigate('/clients/management')}
             variant="outline"
           >
             <Users className="mr-2 h-4 w-4" />
@@ -139,7 +139,7 @@ const Dashboard = () => {
                   <Button 
                     variant="outline" 
                     className="w-full" 
-                    onClick={() => navigate('/calendario')}
+                    onClick={() => navigate('/calendar')}
                   >
                     Ver todos os eventos
                   </Button>
@@ -150,7 +150,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum evento agendado
                 </p>
-                <Button variant="link" onClick={() => navigate('/calendario')}>
+                <Button variant="link" onClick={() => navigate('/calendar')}>
                   Agendar um evento
                 </Button>
               </div>
@@ -232,7 +232,7 @@ const Dashboard = () => {
                 <p className="text-sm text-muted-foreground">
                   Nenhum evento para hoje
                 </p>
-                <Button variant="link" onClick={() => navigate('/calendario')}>
+                <Button variant="link" onClick={() => navigate('/calendar')}>
                   Ver calendário
                 </Button>
               </div>

@@ -15,7 +15,6 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
   ) {
     this.adapter = factory.createAdapter<T>(config);
     this.adapterType = factory.getCurrentStorageType();
-    console.log(`CrudService criado com adaptador tipo: ${this.adapterType}`);
   }
 
   private getAuthHeaders(): HeadersInit {
@@ -29,8 +28,6 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
   }
 
   async getAll(page?: number, limit?: number): Promise<PaginatedResponse<T>> {
-    console.log(`CrudService.getAll(page: ${page}, limit: ${limit}) chamado com adaptador: ${this.adapterType}`);
-    
     if (this.adapterType === 'apiRest') {
       const headers = this.getAuthHeaders();
       return this.adapter.getAll(page, limit, headers);
@@ -40,8 +37,7 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
   }
 
   async getById(id: string): Promise<T | null> {
-    console.log(`CrudService.getById(${id}) chamado com adaptador: ${this.adapterType}`);
-    
+
     if (this.adapterType === 'apiRest') {
       const headers = this.getAuthHeaders();
       return this.adapter.getById(id, headers);
@@ -51,8 +47,7 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
   }
 
   async create(item: Omit<T, 'id'>): Promise<T | null> {
-    console.log(`CrudService.create() chamado com adaptador: ${this.adapterType}`, item);
-    
+
     if (this.adapterType === 'apiRest') {
       const headers = this.getAuthHeaders();
       return this.adapter.create(item, headers);
@@ -62,8 +57,7 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
   }
 
   async update(id: string, item: Partial<T>): Promise<T | null> {
-    console.log(`CrudService.update(${id}) chamado com adaptador: ${this.adapterType}`, item);
-    
+
     if (this.adapterType === 'apiRest') {
       const headers = this.getAuthHeaders();
       return this.adapter.update(id, item, headers);
@@ -73,8 +67,7 @@ export class CrudService<T extends Record<string, any>> implements CrudOperation
   }
 
   async delete(id: string): Promise<boolean> {
-    console.log(`CrudService.delete(${id}) chamado com adaptador: ${this.adapterType}`);
-    
+
     if (this.adapterType === 'apiRest') {
       const headers = this.getAuthHeaders();
       return this.adapter.delete(id, headers);

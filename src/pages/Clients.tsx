@@ -79,7 +79,6 @@ const Clients = () => {
   const pageNumbers = Array.from({ length: totalPages }, (_, i) => i + 1);
 
   const abrirEdicao = (cliente: Client) => {
-    console.log("Cliente para editar:", cliente);
     setClienteParaEditar({
       id: cliente.id,
       nome: cliente.nome,
@@ -135,7 +134,7 @@ const Clients = () => {
           <Button
             variant="outline"
             className="flex items-center gap-2"
-            onClick={() => navigate('/client-management')}
+            onClick={() => navigate('/clients-management')}
           >
             <BarChart2 className="h-4 w-4" />
             Gerenciar Clientes
@@ -251,7 +250,7 @@ const Clients = () => {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => navigate(`/client/${cliente.id}`)}
+                              onClick={() => navigate(`/clients/${cliente.id}`)}
                             >
                               Detalhes
                             </Button>

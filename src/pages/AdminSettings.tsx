@@ -26,8 +26,6 @@ const AdminSettings = () => {
   
   // Atualizar estados quando os valores dos contextos mudarem
   useEffect(() => {
-    console.log("AdminSettings: apiType =", apiType, "storageType =", storageType);
-    
     if (apiType === 'rest') {
       setSelectedDataSource('rest');
     } else {
@@ -39,8 +37,6 @@ const AdminSettings = () => {
   // Manipuladores de eventos
   const handleDataSourceChange = (value: 'localStorage' | 'supabase' | 'rest') => {
     setSelectedDataSource(value);
-    
-    console.log("Changing data source to:", value);
     
     if (value === 'rest') {
       // Se selecionar REST API, configura API REST

@@ -113,7 +113,7 @@ const InactiveClients = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => navigate(`/client/${client.id}`)}
+                        onClick={() => navigate(`/clients/${client.id}`)}
                       >
                         Detalhes
                       </Button>

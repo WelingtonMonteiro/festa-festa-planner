@@ -27,7 +27,7 @@ export const unifiedKitService = {
       switch (dataSource) {
         case 'supabase':
           return await kitService.getAll();
-        
+
         case 'apiRest':
           if (!apiUrl) {
             toast.error('URL da API não configurada');
@@ -37,18 +37,18 @@ export const unifiedKitService = {
           const headers = this.getAuthHeaders();
           console.log('Headers de autenticação:', headers);
           return await kitApiService.getAll(apiUrl, page, limit, headers);
-        
+
         case 'localStorage':
         default:
           // Carregar do localStorage ou usar mock data
           const kitData = localStorage.getItem('kits');
           const kits = kitData ? JSON.parse(kitData) : kitsMock;
-          
+
           // Implementar paginação manual para localStorage
           const startIndex = (page - 1) * limit;
           const endIndex = page * limit;
           const paginatedKits = kits.slice(startIndex, endIndex);
-          
+
           return {
             data: paginatedKits,
             total: kits.length,
@@ -65,11 +65,10 @@ export const unifiedKitService = {
 
   async getById(id: string, dataSource: DataSource, apiUrl?: string): Promise<Kit | null> {
     try {
-      console.log('Getting kit by ID:', id, 'from', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await kitService.getById(id);
-        
+
         case 'apiRest':
           if (!apiUrl) {
             toast.error('URL da API não configurada');
@@ -77,7 +76,7 @@ export const unifiedKitService = {
           }
           const headers = this.getAuthHeaders();
           return await kitApiService.getById(apiUrl, id, headers);
-          
+
         case 'localStorage':
         default:
           const kitData = localStorage.getItem('kits');
@@ -95,7 +94,7 @@ export const unifiedKitService = {
   },
 
   async create(
-    kit: Omit<Kit, 'id' | 'vezes_alugado'>, 
+    kit: Omit<Kit, 'id' | 'vezes_alugado'>,
     dataSource: DataSource,
     apiUrl?: string
   ): Promise<Kit | null> {
@@ -103,7 +102,7 @@ export const unifiedKitService = {
       switch (dataSource) {
         case 'supabase':
           return await kitService.create(kit);
-        
+
         case 'apiRest':
           if (!apiUrl) {
             toast.error('URL da API não configurada');
@@ -111,7 +110,7 @@ export const unifiedKitService = {
           }
           const headers = this.getAuthHeaders();
           return await kitApiService.create(apiUrl, kit, headers);
-        
+
         case 'localStorage':
         default:
           const newKit: Kit = {
@@ -119,10 +118,10 @@ export const unifiedKitService = {
             id: `k${Date.now().toString()}`,
             vezes_alugado: 0
           };
-          
+
           const kitData = localStorage.getItem('kits');
           const kits = kitData ? JSON.parse(kitData) as Kit[] : [];
-          
+
           localStorage.setItem('kits', JSON.stringify([...kits, newKit]));
           return newKit;
       }
@@ -140,11 +139,10 @@ export const unifiedKitService = {
     apiUrl?: string
   ): Promise<Kit | null> {
     try {
-      console.log('Updating kit:', id, 'in', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await kitService.update(id, kitUpdate);
-        
+
         case 'apiRest':
           if (!apiUrl) {
             toast.error('URL da API não configurada');
@@ -152,16 +150,16 @@ export const unifiedKitService = {
           }
           const headers = this.getAuthHeaders();
           return await kitApiService.update(apiUrl, id, kitUpdate, headers);
-        
+
         case 'localStorage':
         default:
           const kitData = localStorage.getItem('kits');
           if (kitData) {
             const kits = JSON.parse(kitData) as Kit[];
-            const updatedKits = kits.map(kit => 
+            const updatedKits = kits.map(kit =>
               kit.id === id ? { ...kit, ...kitUpdate } : kit
             );
-            
+
             localStorage.setItem('kits', JSON.stringify(updatedKits));
             return updatedKits.find(kit => kit.id === id) || null;
           }
@@ -175,16 +173,15 @@ export const unifiedKitService = {
   },
 
   async delete(
-    id: string, 
-    dataSource: DataSource, 
+    id: string,
+    dataSource: DataSource,
     apiUrl?: string
   ): Promise<boolean> {
     try {
-      console.log('Deleting kit:', id, 'from', dataSource);
       switch (dataSource) {
         case 'supabase':
           return await kitService.delete(id);
-        
+
         case 'apiRest':
           if (!apiUrl) {
             toast.error('URL da API não configurada');
@@ -192,14 +189,14 @@ export const unifiedKitService = {
           }
           const headers = this.getAuthHeaders();
           return await kitApiService.delete(apiUrl, id, headers);
-        
+
         case 'localStorage':
         default:
           const kitData = localStorage.getItem('kits');
           if (kitData) {
             const kits = JSON.parse(kitData) as Kit[];
             const filteredKits = kits.filter(kit => kit.id !== id);
-            
+
             localStorage.setItem('kits', JSON.stringify(filteredKits));
             return true;
           }

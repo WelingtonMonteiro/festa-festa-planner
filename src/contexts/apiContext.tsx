@@ -25,9 +25,7 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const loadSettings = () => {
       const savedApiType = localStorage.getItem('adminApiPreference');
       const savedApiUrl = localStorage.getItem('adminApiUrl');
-      
-      console.log("API Context initializing with saved preferences:", { savedApiType, savedApiUrl });
-      
+
       if (savedApiType === 'local' || savedApiType === 'rest') {
         setApiTypeState(savedApiType);
       }
@@ -43,14 +41,12 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const setApiType = (type: ApiType) => {
-    console.log("Setting API type to:", type);
     setApiTypeState(type);
     localStorage.setItem('adminApiPreference', type);
     // Não mostramos toast aqui pois isso é controlado pela página de configurações
   };
 
   const setApiUrl = (url: string) => {
-    console.log("Setting API URL to:", url);
     setApiUrlState(url);
     localStorage.setItem('adminApiUrl', url);
     // Não mostramos toast aqui pois isso é controlado pela página de configurações
@@ -63,8 +59,6 @@ export const ApiProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setApiUrl,
     isApiInitialized
   };
-
-  console.log("API Context value:", value);
 
   return (
     <ApiContext.Provider value={value}>

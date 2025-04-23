@@ -16,7 +16,6 @@ export const PricingSection = () => {
     const loadPlans = async () => {
       try {
         const activePlans = await planService.getActivePlans();
-        console.log("Planos ativos carregados:", activePlans);
         setPlans(Array.isArray(activePlans) ? activePlans : []);
       } catch (error) {
         console.error("Erro ao carregar planos:", error);

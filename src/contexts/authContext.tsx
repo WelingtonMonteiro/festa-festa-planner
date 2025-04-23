@@ -31,8 +31,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const expirationTime = tokenData.exp * 1000; // Converter para milissegundos
           
           if (Date.now() >= expirationTime) {
-            // Token expirado, fazer logout
-            console.log('Token expirado, fazendo logout...');
             logout();
             return;
           }

@@ -21,7 +21,6 @@ const Contracts = () => {
 
   useEffect(() => {
     if (isInitialLoad) {
-      console.log('Contracts: Carregando dados iniciais');
       refreshContracts();
       setIsInitialLoad(false);
     }
@@ -71,7 +70,6 @@ const Contracts = () => {
 
   const handlePageChange = (pageNumber: number) => {
     if (pageNumber !== contractsPage) {
-      console.log(`Contracts: Mudando para página ${pageNumber}`);
       setContractsPage(pageNumber);
     }
   };

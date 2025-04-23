@@ -5,9 +5,6 @@ import { toast } from 'sonner';
 export const themApiService = {
   async getAll(apiUrl: string, page: number = 1, limit: number = 10, headers: HeadersInit = {}): Promise<any> {
     try {
-      console.log(`Fetching themes from ${apiUrl}/temas?page=${page}&limit=${limit}`);
-      console.log('Headers:', headers);
-      
       const response = await fetch(`${apiUrl}/temas?page=${page}&limit=${limit}`, { headers });
       
       if (!response.ok) {
@@ -30,8 +27,6 @@ export const themApiService = {
   
   async getById(apiUrl: string, id: string, headers: HeadersInit = {}): Promise<Them | null> {
     try {
-      console.log(`Fetching theme with ID ${id} from ${apiUrl}/temas/${id}`);
-      
       const response = await fetch(`${apiUrl}/temas/${id}`, { headers });
       
       if (!response.ok) {
@@ -51,8 +46,6 @@ export const themApiService = {
   
   async create(apiUrl: string, them: Omit<Them, 'id' | 'vezes_alugado'>, headers: HeadersInit = {}): Promise<Them | null> {
     try {
-      console.log(`Creating new theme at ${apiUrl}/temas`);
-      
       const response = await fetch(`${apiUrl}/temas`, {
         method: 'POST',
         headers: {
@@ -79,8 +72,6 @@ export const themApiService = {
   
   async update(apiUrl: string, id: string, themUpdate: Partial<Them>, headers: HeadersInit = {}): Promise<Them | null> {
     try {
-      console.log(`Updating theme with ID ${id} at ${apiUrl}/temas/${id}`);
-      
       const response = await fetch(`${apiUrl}/temas/${id}`, {
         method: 'PUT',
         headers: {
@@ -107,8 +98,6 @@ export const themApiService = {
   
   async delete(apiUrl: string, id: string, headers: HeadersInit = {}): Promise<boolean> {
     try {
-      console.log(`Deleting theme with ID ${id} at ${apiUrl}/temas/${id}`);
-      
       const response = await fetch(`${apiUrl}/temas/${id}`, {
         method: 'DELETE',
         headers

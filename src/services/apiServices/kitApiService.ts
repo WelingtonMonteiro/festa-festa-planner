@@ -5,9 +5,6 @@ import { toast } from 'sonner';
 export const kitApiService = {
   async getAll(apiUrl: string, page: number = 1, limit: number = 10, headers: HeadersInit = {}): Promise<any> {
     try {
-      console.log(`Fetching kits from ${apiUrl}/kits?page=${page}&limit=${limit}`);
-      console.log('Headers:', headers);
-      
       const response = await fetch(`${apiUrl}/kits?page=${page}&limit=${limit}`, { headers });
       
       if (!response.ok) {
@@ -19,7 +16,6 @@ export const kitApiService = {
       }
       
       const data = await response.json();
-      console.log('API response:', data);
       return data;
     } catch (error) {
       console.error('Error fetching kits:', error);
@@ -30,8 +26,6 @@ export const kitApiService = {
   
   async getById(apiUrl: string, id: string, headers: HeadersInit = {}): Promise<Kit | null> {
     try {
-      console.log(`Fetching kit with ID ${id} from ${apiUrl}/kits/${id}`);
-      
       const response = await fetch(`${apiUrl}/kits/${id}`, { headers });
       
       if (!response.ok) {
@@ -51,8 +45,6 @@ export const kitApiService = {
   
   async create(apiUrl: string, kit: Omit<Kit, 'id' | 'vezes_alugado'>, headers: HeadersInit = {}): Promise<Kit | null> {
     try {
-      console.log(`Creating new kit at ${apiUrl}/kits`);
-      
       const response = await fetch(`${apiUrl}/kits`, {
         method: 'POST',
         headers: {
@@ -79,8 +71,6 @@ export const kitApiService = {
   
   async update(apiUrl: string, id: string, kitUpdate: Partial<Kit>, headers: HeadersInit = {}): Promise<Kit | null> {
     try {
-      console.log(`Updating kit with ID ${id} at ${apiUrl}/kits/${id}`);
-      
       const response = await fetch(`${apiUrl}/kits/${id}`, {
         method: 'PUT',
         headers: {
@@ -107,8 +97,6 @@ export const kitApiService = {
   
   async delete(apiUrl: string, id: string, headers: HeadersInit = {}): Promise<boolean> {
     try {
-      console.log(`Deleting kit with ID ${id} at ${apiUrl}/kits/${id}`);
-      
       const response = await fetch(`${apiUrl}/kits/${id}`, {
         method: 'DELETE',
         headers

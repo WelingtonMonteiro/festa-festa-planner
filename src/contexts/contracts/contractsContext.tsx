@@ -83,8 +83,6 @@ export const ContractsProvider: React.FC<{
   const refreshData = useCallback(async () => {
     // Evitar chamadas em loop se os dados já estiverem carregados
     if (!initialDataLoaded) {
-      console.log('ContractsContext: Carregando dados iniciais');
-      
       try {
         await Promise.all([
           fetchContracts(),
@@ -94,14 +92,11 @@ export const ContractsProvider: React.FC<{
       } catch (error) {
         console.error('Erro ao carregar dados iniciais:', error);
       }
-    } else {
-      console.log('ContractsContext: Dados já carregados, ignorando refresh automático');
     }
   }, [fetchContracts, fetchTemplates, initialDataLoaded]);
 
   // Load data only once on initial mount
   useEffect(() => {
-    console.log('ContractsContext: Inicializando');
     let isMounted = true;
 
     const loadInitialData = async () => {
@@ -119,7 +114,6 @@ export const ContractsProvider: React.FC<{
   
   // Reset do estado de "initialDataLoaded" quando mudar a página ou limite
   const forceRefresh = useCallback(async () => {
-    console.log('ContractsContext: Forçando atualização de dados');
     try {
       await Promise.all([
         fetchContracts(),
@@ -313,14 +307,12 @@ export const ContractsProvider: React.FC<{
   
   // Funções para controlar paginação
   const handleSetPage = useCallback((newPage: number) => {
-    console.log(`ContractsContext: Alterando para página ${newPage}`);
     if (newPage !== page) {
       fetchContracts(newPage, limit);
     }
   }, [fetchContracts, page, limit]);
 
   const handleSetLimit = useCallback((newLimit: number) => {
-    console.log(`ContractsContext: Alterando limite para ${newLimit}`);
     if (newLimit !== limit) {
       fetchContracts(1, newLimit);
     }

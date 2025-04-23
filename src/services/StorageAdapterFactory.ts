@@ -13,7 +13,6 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
   constructor(storageType: StorageType, apiUrl?: string) {
     this.storageType = storageType;
     this.apiUrl = apiUrl;
-    console.log("StorageAdapterFactory created with storage type:", storageType, "and API URL:", apiUrl);
   }
 
   getCurrentStorageType(): StorageType {
@@ -21,9 +20,6 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
   }
 
   createAdapter<T>(config: StorageAdapterConfig): StorageAdapter<T> {
-    // Log qual adaptador está sendo criado
-    console.log(`Creating adapter for type: ${this.storageType}, config:`, config);
-
     // Adequar a configuração ao tipo de armazenamento atual
     let adaptedConfig: StorageAdapterConfig;
     
@@ -60,8 +56,7 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
             ? adaptedConfig.config.tableName 
             : adaptedConfig.config.endpoint;
             
-        console.log(`Criando LocalStorageAdapter com chave: ${storageKey}`);
-        return new LocalStorageAdapter<T>({ 
+        return new LocalStorageAdapter<T>({
           storageKey,
           mockData: [],
           idField: 'id'
@@ -74,7 +69,6 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
             ? adaptedConfig.config.storageKey 
             : adaptedConfig.config.endpoint;
             
-        console.log(`Criando SupabaseAdapter com tabela: ${tableName}`);
         return new SupabaseAdapter<T>({ tableName });
         
       case StorageType.ApiRest:
@@ -99,7 +93,6 @@ export class StorageAdapterFactoryImpl implements StorageAdapterFactory {
             ? adaptedConfig.config.tableName 
             : adaptedConfig.config.storageKey;
             
-        console.log(`Criando ApiRestAdapter com URL: ${this.apiUrl} e endpoint: ${endpoint}`);
         return new ApiRestAdapter<T>(this.apiUrl, endpoint);
     }
   }
@@ -114,8 +107,6 @@ export const useStorageAdapterFactory = (): StorageAdapterFactory => {
   const currentStorageType: StorageType = 
     apiType === 'rest' ? StorageType.ApiRest : 
     storageType === 'supabase' ? StorageType.Supabase : StorageType.LocalStorage;
-  
-  console.log("useStorageAdapterFactory: currentStorageType =", currentStorageType, "apiType =", apiType, "apiUrl =", apiUrl);
-  
+
   return new StorageAdapterFactoryImpl(currentStorageType, apiUrl);
 };
