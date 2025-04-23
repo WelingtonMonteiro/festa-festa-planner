@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -20,7 +19,8 @@ import {
   UserPlus,
   ScrollText,
   ShieldAlert,
-  CreditCard
+  CreditCard,
+  Tag
 } from 'lucide-react';
 import { useHandleContext } from '@/contexts/handleContext.tsx';
 import { AboutSystemDialog } from '@/components/system/AboutSystemDialog';
@@ -82,6 +82,11 @@ const Sidebar = ({ onToggleCollapse }: SidebarProps) => {
       path: '/products', 
       name: 'Produtos', 
       icon: <Box className="h-5 w-5" /> 
+    },
+    { 
+      path: '/product-types',
+      name: 'Tipos de Produtos', 
+      icon: <Tag className="h-5 w-5" /> 
     },
     { 
       path: '/contracts',

@@ -1,4 +1,3 @@
-
 import { Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
@@ -30,8 +29,9 @@ import LoginPage from './pages/Auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Landing from './pages/Landing';
 import Products from './pages/Products';
+import ProductTypes from './pages/ProductTypes';
 
-function App() {
+const App = () => {
   return (
     <ApiProvider>
       <StorageProvider>
@@ -42,7 +42,6 @@ function App() {
               <Route path="/" element={<Landing />} />
               <Route path="/login" element={<LoginPage />} />
               
-              {/* Rotas protegidas com layout principal */}
               <Route path="/dashboard" element={
                 <ProtectedRoute>
                   <MainLayout>
@@ -99,13 +98,8 @@ function App() {
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/products" element={
-                <ProtectedRoute>
-                  <MainLayout>
-                    <Products />
-                  </MainLayout>
-                </ProtectedRoute>
-              } />
+              <Route path="/products" element={<Products />} />
+              <Route path="/product-types" element={<ProductTypes />} />
               <Route path="/financial" element={
                 <ProtectedRoute>
                   <MainLayout>
@@ -177,6 +171,6 @@ function App() {
       </StorageProvider>
     </ApiProvider>
   );
-}
+};
 
 export default App;
