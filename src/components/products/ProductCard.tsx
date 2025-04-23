@@ -12,7 +12,7 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
-  // Usar apenas product.id pois _id não é parte do novo tipo
+  // Use product.id directly
   const productId = product.id;
 
   const getTypeIcon = (type: string) => {
@@ -41,7 +41,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
     return roi.toFixed(2);
   };
 
-  // Contador de aluguel (rentCount ou vezes_alugado vira metadata.rentCount)
+  // Contador de aluguel (rentCount fica em metadata.rentCount)
   const getRentCount = (product: Product) => {
     return product.metadata?.rentCount || 0;
   };
