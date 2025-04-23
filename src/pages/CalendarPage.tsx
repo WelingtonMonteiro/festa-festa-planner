@@ -14,6 +14,7 @@ import { CalendarPlus, Clock, MapPin } from 'lucide-react';
 import { DayContentProps } from 'react-day-picker';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from '@/hooks/use-toast';
+import { formatCurrency } from '@/utils/format';
 
 const CalendarPage = () => {
   const {
@@ -24,7 +25,7 @@ const CalendarPage = () => {
     addEvent
   } = useHandleContext();
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(new Date());
   const [dialogOpen, setDialogOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -211,6 +212,12 @@ const CalendarPage = () => {
     );
   };
 
+  // Helper function to safely format price
+  const safeFormatPrice = (price?: number) => {
+    if (price === undefined || price === null) return "0";
+    return formatCurrency(price);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -275,8 +282,8 @@ const CalendarPage = () => {
                         <MapPin className="mr-1 h-4 w-4" /> {evento.local}
                       </div>
                       <div className="mt-3 flex justify-between text-sm">
-                        <div>Valor: R$ {evento.valorTotal?.toLocaleString('pt-BR') || '0'}</div>
-                        <div>Sinal: R$ {evento.valorSinal?.toLocaleString('pt-BR') || '0'}</div>
+                        <div>Valor: {safeFormatPrice(evento.valorTotal)}</div>
+                        <div>Sinal: {safeFormatPrice(evento.valorSinal)}</div>
                       </div>
                     </div>) : <div className="flex h-48 flex-col items-center justify-center rounded-lg border border-dashed p-8 text-center">
                     <p className="text-sm text-muted-foreground">Nenhum evento para este dia</p>
@@ -337,7 +344,7 @@ const CalendarPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {kits.map(kit => <SelectItem key={kit.id} value={kit.id}>
-                        {kit.nome} - R$ {kit.preco.toLocaleString('pt-BR')}
+                        {kit.nome} - R$ {kit.preco?.toLocaleString('pt-BR') || '0'}
                       </SelectItem>)}
                   </SelectContent>
                 </Select>

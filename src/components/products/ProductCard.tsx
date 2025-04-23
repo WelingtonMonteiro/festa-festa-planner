@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Edit, Package, Tag, Trash2 } from 'lucide-react';
 import { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
+import { formatCurrency } from '@/utils/format';
 
 interface ProductCardProps {
   product: Product;
@@ -95,10 +96,10 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
         </div>
       </CardHeader>
       <CardContent>
-        <p className="text-sm text-muted-foreground mb-3">{product.description}</p>
+        <div className="text-sm text-muted-foreground mb-3">{product.description}</div>
 
         {/* Itens do kit agora ficam em metadata se existirem */}
-        {product.type === 'kit' && Array.isArray(product.metadata?.items) && product.metadata.items.length > 0 && (
+        {product.type === 'kit' && product.metadata?.items && product.metadata.items.length > 0 && (
           <div className="mb-3">
             <h4 className="text-sm font-medium mb-2">Itens:</h4>
             <div className="flex flex-wrap gap-2">
@@ -146,7 +147,7 @@ const ProductCard = ({ product, onEdit, onDelete }: ProductCardProps) => {
           {product.type === 'kit' && (
             <div className="bg-muted rounded p-2">
               <div className="font-medium">Valor</div>
-              <div>R$ {(product.price || 0).toLocaleString('pt-BR')}</div>
+              <div>{formatCurrency(product.price || 0)}</div>
             </div>
           )}
         </div>

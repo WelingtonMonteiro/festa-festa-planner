@@ -29,6 +29,7 @@ import { FestaProvider } from './contexts/handleContext';
 import LoginPage from './pages/Auth/LoginPage';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 import Landing from './pages/Landing';
+import Products from './pages/Products';
 
 function App() {
   return (
@@ -95,6 +96,13 @@ function App() {
                 <ProtectedRoute>
                   <MainLayout>
                     <KitsThems />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/products" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Products />
                   </MainLayout>
                 </ProtectedRoute>
               } />
