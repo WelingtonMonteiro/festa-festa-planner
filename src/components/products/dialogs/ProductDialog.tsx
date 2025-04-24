@@ -1,6 +1,5 @@
-
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import ProductForm from '../ProductForm';
+import ProductForm from '../forms/ProductForm';
 import { Product } from '@/types/product';
 
 interface ProductDialogProps {
@@ -9,7 +8,6 @@ interface ProductDialogProps {
   onSubmit: (productData: Omit<Product, 'id'>) => Promise<void>;
   onCancel: () => void;
   editingProduct: Product | null;
-  availableKits?: Product[];
   isLoading?: boolean;
   type?: string;
   title?: string;
@@ -22,7 +20,6 @@ const ProductDialog = ({
   onSubmit,
   onCancel,
   editingProduct,
-  availableKits = [],
   isLoading = false,
   type,
   title,
@@ -74,9 +71,8 @@ const ProductDialog = ({
           onCancel={onCancel}
           initialData={editingProduct}
           isEditing={!!editingProduct}
-          availableKits={availableKits}
           isLoading={isLoading}
-          productType={type}
+          type={type}
         />
       </DialogContent>
     </Dialog>
