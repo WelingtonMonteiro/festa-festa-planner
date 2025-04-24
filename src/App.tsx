@@ -1,3 +1,4 @@
+
 import { Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
 import Clients from './pages/Clients';
@@ -98,8 +99,20 @@ const App = () => {
                   </MainLayout>
                 </ProtectedRoute>
               } />
-              <Route path="/products" element={<Products />} />
-              <Route path="/product-types" element={<ProductTypes />} />
+              <Route path="/products" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <Products />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
+              <Route path="/product-types" element={
+                <ProtectedRoute>
+                  <MainLayout>
+                    <ProductTypes />
+                  </MainLayout>
+                </ProtectedRoute>
+              } />
               <Route path="/financial" element={
                 <ProtectedRoute>
                   <MainLayout>

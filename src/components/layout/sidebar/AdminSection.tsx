@@ -35,6 +35,16 @@ const AdminSection = ({ collapsed, isAdmin = true }: AdminSectionProps) => {
           <Button
             variant="ghost"
             className="flex w-full items-center justify-start rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+            onClick={() => navigate('/product-types')}
+          >
+            <Tag className="h-5 w-5" />
+            <span className="ml-3">Tipos de Produtos</span>
+          </Button>
+        </li>
+        <li role="menuitem">
+          <Button
+            variant="ghost"
+            className="flex w-full items-center justify-start rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
             onClick={() => navigate('/contracts')}
           >
             <Tag className="h-5 w-5" />
