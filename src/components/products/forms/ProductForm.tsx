@@ -48,9 +48,10 @@ const ProductForm = ({
       const reader = new FileReader();
       reader.onloadend = () => {
         if (typeof reader.result === 'string') {
+          // Cast to ensure we're only adding strings to the array
           setFormData(prev => ({
             ...prev,
-            images: [...prev.images.filter(img => img !== ''), reader.result]
+            images: [...prev.images.filter(img => img !== ''), reader.result as string]
           }));
         }
       };
@@ -72,8 +73,10 @@ const ProductForm = ({
     try {
       const validatedData = productSchema.parse(formData);
       const productData: Omit<Product, 'id'> = {
-        ...validatedData,
+        name: validatedData.name, // Ensure name is always provided
+        description: validatedData.description,
         type: type || validatedData.type,
+        subtype: validatedData.subtype,
         price: parseFloat(validatedData.price || '0'),
         images: validatedData.images.filter(img => img.trim() !== '')
       };

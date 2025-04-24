@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ProductForm from '../forms/ProductForm';
 import { Product } from '@/types/product';
@@ -12,6 +13,7 @@ interface ProductDialogProps {
   type?: string;
   title?: string;
   description?: string;
+  availableKits?: Product[]; // Added missing prop
 }
 
 const ProductDialog = ({
@@ -23,7 +25,8 @@ const ProductDialog = ({
   isLoading = false,
   type,
   title,
-  description
+  description,
+  availableKits = [] // Set default value
 }: ProductDialogProps) => {
   const getDialogTitle = () => {
     if (title) return title;
