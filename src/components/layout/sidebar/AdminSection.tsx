@@ -1,8 +1,8 @@
 
-import { Package, Tag } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { adminItems } from './navigationItems';
 
 interface AdminSectionProps {
   collapsed: boolean;
@@ -21,36 +21,18 @@ const AdminSection = ({ collapsed, isAdmin = true }: AdminSectionProps) => {
         ADMINISTRAÇÃO
       </h3>
       <ul className="space-y-1" role="menu">
-        <li role="menuitem">
-          <Button
-            variant="ghost"
-            className="flex w-full items-center justify-start rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            onClick={() => navigate('/products')}
-          >
-            <Package className="h-5 w-5" />
-            <span className="ml-3">Kits e Temas</span>
-          </Button>
-        </li>
-        <li role="menuitem">
-          <Button
-            variant="ghost"
-            className="flex w-full items-center justify-start rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            onClick={() => navigate('/product-types')}
-          >
-            <Tag className="h-5 w-5" />
-            <span className="ml-3">Tipos de Produtos</span>
-          </Button>
-        </li>
-        <li role="menuitem">
-          <Button
-            variant="ghost"
-            className="flex w-full items-center justify-start rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-            onClick={() => navigate('/contracts')}
-          >
-            <Tag className="h-5 w-5" />
-            <span className="ml-3">Contratos</span>
-          </Button>
-        </li>
+        {adminItems.map((item) => (
+          <li key={item.path} role="menuitem">
+            <Button
+              variant="ghost"
+              className="flex w-full items-center justify-start rounded-lg p-2 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+              onClick={() => navigate(item.path)}
+            >
+              <item.icon className="h-5 w-5" />
+              <span className="ml-3">{item.name}</span>
+            </Button>
+          </li>
+        ))}
       </ul>
     </div>
   );
