@@ -1,9 +1,10 @@
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import ProductList from '../ProductList';
 import { DataPagination } from '@/components/common/DataPagination';
 import { Product } from '@/types/product';
-import { Grid3X3, Tag } from 'lucide-react';
+import ProductList from '../ProductList';
+import TabsHeader from './TabsHeader';
+import EmptyState from './EmptyState';
+import LoadingState from './LoadingState';
 
 interface ProductTabsProps {
   products: Product[];
@@ -15,6 +16,7 @@ interface ProductTabsProps {
   totalPages: number;
   onPageChange: (page: number) => void;
   paginationLinks: any[];
+  type?: string;
 }
 
 const ProductTabs = ({
@@ -26,17 +28,35 @@ const ProductTabs = ({
   currentPage,
   totalPages,
   onPageChange,
-  paginationLinks
+  paginationLinks,
+  type
 }: ProductTabsProps) => {
+  const filteredProducts = type 
+    ? products.filter(product => product.type === type) 
+    : products;
+
   return (
     <div className="space-y-4">
-      <ProductList 
-        products={products}
+      <TabsHeader
+        type={type}
+        productsCount={filteredProducts.length}
         onAddProduct={onAddProduct}
-        onEditProduct={onEditProduct}
-        onDeleteProduct={onDeleteProduct}
         isLoading={isLoading}
       />
+      
+      {isLoading ? (
+        <LoadingState />
+      ) : filteredProducts.length > 0 ? (
+        <ProductList
+          products={filteredProducts}
+          onEditProduct={onEditProduct}
+          onDeleteProduct={onDeleteProduct}
+          type={type}
+        />
+      ) : (
+        <EmptyState type={type} onAddProduct={onAddProduct} />
+      )}
+
       <DataPagination
         currentPage={currentPage}
         totalPages={totalPages}
