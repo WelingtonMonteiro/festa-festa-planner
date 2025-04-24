@@ -1,7 +1,6 @@
-
 import { ReactNode, useState } from 'react';
 import { cn } from '@/lib/utils';
-import Sidebar from './Sidebar';
+import Sidebar from './sidebar/Sidebar';
 import Header from './Header';
 import { Outlet } from 'react-router-dom';
 
