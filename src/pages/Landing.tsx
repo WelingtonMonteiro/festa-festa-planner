@@ -268,29 +268,44 @@ const Landing = () => {
   );
 
   const handleStartNow = async () => {
+    if (!contactName || !contactEmail) {
+      toast.error("Por favor, preencha nome e email para continuar");
+      return;
+    }
+
     try {
-      const newClient = await clientService.create({
-        name: contactName,
-        email: contactEmail,
-        phone: '', // Could add a phone field to the form if needed
+      const response = await fetch(`${apiUrl}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nome: contactName,
+          email: contactEmail,
+          password: Math.random().toString(36).slice(-8), // Senha temporária aleatória
+        }),
       });
 
-      if (newClient) {
-        toast.success('Cadastro realizado com sucesso!');
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success('Cadastro realizado com sucesso! Verifique seu email para acessar sua conta.');
+        setContactName('');
+        setContactEmail('');
         navigate('/login');
+      } else {
+        throw new Error(data.error || 'Erro ao realizar cadastro');
       }
     } catch (error) {
-      console.error('Error creating client:', error);
-      toast.error('Erro ao realizar cadastro. Por favor, tente novamente.');
+      console.error('Error:', error);
+      toast.error(error.message || 'Erro ao realizar cadastro. Por favor, tente novamente.');
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Header com opção de login */}
       <LoginHeader onLoginClick={() => setLoginModalOpen(true)} />
 
-      {/* Hero Section */}
       <section className="bg-gradient-to-r from-festa-primary/10 via-background to-festa-secondary/10 py-20">
         <div className="container mx-auto px-4 flex flex-col lg:flex-row items-center justify-between gap-16">
           <div className="flex-1 space-y-6">
@@ -300,24 +315,41 @@ const Landing = () => {
             <p className="text-xl text-muted-foreground max-w-2xl">
               A plataforma completa para organizadores de eventos gerenciarem clientes, eventos, inventário e finanças em um só lugar.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Button 
-                size="lg" 
-                className="text-lg px-8"
-                onClick={handleStartNow}
-              >
-                Começar Agora
-              </Button>
-              <Button 
-                variant="outline" 
-                size="lg" 
-                className="text-lg px-8"
-                onClick={() => {
-                  document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Saiba Mais
-              </Button>
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row gap-4 max-w-md">
+                <Input
+                  placeholder="Seu nome"
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  className="flex-1"
+                />
+                <Input
+                  type="email"
+                  placeholder="Seu email"
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  className="flex-1"
+                />
+              </div>
+              <div className="flex flex-wrap gap-4">
+                <Button 
+                  size="lg" 
+                  className="text-lg px-8"
+                  onClick={handleStartNow}
+                >
+                  Começar Agora
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="text-lg px-8"
+                  onClick={() => {
+                    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                >
+                  Saiba Mais
+                </Button>
+              </div>
             </div>
           </div>
           <div className="flex-1 relative min-h-[400px] w-full rounded-lg overflow-hidden shadow-xl border">
@@ -335,7 +367,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Features Section */}
       <section id="features" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -363,7 +394,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Screenshots Carousel */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -417,7 +447,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Why Choose Us */}
       <section className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -491,10 +520,8 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Pricing Section */}
       {pricingSection}
 
-      {/* About Us Section */}
       <section id="about" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -557,7 +584,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -586,7 +612,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
       <section id="contact" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -701,7 +726,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
       <section id="faq" className="py-20">
         <div className="container mx-auto px-4">
           <div className="text-center mb-16">
@@ -768,7 +792,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Footer */}
       <footer className="bg-muted py-12">
         <div className="container mx-auto px-4">
           <div className="flex flex-col md:flex-row justify-between items-center mb-8">
@@ -803,7 +826,6 @@ const Landing = () => {
         </div>
       </footer>
 
-      {/* Login Modal */}
       <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
