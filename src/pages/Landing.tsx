@@ -13,9 +13,25 @@ import { useQuery } from '@tanstack/react-query';
 import { planService } from '@/services/planService';
 import { formatCurrency } from '@/utils/format';
 import { Switch } from '@/components/ui/switch';
+import { useNavigate } from 'react-router-dom';
+import { CrudService } from '@/services/CrudService';
+import { useStorageAdapterFactory } from '@/services/StorageAdapterFactory';
+import { StorageType } from '@/types/crud';
+import { useApi } from '@/contexts/apiContext';
 
 const Landing = () => {
   const navigate = useNavigate();
+  const factory = useStorageAdapterFactory();
+  const { apiUrl } = useApi();
+  
+  const clientService = new CrudService(factory, {
+    type: StorageType.ApiRest,
+    config: { 
+      apiUrl: apiUrl || '',
+      endpoint: 'clients' 
+    }
+  });
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
@@ -251,6 +267,24 @@ const Landing = () => {
     </section>
   );
 
+  const handleStartNow = async () => {
+    try {
+      const newClient = await clientService.create({
+        name: contactName,
+        email: contactEmail,
+        phone: '', // Could add a phone field to the form if needed
+      });
+
+      if (newClient) {
+        toast.success('Cadastro realizado com sucesso!');
+        navigate('/login');
+      }
+    } catch (error) {
+      console.error('Error creating client:', error);
+      toast.error('Erro ao realizar cadastro. Por favor, tente novamente.');
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Header com opção de login */}
@@ -270,7 +304,7 @@ const Landing = () => {
               <Button 
                 size="lg" 
                 className="text-lg px-8"
-                onClick={() => setLoginModalOpen(true)}
+                onClick={handleStartNow}
               >
                 Começar Agora
               </Button>
