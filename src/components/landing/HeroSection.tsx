@@ -1,10 +1,10 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import { useApi } from "@/contexts/apiContext";
 import { toast } from "sonner";
+import { RegisterModal } from "@/components/auth/RegisterModal";
 
 export const HeroSection = () => {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ export const HeroSection = () => {
   const [contactName, setContactName] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
 
   const handleStartNow = async () => {
     if (!contactName || !contactEmail) {
@@ -83,7 +84,7 @@ export const HeroSection = () => {
               <Button 
                 size="lg" 
                 className="text-lg px-8"
-                onClick={handleStartNow}
+                onClick={() => setRegisterModalOpen(true)}
                 disabled={isLoading}
               >
                 {isLoading ? 'Cadastrando...' : 'Começar Agora'}
@@ -114,6 +115,11 @@ export const HeroSection = () => {
           </div>
         </div>
       </div>
+
+      <RegisterModal 
+        open={registerModalOpen} 
+        onOpenChange={setRegisterModalOpen} 
+      />
     </section>
   );
 };

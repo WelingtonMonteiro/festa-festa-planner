@@ -24,6 +24,8 @@ const LoginHeader = ({ onLoginClick }: LoginHeaderProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [registerModalOpen, setRegisterModalOpen] = useState(false);
+  const [forgotPasswordModalOpen, setForgotPasswordModalOpen] = useState(false);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -194,7 +196,6 @@ const LoginHeader = ({ onLoginClick }: LoginHeaderProps) => {
         </div>
       </div>
 
-      {/* Modal de Login no Header */}
       <Dialog open={loginModalOpen} onOpenChange={setLoginModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -205,11 +206,11 @@ const LoginHeader = ({ onLoginClick }: LoginHeaderProps) => {
           </DialogHeader>
           <form onSubmit={handleLogin} className="space-y-4 py-4">
             <div className="space-y-2">
-              <label htmlFor="header-email" className="text-sm font-medium">
+              <label htmlFor="email" className="text-sm font-medium">
                 Email
               </label>
               <Input 
-                id="header-email"
+                id="email"
                 type="email" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
@@ -220,15 +221,23 @@ const LoginHeader = ({ onLoginClick }: LoginHeaderProps) => {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <label htmlFor="header-password" className="text-sm font-medium">
+                <label htmlFor="password" className="text-sm font-medium">
                   Senha
                 </label>
-                <Button type="button" variant="link" className="p-0 h-auto text-xs">
+                <Button 
+                  type="button" 
+                  variant="link" 
+                  className="p-0 h-auto text-xs"
+                  onClick={() => {
+                    setLoginModalOpen(false);
+                    setForgotPasswordModalOpen(true);
+                  }}
+                >
                   Esqueceu a senha?
                 </Button>
               </div>
               <Input 
-                id="header-password"
+                id="password"
                 type="password" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -240,14 +249,31 @@ const LoginHeader = ({ onLoginClick }: LoginHeaderProps) => {
             <div className="text-center">
               <p className="text-sm text-muted-foreground">
                 Não tem uma conta?{" "}
-                <Button variant="link" className="p-0 h-auto">
-                  Entre em contato
+                <Button 
+                  variant="link" 
+                  className="p-0 h-auto"
+                  onClick={() => {
+                    setLoginModalOpen(false);
+                    setRegisterModalOpen(true);
+                  }}
+                >
+                  Criar sua conta
                 </Button>
               </p>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      <RegisterModal 
+        open={registerModalOpen} 
+        onOpenChange={setRegisterModalOpen} 
+      />
+
+      <ForgotPasswordModal 
+        open={forgotPasswordModalOpen} 
+        onOpenChange={setForgotPasswordModalOpen} 
+      />
     </header>
   );
 };
