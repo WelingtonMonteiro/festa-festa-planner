@@ -14,6 +14,8 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
+import { RegisterModal } from "@/components/auth/RegisterModal";
+import { ForgotPasswordModal } from "@/components/auth/ForgotPasswordModal";
 
 interface LoginHeaderProps {
   onLoginClick: () => void;
